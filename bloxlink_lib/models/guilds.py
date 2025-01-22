@@ -2,6 +2,7 @@ from typing import Mapping, Self, Type, Literal, Annotated
 from pydantic import Field, field_validator
 import hikari
 from .base import Snowflake, BaseModel
+from ..validators import is_positive_number_as_str
 import bloxlink_lib.models.binds as binds_module
 
 
@@ -26,7 +27,6 @@ class Webhooks(BaseModel):
     """Fired when certain actions happen on Bloxlink"""
 
     authentication: str
-
     userInfo: UserInfoWebhook = None
 
 
@@ -38,6 +38,14 @@ class GroupLock(BaseModel):
     roleSets: Annotated[list[int], Field(default_factory=list)]
     verifiedAction: Literal["kick", "dm"] = "kick"
     unverifiedAction: Literal["kick", "dm"] = "kick"
+
+
+class GuildRestrictions(BaseModel):
+    """Server restrictions set by the server owner"""
+
+    name: str
+    addedBy: Annotated[str, is_positive_number_as_str]
+    reason: str | None = None
 
 
 type MagicRoleTypes = Literal["Bloxlink Admin",
@@ -79,6 +87,8 @@ class GuildData(BaseModel):
     groupLock: dict[str, GroupLock] = None
     highTrafficServer: bool = False
     allowOldRoles: bool = False
+    restrictions: dict[Literal["users", "groups", "users",
+                               "robloxAccounts", "roles"], dict[Annotated[str, is_positive_number_as_str], GuildRestrictions]] = None
 
     webhooks: Webhooks = None
 
