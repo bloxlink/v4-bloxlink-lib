@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from .users import RobloxUser
 
 GROUP_API = "https://groups.roblox.com/v1/groups"
-ROBLOX_GROUP_REGEX = re.compile(r"roblox.com/groups/(\d+)/")
+ROBLOX_GROUP_REGEX = re.compile(r"roblox.com/communities/(\d+)/")
 
 
 class GroupRoleset(BaseModel):
