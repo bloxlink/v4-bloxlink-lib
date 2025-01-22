@@ -40,7 +40,7 @@ class GroupLock(BaseModel):
     unverifiedAction: Literal["kick", "dm"] = "kick"
 
 
-class GuildRestrictions(BaseModel):
+class GuildRestriction(BaseModel):
     """Server restrictions set by the server owner"""
 
     name: str
@@ -88,7 +88,7 @@ class GuildData(BaseModel):
     highTrafficServer: bool = False
     allowOldRoles: bool = False
     restrictions: dict[Literal["users", "groups", "users",
-                               "robloxAccounts", "roles"], dict[Annotated[str, is_positive_number_as_str], GuildRestrictions]] = None
+                               "robloxAccounts", "roles"], dict[Annotated[str, is_positive_number_as_str], GuildRestriction]] = None
 
     webhooks: Webhooks = None
 
