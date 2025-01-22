@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Sequence, Self, Annotated, Literal, TYPE_CHECKING
 from pydantic import Field
 import math
-from datetime import datetime
+from datetime import datetime, timezone
 import hikari
 import discord
 from ..fetch import fetch, fetch_typed, StatusCodes
@@ -214,7 +214,7 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
         if (self.age_days is not None) or not self.created:
             return
 
-        today = datetime.today()
+        today = datetime.now(timezone.utc)
         self.age_days = (today - self.created).days
 
         if not self.short_age_string:
