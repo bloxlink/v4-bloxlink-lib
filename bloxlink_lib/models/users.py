@@ -531,7 +531,7 @@ class MemberSerializable(BaseModel):
     username: str = None
     avatar_url: str = None
     display_name: str = None
-    global_name: str = None
+    global_name: str | None = None
     is_bot: bool = None
     joined_at: datetime = None
     role_ids: Sequence[Snowflake] = None
