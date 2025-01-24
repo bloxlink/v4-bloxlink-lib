@@ -53,6 +53,10 @@ class BaseModel(PydanticBaseModel):
         return self._generic_type_value
 
 
+class PydanticDict[T, V](BaseModel):
+    __root__: dict[T, V]
+
+
 class RobloxEntity(BaseModel, ABC):
     """Representation of an entity on Roblox.
 
