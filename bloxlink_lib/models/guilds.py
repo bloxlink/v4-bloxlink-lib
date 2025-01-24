@@ -52,11 +52,11 @@ MagicRoleTypes = Literal["Bloxlink Admin",
                          "Bloxlink Updater", "Bloxlink Bypass"]
 
 RestrictionTypes = Literal[
-    "user",
-    "group_url",
+    "users",
+    "groups",
     "discord_user",
-    "roblox_username",
-    "discord_role"
+    "robloxAccounts",
+    "roles"
 ]
 
 
