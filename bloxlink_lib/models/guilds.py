@@ -1,7 +1,7 @@
 from typing import Mapping, Self, Type, Literal, Annotated
 from pydantic import Field, field_validator
 import hikari
-from .base import Snowflake, BaseModel, PydanticFieldDict
+from .base import Snowflake, BaseModel, PydanticDict
 from ..validators import is_positive_number_as_str
 import bloxlink_lib.models.binds as binds_module
 
@@ -91,10 +91,10 @@ class GuildData(BaseModel):
     banRelatedAccounts: bool | None = False
     unbanRelatedAccounts: bool | None = False
     dynamicRoles: bool | None = True
-    groupLock: PydanticFieldDict[str, GroupLock] = None
+    groupLock: PydanticDict[str, GroupLock] = None
     highTrafficServer: bool = False
     allowOldRoles: bool = False
-    restrictions: PydanticFieldDict[RestrictionTypes, PydanticFieldDict[Annotated[str,
+    restrictions: PydanticDict[RestrictionTypes, PydanticDict[Annotated[str,
                                                                         is_positive_number_as_str], GuildRestriction]] = None
 
     webhooks: Webhooks = None
@@ -105,14 +105,14 @@ class GuildData(BaseModel):
     nicknameTemplate: str = "{smart-name}"
     unverifiedNickname: str = ""
 
-    magicRoles: PydanticFieldDict[str, list[MagicRoleTypes]] = None
+    magicRoles: PydanticDict[str, list[MagicRoleTypes]] = None
 
-    premium: PydanticFieldDict = Field(
-        default_factory=PydanticFieldDict)  # deprecated
+    premium: PydanticDict = Field(
+        default_factory=PydanticDict)  # deprecated
 
     # Old bind fields.
-    roleBinds: PydanticFieldDict = None
-    groupIDs: PydanticFieldDict = None
+    roleBinds: PydanticDict = None
+    groupIDs: PydanticDict = None
     migratedBindsToV4: bool = False
 
     def model_post_init(self, __context):
