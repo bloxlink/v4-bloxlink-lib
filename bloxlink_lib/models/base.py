@@ -53,7 +53,7 @@ class BaseModel(PydanticBaseModel):
         return self._generic_type_value
 
 
-class PydanticFieldDict[K, V](RootModel[Dict[K, V]]):
+class PydanticDict[K, V](RootModel[Dict[K, V]]):
     """A Pydantic model that represents a dictionary."""
 
     root: Dict[K, V] = Field(default_factory=dict)
@@ -95,7 +95,7 @@ class PydanticFieldDict[K, V](RootModel[Dict[K, V]]):
         return len(self.root)
 
     def __eq__(self, other) -> bool:
-        return self.root == other.root if isinstance(other, PydanticFieldDict) else False
+        return self.root == other.root if isinstance(other, PydanticDict) else False
 
     def __str__(self) -> str:
         return str(self.root)
