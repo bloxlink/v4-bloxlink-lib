@@ -57,10 +57,10 @@ class RobloxEntity(BaseModel, ABC):
     """Representation of an entity on Roblox.
 
     Attributes:
-        id (str): Roblox given ID of the entity.
-        name (str, optional): Name of the entity.
-        description (str, optional): The description of the entity (if any).
-        synced (bool): If this entity has been synced with Roblox or not. False by default.
+        id(str): Roblox given ID of the entity.
+        name(str, optional): Name of the entity.
+        description(str, optional): The description of the entity(if any).
+        synced(bool): If this entity has been synced with Roblox or not . False by default.
     """
 
     id: int | None
@@ -229,8 +229,8 @@ def create_entity(
     """Create a respective Roblox entity from a category and ID.
 
     Args:
-        category (str): Type of Roblox entity to make. Subset from asset, badge, group, gamepass.
-        entity_id (int): ID of the entity on Roblox.
+        category(str): Type of Roblox entity to make. Subset from asset, badge, group, gamepass.
+        entity_id(int): ID of the entity on Roblox.
 
     Returns:
         RobloxEntity: The respective RobloxEntity implementer, unsynced, or None if the category is invalid.
@@ -269,8 +269,8 @@ async def get_entity(
     """Get and sync a Roblox entity.
 
     Args:
-        category (str): Type of Roblox entity to get. Subset from asset, badge, group, gamepass.
-        entity_id (int): ID of the entity on Roblox.
+        category(str): Type of Roblox entity to get. Subset from asset, badge, group, gamepass.
+        entity_id(int): ID of the entity on Roblox.
 
     Returns:
         RobloxEntity: The respective RobloxEntity implementer, synced.
