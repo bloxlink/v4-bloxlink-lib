@@ -214,7 +214,7 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
         if (self.age_days is not None) or not self.created:
             return
 
-        today = datetime.now(timezone.utc)
+        today = datetime.now()
         self.age_days = (today - self.created).days
 
         if not self.short_age_string:
