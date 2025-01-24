@@ -76,6 +76,9 @@ class PydanticDict[K, V](RootModel[Dict[K, V]]):
     def get(self, key: K, default: V = None) -> V:
         return self.root.get(key, default)
 
+    def pop(self, key: K, default: V = None) -> V:
+        return self.root.pop(key, default)
+
     def keys(self):
         return self.root.keys()
 
