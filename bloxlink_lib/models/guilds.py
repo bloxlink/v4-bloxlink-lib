@@ -54,7 +54,6 @@ MagicRoleTypes = Literal["Bloxlink Admin",
 RestrictionTypes = Literal[
     "users",
     "groups",
-    "discord_user",
     "robloxAccounts",
     "roles"
 ]
