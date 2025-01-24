@@ -1,5 +1,5 @@
-from pydantic import BaseModel, PrivateAttr, field_validator
-from typing import Callable, Iterable, Type, Any,  Literal, Annotated, Tuple, Sequence, Self
+from pydantic import BaseModel, RootModel, PrivateAttr, field_validator
+from typing import Callable, Iterable, Type, Any,  Literal, Annotated, Tuple, Sequence, Self, Dict
 from abc import ABC, abstractmethod
 from pydantic import BaseModel as PydanticBaseModel, BeforeValidator, WithJsonSchema, ConfigDict, Field, ConfigDict, SkipValidation
 from pydantic.fields import FieldInfo
@@ -53,8 +53,55 @@ class BaseModel(PydanticBaseModel):
         return self._generic_type_value
 
 
-class PydanticDict[T, V](BaseModel):
-    __root__: dict[T, V]
+class PydanticFieldDict[K, V](RootModel[Dict[K, V]]):
+    """A Pydantic model that represents a dictionary."""
+
+    root: Dict[K, V] = Field(default_factory=dict)
+
+    def __iter__(self):
+        return iter(self.root)
+
+    def __getitem__(self, key: K) -> V:
+        return self.root[key]
+
+    def __setitem__(self, key: K, value: V):
+        self.root[key] = value
+
+    def __delitem__(self, key: K):
+        del self.root[key]
+
+    def __contains__(self, key: K) -> bool:
+        return key in self.root
+
+    def get(self, key: K, default: V = None) -> V:
+        return self.root.get(key, default)
+
+    def keys(self):
+        return self.root.keys()
+
+    def values(self):
+        return self.root.values()
+
+    def items(self):
+        return self.root.items()
+
+    def update(self, other: Dict[K, V]):
+        self.root.update(other)
+
+    def __iter__(self):
+        return iter(self.root)
+
+    def __len__(self) -> int:
+        return len(self.root)
+
+    def __eq__(self, other) -> bool:
+        return self.root == other.root if isinstance(other, PydanticFieldDict) else False
+
+    def __str__(self) -> str:
+        return str(self.root)
+
+    def __repr__(self) -> str:
+        return self.__str__()
 
 
 class RobloxEntity(BaseModel, ABC):
