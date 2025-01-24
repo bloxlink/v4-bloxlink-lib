@@ -48,8 +48,16 @@ class GuildRestriction(BaseModel):
     reason: str | None = None
 
 
-type MagicRoleTypes = Literal["Bloxlink Admin",
-                              "Bloxlink Updater", "Bloxlink Bypass"]
+MagicRoleTypes = Literal["Bloxlink Admin",
+                         "Bloxlink Updater", "Bloxlink Bypass"]
+
+RestrictionTypes = Literal[
+    "user",
+    "group_url",
+    "discord_user",
+    "roblox_username",
+    "discord_role"
+]
 
 
 class GuildData(BaseModel):
@@ -87,8 +95,8 @@ class GuildData(BaseModel):
     groupLock: dict[str, GroupLock] = None
     highTrafficServer: bool = False
     allowOldRoles: bool = False
-    restrictions: dict[Literal["users", "groups", "users",
-                               "robloxAccounts", "roles"], dict[Annotated[str, is_positive_number_as_str], GuildRestriction]] = None
+    restrictions: dict[RestrictionTypes, dict[Annotated[str,
+                                                        is_positive_number_as_str], GuildRestriction]] = None
 
     webhooks: Webhooks = None
 
