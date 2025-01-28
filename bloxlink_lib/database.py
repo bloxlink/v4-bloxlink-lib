@@ -10,13 +10,16 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from redis.asyncio import Redis
 from redis import ConnectionError as RedisConnectionError
 
-from bloxlink_lib.models import users, guilds
-from bloxlink_lib.models.base import MemberSerializable, GuildSerializable
+import bloxlink_lib.models.guilds as guilds
 from bloxlink_lib import BaseModel
+from bloxlink_lib.models.roblox import users
 from .config import CONFIG
 
 mongo: AsyncIOMotorClient = None
 redis: Redis = None
+
+if TYPE_CHECKING:
+    from . import MemberSerializable, GuildSerializable
 
 
 def connect_database():
@@ -230,7 +233,7 @@ async def fetch_user_data(
 
     if isinstance(user, dict):
         user_id = str(user["id"])
-    elif isinstance(user, MemberSerializable):
+    elif isinstance(user, users.MemberSerializable):
         user_id = str(user.id)
     else:
         user_id = str(user)
@@ -248,7 +251,7 @@ async def fetch_guild_data(
 
     if isinstance(guild, dict):
         guild_id = str(guild["id"])
-    elif isinstance(guild, GuildSerializable):
+    elif isinstance(guild, guilds.GuildSerializable):
         guild_id = str(guild.id)
     else:
         guild_id = str(guild)
@@ -265,7 +268,7 @@ async def update_user_data(
 
     if isinstance(user, dict):
         user_id = str(user["id"])
-    elif isinstance(user, MemberSerializable):
+    elif isinstance(user, users.MemberSerializable):
         user_id = str(user.id)
     else:
         user_id = str(user)
@@ -282,7 +285,7 @@ async def update_guild_data(
 
     if isinstance(guild, dict):
         guild_id = str(guild["id"])
-    elif isinstance(guild, GuildSerializable):
+    elif isinstance(guild, guilds.GuildSerializable):
         guild_id = str(guild.id)
     else:
         guild_id = str(guild)

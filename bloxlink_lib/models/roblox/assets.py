@@ -1,6 +1,7 @@
 from pydantic import Field
-from ..fetch import fetch_typed
-from .base import BaseModel, get_entity
+from ...fetch import fetch_typed
+from bloxlink_lib.models.base import BaseModel
+from .base import get_entity
 from .base_assets import RobloxBaseAsset
 
 

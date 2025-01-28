@@ -13,7 +13,7 @@ from typing import (
     Type,
 )
 
-from pydantic import ConfigDict, Field, ValidationError
+from pydantic import Field, ValidationError
 
 from bloxlink_lib import database
 
@@ -31,10 +31,10 @@ from ..utils import find
 if TYPE_CHECKING:
     from hikari import Member
 
-    from .base_assets import RobloxBaseAsset
-    from .groups import RobloxGroup
-    from .guilds import GuildData
-    from .users import RobloxUser
+    from .roblox.base_assets import RobloxBaseAsset
+    from .roblox.groups import RobloxGroup
+    from .guilds import RoleSerializable, GuildData
+    from .roblox.users import MemberSerializable, RobloxUser
 
 
 POP_OLD_BINDS: bool = False  # remove old binds from the database
@@ -73,8 +73,6 @@ class BindDataDict(TypedDict):
 class GroupBindData(BaseModel):
     """Represents the data required for a group bind."""
 
-    model_config = ConfigDict(frozen=True)
-
     # conditions
     everyone: bool | None = False
     guest: bool | None = False
@@ -100,8 +98,6 @@ class GroupBindData(BaseModel):
 
 class BindCriteria(BaseModel):
     """Represents the criteria required for a bind. If anything is set, it must ALL be met."""
-
-    model_config = ConfigDict(frozen=True)
 
     type: VALID_BIND_TYPES
     id: int | None = Field(default=None)
