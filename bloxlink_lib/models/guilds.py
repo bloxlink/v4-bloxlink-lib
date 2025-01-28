@@ -59,6 +59,16 @@ RestrictionTypes = Literal[
 ]
 
 
+class GuildRestriction(BaseModel):
+    """Server restrictions set by the server owner"""
+
+    id: int
+    displayName: str
+    addedBy: Annotated[str, is_positive_number_as_str]
+    reason: str | None = None
+    type: RestrictionTypes
+
+
 class GuildData(BaseModel):
     """Representation of the stored settings for a guild"""
 
