@@ -4,20 +4,21 @@ import re
 import math
 from typing import TYPE_CHECKING, Any, Literal, NotRequired, TypedDict, Annotated, Self, Type
 
-from pydantic import ConfigDict, Field, ValidationError
+from pydantic import Field, ValidationError
 
 from bloxlink_lib import database
 
-from ..models.base import BaseModel, CoerciveSet, RobloxEntity, SnowflakeSet, create_entity, RoleSerializable, MemberSerializable
+from .base import BaseModel, CoerciveSet, SnowflakeSet
+from .roblox.base import RobloxEntity, create_entity
 from ..utils import find
 
 if TYPE_CHECKING:
     from hikari import Member
 
-    from .base_assets import RobloxBaseAsset
-    from .groups import RobloxGroup
-    from .guilds import GuildData
-    from .users import RobloxUser
+    from .roblox.base_assets import RobloxBaseAsset
+    from .roblox.groups import RobloxGroup
+    from .guilds import RoleSerializable, GuildData
+    from .roblox.users import MemberSerializable, RobloxUser
 
 
 POP_OLD_BINDS: bool = False  # remove old binds from the database
@@ -25,8 +26,6 @@ SAVE_NEW_BINDS: bool = False  # save new binds to the database
 
 VALID_BIND_TYPES = Literal["group", "asset",
                            "badge", "gamepass", "verified", "unverified"]
-BIND_GROUP_SUBTYPES = Literal["role_bind", "full_group"]
-
 ARBITRARY_GROUP_TEMPLATE = re.compile(r"\{group-rank-(.*?)\}")
 NICKNAME_TEMPLATE_REGEX = re.compile(r"\{(.*?)\}")
 
@@ -55,8 +54,6 @@ class BindDataDict(TypedDict):
 class GroupBindData(BaseModel):
     """Represents the data required for a group bind."""
 
-    model_config = ConfigDict(frozen=True)
-
     # conditions
     everyone: bool | None = False
     guest: bool | None = False
@@ -81,8 +78,6 @@ class GroupBindData(BaseModel):
 
 class BindCriteria(BaseModel):
     """Represents the criteria required for a bind. If anything is set, it must ALL be met."""
-
-    model_config = ConfigDict(frozen=True)
 
     type: VALID_BIND_TYPES
     id: int | None = Field(default=None)
@@ -122,10 +117,10 @@ class GuildBind(BaseModel):
     pending_new_roles: Annotated[list[str], Field(
         exclude=True, default_factory=list)]
     entity: RobloxEntity | None = Field(exclude=True, default=None)
-    type: VALID_BIND_TYPES | None = Field(
+    type: Literal["group", "asset", "badge", "gamepass", "verified", "unverified"] | None = Field(
         exclude=True, default=None
     )
-    subtype: BIND_GROUP_SUBTYPES | None = Field(
+    subtype: Literal["role_bind", "full_group"] | None = Field(
         exclude=True, default=None)
     highest_role: RoleSerializable | None = Field(
         exclude=True, default=None)  # highest role in the guild
@@ -464,9 +459,6 @@ class GuildBind(BaseModel):
             and self.remove_roles == getattr(other, "remove_roles", None)
             and self.nickname == getattr(other, "nickname", None)
         )
-
-    def __hash__(self) -> int:
-        return hash((self.criteria, tuple(self.roles), tuple(self.remove_roles), self.nickname))
 
 
 async def build_binds_desc(

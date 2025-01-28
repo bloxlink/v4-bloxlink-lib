@@ -1,7 +1,4 @@
 from typing import Any, Literal
-# import bloxlink_lib.models.badges as badges
-# from ..exceptions import RobloxAPIError, RobloxNotFound
-
 from .base import RobloxEntity
 
 
@@ -31,7 +28,8 @@ class RobloxBaseAsset(RobloxEntity):
                 raise ValueError("Invalid asset type.")
 
     def __str__(self) -> str:
-        name = f"**{self.name}**" if self.name else f"*(Unknown {self.type.capitalize()})*"
+        name = f"**{self.name}**" if self.name else f"*(Unknown {
+            self.type.capitalize()})*"
 
         return f"{name} ({self.id})"
 
