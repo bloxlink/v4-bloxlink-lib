@@ -3,6 +3,7 @@ from pydantic import Field, field_validator
 import hikari
 from .base import PydanticList, Snowflake, BaseModel, PydanticDict
 from ..validators import is_positive_number_as_str
+from .migrators import migrate_restrictions
 import bloxlink_lib.models.binds as binds_module
 
 
@@ -55,7 +56,7 @@ class GuildRestriction(BaseModel):
     """Server restrictions set by the server owner"""
 
     id: int
-    displayName: str
+    displayName: Annotated[str, Field(alias="name")]
     addedBy: Annotated[str, is_positive_number_as_str]
     reason: str | None = None
     type: RestrictionTypes
@@ -99,7 +100,13 @@ class GuildData(BaseModel):
     groupLock: PydanticDict[str, GroupLock] = None
     highTrafficServer: bool = False
     allowOldRoles: bool = False
+
     restrictions: PydanticList[GuildRestriction] = Field(default_factory=list)
+
+    @field_validator("restrictions", mode="before")
+    @classmethod
+    def transform_restrictions(cls: Type[Self], restrictions: dict[str, dict[str, GuildRestriction]]) -> list[GuildRestriction]:
+        return migrate_restrictions(restrictions)
 
     webhooks: Webhooks = None
 
