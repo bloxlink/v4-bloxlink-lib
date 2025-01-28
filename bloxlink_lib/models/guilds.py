@@ -60,6 +60,9 @@ class GuildRestriction(BaseModel):
     reason: str | None = None
     type: RestrictionTypes
 
+    def __eq__(self, other):
+        return self.id == other.id and self.type == other.type
+
 
 class GuildData(BaseModel):
     """Representation of the stored settings for a guild"""
