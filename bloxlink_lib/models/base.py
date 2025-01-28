@@ -1,5 +1,5 @@
 from pydantic import BaseModel, RootModel, PrivateAttr, field_validator
-from typing import Callable, Iterable, Type, Any,  Literal, Annotated, Tuple, Sequence, Self, Dict
+from typing import Callable, Iterable, Type, Any,  Literal, Annotated, Tuple, Sequence, Self
 from abc import ABC, abstractmethod
 from pydantic import BaseModel as PydanticBaseModel, BeforeValidator, WithJsonSchema, ConfigDict, Field, ConfigDict, SkipValidation
 from pydantic.fields import FieldInfo
@@ -53,10 +53,10 @@ class BaseModel(PydanticBaseModel):
         return self._generic_type_value
 
 
-class PydanticDict[K, V](RootModel[Dict[K, V]]):
+class PydanticDict[K, V](RootModel[dict[K, V]]):
     """A Pydantic model that represents a dictionary."""
 
-    root: Dict[K, V] = Field(default_factory=dict)
+    root: dict[K, V] = Field(default_factory=dict)
 
     def __iter__(self):
         return iter(self.root)
@@ -88,7 +88,7 @@ class PydanticDict[K, V](RootModel[Dict[K, V]]):
     def items(self):
         return self.root.items()
 
-    def update(self, other: Dict[K, V]):
+    def update(self, other: dict[K, V]):
         self.root.update(other)
 
     def __iter__(self):
@@ -99,6 +99,66 @@ class PydanticDict[K, V](RootModel[Dict[K, V]]):
 
     def __eq__(self, other) -> bool:
         return self.root == other.root if isinstance(other, PydanticDict) else False
+
+    def __str__(self) -> str:
+        return str(self.root)
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+
+class PydanticList[T](RootModel[list[T]]):
+    """A Pydantic model that represents a list."""
+
+    root: list[T] = Field(default_factory=list)
+
+    def __iter__(self):
+        return iter(self.root)
+
+    def __getitem__(self, index: int) -> T:
+        return self.root[index]
+
+    def __setitem__(self, index: int, value: T):
+        self.root[index] = value
+
+    def __delitem__(self, index: int):
+        del self.root[index]
+
+    def append(self, value: T):
+        self.root.append(value)
+
+    def extend(self, values: Iterable[T]):
+        self.root.extend(values)
+
+    def insert(self, index: int, value: T):
+        self.root.insert(index, value)
+
+    def remove(self, value: T):
+        self.root.remove(value)
+
+    def pop(self, index: int = -1) -> T:
+        return self.root.pop(index)
+
+    def clear(self):
+        self.root.clear()
+
+    def index(self, value: T, start: int = 0, end: int = None) -> int:
+        return self.root.index(value, start, end)
+
+    def count(self, value: T) -> int:
+        return self.root.count(value)
+
+    def sort(self, *, key: Callable[[T], Any] = None, reverse: bool = False):
+        self.root.sort(key=key, reverse=reverse)
+
+    def reverse(self):
+        self.root.reverse()
+
+    def __len__(self) -> int:
+        return len(self.root)
+
+    def __eq__(self, other) -> bool:
+        return self.root == other.root if isinstance(other, PydanticList) else False
 
     def __str__(self) -> str:
         return str(self.root)
