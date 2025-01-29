@@ -114,3 +114,6 @@ def init_sentry():
             debug=True,
             attach_stacktrace=True
         )
+
+
+lambda NO_OP: None
