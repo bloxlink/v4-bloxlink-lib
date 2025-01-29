@@ -116,4 +116,6 @@ def init_sentry():
         )
 
 
-lambda NO_OP: None
+def NO_OP(*args, **kwargs):
+    """No operation function."""
+    pass
