@@ -61,6 +61,9 @@ class GuildRestriction(BaseModel):
     reason: str | None = None
     type: RestrictionTypes
 
+    def __str__(self) -> str:
+        return f"{self.displayName or ''} ({self.id}) | Reason: {self.reason or "N/A"} | Added by: @<{self.addedBy}>"
+
     def __eq__(self, other):
         return self.id == other.id and self.type == other.type
 
