@@ -25,6 +25,8 @@ SAVE_NEW_BINDS: bool = False  # save new binds to the database
 
 VALID_BIND_TYPES = Literal["group", "asset",
                            "badge", "gamepass", "verified", "unverified"]
+BIND_GROUP_SUBTYPES = Literal["role_bind", "full_group"]
+
 ARBITRARY_GROUP_TEMPLATE = re.compile(r"\{group-rank-(.*?)\}")
 NICKNAME_TEMPLATE_REGEX = re.compile(r"\{(.*?)\}")
 
@@ -116,10 +118,10 @@ class GuildBind(BaseModel):
     pending_new_roles: Annotated[list[str], Field(
         exclude=True, default_factory=list)]
     entity: RobloxEntity | None = Field(exclude=True, default=None)
-    type: Literal["group", "asset", "badge", "gamepass", "verified", "unverified"] | None = Field(
+    type: VALID_BIND_TYPES | None = Field(
         exclude=True, default=None
     )
-    subtype: Literal["role_bind", "full_group"] | None = Field(
+    subtype: BIND_GROUP_SUBTYPES | None = Field(
         exclude=True, default=None)
     highest_role: RoleSerializable | None = Field(
         exclude=True, default=None)  # highest role in the guild
