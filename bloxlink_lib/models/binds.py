@@ -465,6 +465,9 @@ class GuildBind(BaseModel):
             and self.nickname == getattr(other, "nickname", None)
         )
 
+    def __hash__(self) -> int:
+        return hash((self.criteria, tuple(self.roles), tuple(self.remove_roles), self.nickname))
+
 
 async def build_binds_desc(
     guild_id: int | str,
