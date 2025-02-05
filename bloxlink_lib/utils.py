@@ -17,7 +17,7 @@ class Environment(enum.Enum):
     PRODUCTION = 3
 
 
-def find[T](predicate: Callable, iterable: Iterable[T]) -> T | None:
+def find[T](predicate: Callable[[T], bool], iterable: Iterable[T]) -> T | None:
     """Finds the first element in an iterable that matches the predicate."""
 
     for element in iterable:
