@@ -4,7 +4,7 @@ import re
 import math
 from typing import TYPE_CHECKING, Any, Literal, NotRequired, TypedDict, Annotated, Self, Type
 
-from pydantic import Field, ValidationError
+from pydantic import ConfigDict, Field, ValidationError
 
 from bloxlink_lib import database
 
@@ -55,6 +55,8 @@ class BindDataDict(TypedDict):
 class GroupBindData(BaseModel):
     """Represents the data required for a group bind."""
 
+    model_config = ConfigDict(frozen=True)
+
     # conditions
     everyone: bool | None = False
     guest: bool | None = False
@@ -79,6 +81,8 @@ class GroupBindData(BaseModel):
 
 class BindCriteria(BaseModel):
     """Represents the criteria required for a bind. If anything is set, it must ALL be met."""
+
+    model_config = ConfigDict(frozen=True)
 
     type: VALID_BIND_TYPES
     id: int | None = Field(default=None)
