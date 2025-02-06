@@ -1,5 +1,5 @@
 import pytest
-from bloxlink_lib.models.guilds import GuildSerializable, RoleSerializable
+from bloxlink_lib.models.base import GuildSerializable, RoleSerializable
 
 
 @pytest.fixture

@@ -8,7 +8,7 @@ from pydantic import ConfigDict, Field, ValidationError
 
 from bloxlink_lib import database
 
-from ..models.base import BaseModel, CoerciveSet, RobloxEntity, SnowflakeSet, create_entity
+from ..models.base import BaseModel, CoerciveSet, RobloxEntity, SnowflakeSet, create_entity, RoleSerializable, MemberSerializable
 from ..utils import find
 
 if TYPE_CHECKING:
@@ -16,8 +16,8 @@ if TYPE_CHECKING:
 
     from .base_assets import RobloxBaseAsset
     from .groups import RobloxGroup
-    from .guilds import RoleSerializable, GuildData
-    from .users import MemberSerializable, RobloxUser
+    from .guilds import GuildData
+    from .users import RobloxUser
 
 
 POP_OLD_BINDS: bool = False  # remove old binds from the database
