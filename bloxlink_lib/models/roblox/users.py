@@ -6,10 +6,12 @@ import math
 from datetime import datetime
 import hikari
 import discord
+
+from bloxlink_lib.models.schemas import fetch_user_data
 from ...fetch import fetch, fetch_typed, StatusCodes
 from ...config import CONFIG
 from ...exceptions import RobloxNotFound, RobloxAPIError, UserNotVerified
-from ...database import fetch_user_data, mongo
+from ...database import mongo
 from .groups import GroupRoleset
 from ..base import Snowflake, BaseModel
 
@@ -28,21 +30,6 @@ AVATAR_URLS = {
     "headshotThumbnail": "https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds={roblox_id}&size=420x420&format=Png&isCircular=false",
     "fullBody": "https://thumbnails.roblox.com/v1/users/avatar?userIds={roblox_id}&size=720x720&format=Png&isCircular=false"
 }
-
-
-class UserData(BaseModel):
-    """Representation of a User's data in Bloxlink
-
-    Attributes:
-        id (int): The Discord ID of the user.
-        robloxID (str): The roblox ID of the user's primary account.
-        robloxAccounts (dict): All of the user's linked accounts, and any guild specific verifications.
-    """
-
-    id: int
-    robloxID: str | None = None
-    robloxAccounts: dict = Field(default_factory=lambda: {
-                                 "accounts": [], "guilds": {}, "confirms": {}})
 
 
 class UserAvatar(BaseModel):

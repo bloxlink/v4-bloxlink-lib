@@ -6,9 +6,9 @@ from typing import TYPE_CHECKING, Any, Literal, NotRequired, TypedDict, Annotate
 
 from pydantic import Field, ValidationError
 
-from bloxlink_lib import database
+import bloxlink_lib.database as database
 
-from .base import BaseModel, CoerciveSet, SnowflakeSet
+from .base import BaseModel, CoerciveSet, SnowflakeSet, RoleSerializable
 from .roblox.base import RobloxEntity, create_entity
 from ..utils import find
 
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
     from .roblox.base_assets import RobloxBaseAsset
     from .roblox.groups import RobloxGroup
-    from .guilds import RoleSerializable, GuildData
+    from .schemas import GuildData
     from .roblox.users import MemberSerializable, RobloxUser
 
 
