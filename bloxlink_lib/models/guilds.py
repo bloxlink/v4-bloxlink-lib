@@ -1,7 +1,7 @@
 from typing import Mapping, Self, Type, Literal, Annotated
 from pydantic import Field, field_validator
 import hikari
-from .base import PydanticList, RoleSerializable, BaseModel, PydanticDict
+from .base import PydanticList,  BaseModel, PydanticDict
 from ..validators import is_positive_number_as_str
 from .migrators import migrate_restrictions
 import bloxlink_lib.models.binds as binds_module
@@ -62,7 +62,7 @@ class GuildRestriction(BaseModel):
     type: RestrictionTypes
 
     def __str__(self) -> str:
-        return f"{self.displayName or ''} ({self.id})\n> Reason: {self.reason or "N/A"}\n> Added by: {RoleSerializable.role_mention(self.addedBy)}>"
+        return f"{self.displayName or ''} ({self.id})\n> Reason: {self.reason or "N/A"}\n> Added by: {MemberSerializable.role_mention(self.addedBy)}>"
 
     def __eq__(self, other):
         return self.id == other.id and self.type == other.type
