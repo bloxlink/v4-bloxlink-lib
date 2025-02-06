@@ -1,5 +1,6 @@
 from __future__ import annotations
-import bloxlink_lib.models.guilds as guilds
+
+from bloxlink_lib.models.schemas.guilds.guild_types import GuildRestriction
 
 
 def migrate_restrictions(
@@ -8,7 +9,7 @@ def migrate_restrictions(
     if isinstance(restrictions, list):
         return restrictions
 
-    new_guild_restrictions: list[guilds.GuildRestriction] = []
+    new_guild_restrictions: list[GuildRestriction] = []
 
     for restriction_type, restriction_data in restrictions.items():
         for restricted_id, restriction in restriction_data.items():

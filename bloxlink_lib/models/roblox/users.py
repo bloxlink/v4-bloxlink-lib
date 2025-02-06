@@ -6,10 +6,12 @@ import math
 from datetime import datetime
 import hikari
 import discord
+
+from bloxlink_lib.models.schemas import fetch_user_data
 from ...fetch import fetch, fetch_typed, StatusCodes
 from ...config import CONFIG
 from ...exceptions import RobloxNotFound, RobloxAPIError, UserNotVerified
-from ...database import fetch_user_data, mongo
+from ...database import mongo
 from .groups import GroupRoleset
 from ..base import Snowflake, BaseModel
 

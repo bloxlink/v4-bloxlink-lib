@@ -1,30 +1,16 @@
 from __future__ import annotations
 
 import asyncio
-import datetime
-import json
-import os
-from typing import Type, Any
+from os.path import exists
 
 from motor.motor_asyncio import AsyncIOMotorClient
-from redis.asyncio import Redis
-from redis import ConnectionError as RedisConnectionError
-
-import bloxlink_lib.models.guilds as guilds
-from bloxlink_lib import BaseModel
-from bloxlink_lib.models.roblox import users
 from .config import CONFIG
 
 mongo: AsyncIOMotorClient = None
-redis: Redis = None
-
-if TYPE_CHECKING:
-    from . import MemberSerializable, GuildSerializable
 
 
 def connect_database():
     global mongo  # pylint: disable=global-statement
-    global redis  # pylint: disable=global-statement
 
     mongo_options: dict[str, str | int] = {}
 

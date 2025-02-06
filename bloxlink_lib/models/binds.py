@@ -15,7 +15,7 @@ from typing import (
 
 from pydantic import Field, ValidationError
 
-from bloxlink_lib import database
+import bloxlink_lib.database as database
 
 from ..models.base import (
     BaseModel,
@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 
     from .roblox.base_assets import RobloxBaseAsset
     from .roblox.groups import RobloxGroup
-    from .guilds import RoleSerializable, GuildData
+    from .schemas import GuildData
     from .roblox.users import MemberSerializable, RobloxUser
 
 
