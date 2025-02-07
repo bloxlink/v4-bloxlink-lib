@@ -51,6 +51,9 @@ RestrictionTypes = Literal[
     "roles"
 ]
 
+RestrictionSources = Literal["ageLimit", "groupLock",
+                             "disallowAlts", "banEvader", "restrictions"]
+
 
 class GuildRestriction(BaseModel):
     """Server restrictions set by the server owner"""
