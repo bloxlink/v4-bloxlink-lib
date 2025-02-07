@@ -62,7 +62,7 @@ class GuildRestriction(BaseModel):
     type: RestrictionTypes
 
     def __str__(self) -> str:
-        return f"{self.displayName or ''} ({self.id})\n> Reason: {self.reason or "N/A"}\n> Added by: {MemberSerializable.user_mention(self.addedBy)}>"
+        return f"{self.displayName or ''} ({self.id})\n> Reason: {self.reason or "N/A"}\n> Added by: {MemberSerializable.user_mention(self.addedBy)}"
 
     def __eq__(self, other):
         return self.id == other.id and self.type == other.type
