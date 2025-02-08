@@ -1,0 +1,63 @@
+name: Code Quality
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  format_code:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.run_attempt > 1
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        python-version: ["3.12"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+
+      - name: Install poetry
+        run: pipx install poetry==2.0.1
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "poetry"
+
+      - name: Install dependencies
+        run: |
+          poetry install --with dev --sync
+
+      - name: Format code with black
+        run: |
+          poetry run black .
+
+      - name: Run pylint
+        continue-on-error: true
+        run: |
+          poetry run pylint $(git ls-files '*.py')
+
+      - name: Commit changes if any
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git config --global user.name "GitHub Actions"
+            git config --global user.email "actions@github.com"
+            git add .
+            git commit -m "style: format code with black"
+            if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+              git push origin HEAD:${{ github.head_ref }}
+            else
+              git push
+            fi
+          fi
+
+  # This job always runs to show the message when the lint job is skipped
+  show_message:
+    runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch' && github.run_attempt == 1
+    steps:
+      - name: Show skip message
+        run: echo "Re-run workflow to auto-format code with black"
