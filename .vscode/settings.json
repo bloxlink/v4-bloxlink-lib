@@ -1,8 +1,6 @@
 {
-  "pylint.args": ["--disable=C0413", "--disable=C0114"],
-  "pylint.cwd": "${workspaceFolder}/src",
   "[python]": {
-    "editor.defaultFormatter": "ms-python.autopep8",
+    "editor.defaultFormatter": "ms-python.black-formatter",
     "diffEditor.ignoreTrimWhitespace": false,
     "editor.formatOnSave": true
   },
