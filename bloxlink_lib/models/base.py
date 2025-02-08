@@ -13,7 +13,10 @@ Snowflake = Annotated[int, BeforeValidator(
 
 
 class UNDEFINED:
-    """Can be used to differentiate between None and undefine in function arguments."""
+    """
+    Can be used to differentiate between None and undefined
+    in function arguments.
+    """
 
 
 class BaseModelArbitraryTypes(PydanticBaseModel):
