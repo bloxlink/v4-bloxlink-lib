@@ -15,8 +15,7 @@ from .base import BaseModel, MemberSerializable
 if TYPE_CHECKING:
     from .base_assets import RobloxBaseAsset
 
-VALID_INFO_SERVER_SCOPES: list[Literal["groups", "badges"]] = [
-    "groups", "badges"]
+VALID_INFO_SERVER_SCOPES: list[Literal["groups", "badges"]] = ["groups", "badges"]
 INVENTORY_API = "https://inventory.roblox.com"
 USERS_API = "https://users.roblox.com"
 USERS_BASE_DATA_API = USERS_API + "/v1/users/{roblox_id}"
@@ -25,7 +24,7 @@ USER_BADGES_API = "https://www.roblox.com/badges/roblox?userId={roblox_id}"
 AVATAR_URLS = {
     "bustThumbnail": "https://thumbnails.roblox.com/v1/users/avatar-bust?userIds={roblox_id}&size=420x420&format=Png&isCircular=false",
     "headshotThumbnail": "https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds={roblox_id}&size=420x420&format=Png&isCircular=false",
-    "fullBody": "https://thumbnails.roblox.com/v1/users/avatar?userIds={roblox_id}&size=720x720&format=Png&isCircular=false"
+    "fullBody": "https://thumbnails.roblox.com/v1/users/avatar?userIds={roblox_id}&size=720x720&format=Png&isCircular=false",
 }
 
 
@@ -40,8 +39,9 @@ class UserData(BaseModel):
 
     id: int
     robloxID: str | None = None
-    robloxAccounts: dict = Field(default_factory=lambda: {
-                                 "accounts": [], "guilds": {}, "confirms": {}})
+    robloxAccounts: dict = Field(
+        default_factory=lambda: {"accounts": [], "guilds": {}, "confirms": {}}
+    )
 
 
 class UserAvatar(BaseModel):
@@ -127,7 +127,7 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
         self,
         includes: list[Literal["groups", "badges"]] | bool | None = None,
         *,
-        cache: bool = True
+        cache: bool = True,
     ):
         """Retrieve and sync information about this user from Roblox. Requires a username or id to be set.
 
@@ -138,7 +138,10 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
             cache (bool, optional): Should we check the object for values before retrieving. Defaults to True.
         """
 
-        if includes is not None and any((x is False or x not in [*VALID_INFO_SERVER_SCOPES, True, None]) for x in includes):
+        if includes is not None and any(
+            (x is False or x not in [*VALID_INFO_SERVER_SCOPES, True, None])
+            for x in includes
+        ):
             raise ValueError("Invalid includes provided.")
 
         if includes is None:
@@ -160,8 +163,11 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
             RobloxUser,
             f"{CONFIG.BOT_API}/users",
             headers={"Authorization": CONFIG.BOT_API_AUTH},
-            params={"id": self.id, "username": self.username,
-                    "include": ",".join(includes)},
+            params={
+                "id": self.id,
+                "username": self.username,
+                "include": ",".join(includes),
+            },
         )
 
         if user_data_response.status == StatusCodes.OK:
@@ -170,9 +176,12 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
             self.username = roblox_user_data.username or self.username
             self.banned = roblox_user_data.banned or self.banned
             self.badges = roblox_user_data.badges or self.badges
-            self.display_name = roblox_user_data.display_name or self.display_name or self.username
-            self.created = (
-                roblox_user_data.created or self.created).replace(tzinfo=None)
+            self.display_name = (
+                roblox_user_data.display_name or self.display_name or self.username
+            )
+            self.created = (roblox_user_data.created or self.created).replace(
+                tzinfo=None
+            )
             self.avatar = roblox_user_data.avatar or self.avatar
             self.profile_link = roblox_user_data.profile_link or self.profile_link
             self.groups = roblox_user_data.groups or self.groups
@@ -185,8 +194,9 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
                 avatar_url, avatar_response = await fetch("GET", avatar.bust_thumbnail)
 
                 if avatar_response.status == StatusCodes.OK:
-                    self.avatar_url = avatar_url.get(
-                        "data", [{}])[0].get("imageUrl") or None
+                    self.avatar_url = (
+                        avatar_url.get("data", [{}])[0].get("imageUrl") or None
+                    )
 
     async def owns_asset(self, asset: RobloxBaseAsset) -> bool:
         """Check if the user owns a specific asset.
@@ -202,7 +212,7 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
             response_data, _ = await fetch(
                 "GET",
                 f"{INVENTORY_API}/v1/users/{self.id}/items/{asset.type_number}/{asset.id}/is-owned",
-                parse_as="TEXT"
+                parse_as="TEXT",
             )
         except RobloxAPIError:
             return False
@@ -248,12 +258,7 @@ async def fetch_roblox_id(roblox_username: str) -> int | None:
         RobloxUsernameResponse,
         f"{USERS_API}/v1/usernames/users",
         method="POST",
-        body={
-            "usernames": [
-                roblox_username
-            ],
-            "excludeBannedUsers": False
-        }
+        body={"usernames": [roblox_username], "excludeBannedUsers": False},
     )
 
     if username_response.status != StatusCodes.OK:
@@ -270,7 +275,7 @@ async def fetch_base_data(roblox_id: int) -> dict | None:
     user_base_data, user_base_data_response = await fetch_typed(
         RobloxUser,
         USERS_BASE_DATA_API.format(roblox_id=roblox_id),
-        raise_on_failure=False
+        raise_on_failure=False,
     )
 
     if user_base_data_response.status != StatusCodes.OK:
@@ -279,7 +284,9 @@ async def fetch_base_data(roblox_id: int) -> dict | None:
     return user_base_data.model_dump(exclude_unset=True)
 
 
-async def fetch_user_groups(roblox_id: int) -> dict[Literal["groups"]: dict[int, RobloxUserGroups]] | None:
+async def fetch_user_groups(
+    roblox_id: int,
+) -> dict[Literal["groups"] : dict[int, RobloxUserGroups]] | None:
     """
     Fetch the groups of a user.
 
@@ -290,16 +297,22 @@ async def fetch_user_groups(roblox_id: int) -> dict[Literal["groups"]: dict[int,
     user_groups, user_groups_response = await fetch_typed(
         RobloxUserGroupsResponse,
         USER_GROUPS_API.format(roblox_id=roblox_id),
-        raise_on_failure=False
+        raise_on_failure=False,
     )
 
     if user_groups_response.status != StatusCodes.OK:
         return None
 
-    return {"groups": {int(group_data.group.id): group_data for group_data in user_groups.data}}
+    return {
+        "groups": {
+            int(group_data.group.id): group_data for group_data in user_groups.data
+        }
+    }
 
 
-async def fetch_user_avatars(roblox_id: int, resolve_avatars: bool) -> dict[Literal["avatar"], UserAvatar]:
+async def fetch_user_avatars(
+    roblox_id: int, resolve_avatars: bool
+) -> dict[Literal["avatar"], UserAvatar]:
     """
     Fetch the avatar templates of a user.
 
@@ -314,7 +327,7 @@ async def fetch_user_avatars(roblox_id: int, resolve_avatars: bool) -> dict[Lite
             avatar_data, avatar_data_response = await fetch_typed(
                 RobloxUserAvatarResponse,
                 avatar_url.format(roblox_id=roblox_id),
-                raise_on_failure=False
+                raise_on_failure=False,
             )
             if avatar_data_response.status == StatusCodes.OK:
                 avatars[avatar_name] = avatar_data.data[0].imageUrl
@@ -339,7 +352,7 @@ async def fetch_user_badges(roblox_id: int) -> list[RobloxUserBadge] | None:
     user_badges, user_badges_response = await fetch_typed(
         RobloxUserBadgeResponse,
         USER_BADGES_API.format(roblox_id=roblox_id),
-        raise_on_failure=False
+        raise_on_failure=False,
     )
 
     if user_badges_response.status != StatusCodes.OK:
@@ -349,7 +362,9 @@ async def fetch_user_badges(roblox_id: int) -> list[RobloxUserBadge] | None:
 
 
 async def get_user_account(
-    user: hikari.User | MemberSerializable | str, guild_id: int = None, raise_errors=True
+    user: hikari.User | MemberSerializable | str,
+    guild_id: int = None,
+    raise_errors=True,
 ) -> RobloxUser | None:
     """Get a user's linked Roblox account.
 
@@ -366,13 +381,15 @@ async def get_user_account(
         RobloxUser | None: The linked Roblox account either globally or for this guild, if any.
     """
 
-    user_id = str(user.id) if isinstance(
-        user, (hikari.User, MemberSerializable)) else str(user)
+    user_id = (
+        str(user.id)
+        if isinstance(user, (hikari.User, MemberSerializable))
+        else str(user)
+    )
     bloxlink_user = await fetch_user_data(user_id, "robloxID", "robloxAccounts")
 
     if guild_id:
-        guild_accounts = (bloxlink_user.robloxAccounts or {}
-                          ).get("guilds") or {}
+        guild_accounts = (bloxlink_user.robloxAccounts or {}).get("guilds") or {}
         guild_account = guild_accounts.get(str(guild_id))
 
         if guild_account:
@@ -418,12 +435,12 @@ async def get_user(
     roblox_user: RobloxUser = None
 
     if roblox_id and roblox_username:
-        raise ValueError(
-            "You cannot provide both a roblox_id and a roblox_username.")
+        raise ValueError("You cannot provide both a roblox_id and a roblox_username.")
 
     if user and (roblox_username or roblox_id):
         raise ValueError(
-            "You cannot provide both a user and a roblox_id or roblox_username.")
+            "You cannot provide both a user and a roblox_id or roblox_username."
+        )
 
     if user:
         roblox_user = await get_user_account(user, guild_id)
@@ -457,14 +474,14 @@ async def get_accounts(user_id: int) -> list[RobloxUser]:
     for guild_account_id in guild_accounts.values():
         account_ids.add(guild_account_id)
 
-    accounts = [
-        RobloxUser(id=account_id) for account_id in account_ids
-    ]
+    accounts = [RobloxUser(id=account_id) for account_id in account_ids]
 
     return accounts
 
 
-async def reverse_lookup(roblox_user: RobloxUser, exclude_user_id: int | None = None) -> list[int]:
+async def reverse_lookup(
+    roblox_user: RobloxUser, exclude_user_id: int | None = None
+) -> list[int]:
     """Find Discord IDs linked to a roblox id.
 
     Args:
@@ -479,15 +496,18 @@ async def reverse_lookup(roblox_user: RobloxUser, exclude_user_id: int | None = 
     roblox_id = str(roblox_user.id)
 
     cursor = mongo.bloxlink["users"].find(
-        {"$or": [{"robloxID": roblox_id}, {
-            "robloxAccounts.accounts": roblox_id}]},
+        {"$or": [{"robloxID": roblox_id}, {"robloxAccounts.accounts": roblox_id}]},
         {"_id": 1},
     )
 
-    return [int(x["_id"]) async for x in cursor if str(exclude_user_id) != str(x["_id"])]
+    return [
+        int(x["_id"]) async for x in cursor if str(exclude_user_id) != str(x["_id"])
+    ]
 
 
-async def get_user_from_string(target: Annotated[str, "Roblox username or ID"]) -> RobloxUser:
+async def get_user_from_string(
+    target: Annotated[str, "Roblox username or ID"]
+) -> RobloxUser:
     """Get a RobloxUser from a given target string (either an ID or username)
 
     Args:
@@ -520,7 +540,6 @@ async def get_user_from_string(target: Annotated[str, "Roblox username or ID"]) 
             ) from exc
 
     if account.id is None or account.username is None:
-        raise RobloxNotFound(
-            "The Roblox user you were searching for does not exist.")
+        raise RobloxNotFound("The Roblox user you were searching for does not exist.")
 
     return account

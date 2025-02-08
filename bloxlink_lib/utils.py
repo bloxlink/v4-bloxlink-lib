@@ -81,8 +81,11 @@ def parse_into[T: BaseModel | dict](data: dict, model: Type[T]) -> T:
 
     if issubclass(model, BaseModel):
         # Filter only relevant fields before constructing the pydantic instance
-        relevant_fields = {field_name: data.get(field_name, data.get(
-            field.alias)) for field_name, field in model.model_fields.items() if field_name in data or field.alias in data}
+        relevant_fields = {
+            field_name: data.get(field_name, data.get(field.alias))
+            for field_name, field in model.model_fields.items()
+            if field_name in data or field.alias in data
+        }
 
         return model(**relevant_fields)
 
@@ -112,7 +115,7 @@ def init_sentry():
             integrations=[AioHttpIntegration()],
             enable_tracing=True,
             debug=True,
-            attach_stacktrace=True
+            attach_stacktrace=True,
         )
 
 

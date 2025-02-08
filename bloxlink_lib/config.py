@@ -47,21 +47,33 @@ class Config(BaseModel):
             self.REDIS_HOST is None or self.REDIS_PORT is None
         ):
             raise ValueError(
-                "REDIS_URL or REDIS_HOST/REDIS_PORT/REDIS_PASSWORD must be set")
+                "REDIS_URL or REDIS_HOST/REDIS_PORT/REDIS_PASSWORD must be set"
+            )
 
         if all([self.REDIS_HOST, self.REDIS_PORT, self.REDIS_PASSWORD, self.REDIS_URL]):
             raise ValueError(
-                "REDIS_URL and REDIS_HOST/REDIS_PORT/REDIS_PASSWORD cannot both be set")
+                "REDIS_URL and REDIS_HOST/REDIS_PORT/REDIS_PASSWORD cannot both be set"
+            )
 
         if self.MONGO_URL is None and (
             self.MONGO_HOST is None or self.MONGO_PORT is None
         ):
             raise ValueError(
-                "MONGO_URL or MONGO_HOST/MONGO_PORT/MONGO_USER/MONGO_PASSWORD must be set")
+                "MONGO_URL or MONGO_HOST/MONGO_PORT/MONGO_USER/MONGO_PASSWORD must be set"
+            )
 
-        if all([self.MONGO_HOST, self.MONGO_PORT, self.MONGO_USER, self.MONGO_PASSWORD, self.MONGO_URL]):
+        if all(
+            [
+                self.MONGO_HOST,
+                self.MONGO_PORT,
+                self.MONGO_USER,
+                self.MONGO_PASSWORD,
+                self.MONGO_URL,
+            ]
+        ):
             raise ValueError(
-                "MONGO_URL and MONGO_HOST/MONGO_PORT/MONGO_USER/MONGO_PASSWORD cannot both be set")
+                "MONGO_URL and MONGO_HOST/MONGO_PORT/MONGO_USER/MONGO_PASSWORD cannot both be set"
+            )
 
 
 CONFIG: Config = Config(

@@ -1,7 +1,7 @@
 from typing import Mapping, Self, Type, Literal, Annotated
 from pydantic import Field, field_validator
 import hikari
-from .base import PydanticList,  BaseModel, PydanticDict, MemberSerializable
+from .base import PydanticList, BaseModel, PydanticDict, MemberSerializable
 from ..validators import is_positive_number_as_str
 from .migrators import migrate_restrictions
 import bloxlink_lib.models.binds as binds_module
@@ -41,18 +41,13 @@ class GroupLock(BaseModel):
     unverifiedAction: Literal["kick", "dm"] = "kick"
 
 
-MagicRoleTypes = Literal["Bloxlink Admin",
-                         "Bloxlink Updater", "Bloxlink Bypass"]
+MagicRoleTypes = Literal["Bloxlink Admin", "Bloxlink Updater", "Bloxlink Bypass"]
 
-RestrictionTypes = Literal[
-    "users",
-    "groups",
-    "robloxAccounts",
-    "roles"
+RestrictionTypes = Literal["users", "groups", "robloxAccounts", "roles"]
+
+RestrictionSources = Literal[
+    "ageLimit", "groupLock", "disallowAlts", "banEvader", "restrictions"
 ]
-
-RestrictionSources = Literal["ageLimit", "groupLock",
-                             "disallowAlts", "banEvader", "restrictions"]
 
 
 class GuildRestriction(BaseModel):
@@ -93,7 +88,9 @@ class GuildData(BaseModel):
     unverifiedRoleName: str | None = "Unverified"  # deprecated
     unverifiedRole: str = None
 
-    verifiedDM: str = ":wave: Welcome to **{server-name}**, {roblox-name}! Visit <{verify-url}> to change your account.\nFind more Roblox Communities at https://blox.link/communities !"
+    verifiedDM: str = (
+        ":wave: Welcome to **{server-name}**, {roblox-name}! Visit <{verify-url}> to change your account.\nFind more Roblox Communities at https://blox.link/communities !"
+    )
 
     ageLimit: int = None
     autoRoles: bool = True
@@ -111,7 +108,9 @@ class GuildData(BaseModel):
 
     @field_validator("restrictions", mode="before")
     @classmethod
-    def transform_restrictions(cls: Type[Self], restrictions: dict[str, dict[str, GuildRestriction]]) -> list[GuildRestriction]:
+    def transform_restrictions(
+        cls: Type[Self], restrictions: dict[str, dict[str, GuildRestriction]]
+    ) -> list[GuildRestriction]:
         return migrate_restrictions(restrictions)
 
     webhooks: Webhooks = None
@@ -124,8 +123,7 @@ class GuildData(BaseModel):
 
     magicRoles: PydanticDict[str, list[MagicRoleTypes]] = None
 
-    premium: PydanticDict = Field(
-        default_factory=PydanticDict)  # deprecated
+    premium: PydanticDict = Field(default_factory=PydanticDict)  # deprecated
 
     # Old bind fields.
     roleBinds: PydanticDict = None
@@ -136,14 +134,16 @@ class GuildData(BaseModel):
         # merge verified roles into binds
         if self.verifiedRole:
             verified_role_bind = binds_module.GuildBind(
-                criteria={"type": "verified"}, roles=[self.verifiedRole])
+                criteria={"type": "verified"}, roles=[self.verifiedRole]
+            )
 
             if verified_role_bind not in self.binds:
                 self.binds.append(verified_role_bind)
 
         if self.unverifiedRole:
             unverified_role_bind = binds_module.GuildBind(
-                criteria={"type": "unverified"}, roles=[self.unverifiedRole])
+                criteria={"type": "unverified"}, roles=[self.unverifiedRole]
+            )
 
             if unverified_role_bind not in self.binds:
                 self.binds.append(unverified_role_bind)

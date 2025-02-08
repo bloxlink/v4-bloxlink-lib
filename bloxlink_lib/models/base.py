@@ -1,15 +1,33 @@
 from datetime import datetime
 import discord
 from pydantic import BaseModel, RootModel, PrivateAttr, field_validator
-from typing import Callable, Iterable, Mapping, Type, Any,  Literal, Annotated, Tuple, Sequence, Self
+from typing import (
+    Callable,
+    Iterable,
+    Mapping,
+    Type,
+    Any,
+    Literal,
+    Annotated,
+    Tuple,
+    Sequence,
+    Self,
+)
 from abc import ABC, abstractmethod
-from pydantic import BaseModel as PydanticBaseModel, BeforeValidator, WithJsonSchema, ConfigDict, Field, ConfigDict, SkipValidation
+from pydantic import (
+    BaseModel as PydanticBaseModel,
+    BeforeValidator,
+    WithJsonSchema,
+    ConfigDict,
+    Field,
+    ConfigDict,
+    SkipValidation,
+)
 from pydantic.fields import FieldInfo
 from generics import get_filled_type
 import hikari
 
-Snowflake = Annotated[int, BeforeValidator(
-    int), WithJsonSchema({"type": 'int'})]
+Snowflake = Annotated[int, BeforeValidator(int), WithJsonSchema({"type": "int"})]
 
 
 class UNDEFINED:
@@ -22,8 +40,9 @@ class UNDEFINED:
 class BaseModelArbitraryTypes(PydanticBaseModel):
     """Base model with arbitrary types allowed."""
 
-    model_config = ConfigDict(arbitrary_types_allowed=True,
-                              populate_by_name=True, validate_assignment=True)
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True, populate_by_name=True, validate_assignment=True
+    )
 
 
 class BaseModel(PydanticBaseModel):
@@ -33,7 +52,9 @@ class BaseModel(PydanticBaseModel):
     _generic_type_value: Any = None
 
     @classmethod
-    def model_fields_index(cls: Type[PydanticBaseModel | BaseModelArbitraryTypes]) -> list[Tuple[str, FieldInfo]]:
+    def model_fields_index(
+        cls: Type[PydanticBaseModel | BaseModelArbitraryTypes],
+    ) -> list[Tuple[str, FieldInfo]]:
         """Returns a list of the model's fields with the name as a tuple.
 
         Useful if the field index is necessary.
@@ -254,22 +275,20 @@ class CoerciveSet[T: Callable](BaseModel):
             for item in iterable:
                 self._data.add(self._coerce(item))
 
-    def intersection(self, *s: Iterable[T]) -> 'CoerciveSet[T]':
+    def intersection(self, *s: Iterable[T]) -> "CoerciveSet[T]":
         result = self._data.intersection(self._coerce(x) for i in s for x in i)
         return self.__class__(root=result)
 
-    def difference(self, *s: Iterable[T]) -> 'CoerciveSet[T]':
+    def difference(self, *s: Iterable[T]) -> "CoerciveSet[T]":
         result = self._data.difference(self._coerce(x) for i in s for x in i)
         return self.__class__(root=result)
 
-    def symmetric_difference(self, *s: Iterable[T]) -> 'CoerciveSet[T]':
-        result = self._data.symmetric_difference(
-            self._coerce(x) for i in s for x in i)
+    def symmetric_difference(self, *s: Iterable[T]) -> "CoerciveSet[T]":
+        result = self._data.symmetric_difference(self._coerce(x) for i in s for x in i)
         return self.__class__(root=result)
 
-    def union(self, *s: Iterable[T]) -> 'CoerciveSet[T]':
-        result = self._data.union(self._coerce(x)
-                                  for iterable in s for x in iterable)
+    def union(self, *s: Iterable[T]) -> "CoerciveSet[T]":
+        result = self._data.union(self._coerce(x) for iterable in s for x in iterable)
         return self.__class__(root=result)
 
     def contains_all(self, iterable: Iterable[T]) -> bool:
@@ -285,7 +304,9 @@ class CoerciveSet[T: Callable](BaseModel):
         return len(self._data)
 
     def __eq__(self, other) -> bool:
-        return self.contains(x for x in other) if isinstance(other, CoerciveSet) else False
+        return (
+            self.contains(x for x in other) if isinstance(other, CoerciveSet) else False
+        )
 
     def __str__(self) -> str:
         return ", ".join(str(i) for i in self)
@@ -301,7 +322,12 @@ class SnowflakeSet(CoerciveSet[int]):
     type: Literal["role", "user"] | None = Field(default=None)
     str_reference: dict = Field(default_factory=dict)
 
-    def __init__(self, root: Iterable[int] = None, type: Literal["role", "user"] = None, str_reference: dict = None):
+    def __init__(
+        self,
+        root: Iterable[int] = None,
+        type: Literal["role", "user"] = None,
+        str_reference: dict = None,
+    ):
         super().__init__(root=root or [])
         self.type = type
         self.str_reference = str_reference or {}
@@ -312,28 +338,40 @@ class SnowflakeSet(CoerciveSet[int]):
             return super().add(item.id)
         return super().add(item)
 
-    def intersection(self, *s: Iterable[int]) -> 'SnowflakeSet':
+    def intersection(self, *s: Iterable[int]) -> "SnowflakeSet":
         result = super().intersection(*s)
-        return SnowflakeSet(root=result._data, type=self.type, str_reference=self.str_reference)
+        return SnowflakeSet(
+            root=result._data, type=self.type, str_reference=self.str_reference
+        )
 
-    def difference(self, *s: Iterable[int]) -> 'SnowflakeSet':
+    def difference(self, *s: Iterable[int]) -> "SnowflakeSet":
         result = super().difference(*s)
-        return SnowflakeSet(root=result._data, type=self.type, str_reference=self.str_reference)
+        return SnowflakeSet(
+            root=result._data, type=self.type, str_reference=self.str_reference
+        )
 
-    def symmetric_difference(self, *s: Iterable[int]) -> 'SnowflakeSet':
+    def symmetric_difference(self, *s: Iterable[int]) -> "SnowflakeSet":
         result = super().symmetric_difference(*s)
-        return SnowflakeSet(root=result._data, type=self.type, str_reference=self.str_reference)
+        return SnowflakeSet(
+            root=result._data, type=self.type, str_reference=self.str_reference
+        )
 
-    def union(self, *s: Iterable[int]) -> 'SnowflakeSet':
+    def union(self, *s: Iterable[int]) -> "SnowflakeSet":
         result = super().union(*s)
-        return SnowflakeSet(root=result._data, type=self.type, str_reference=self.str_reference)
+        return SnowflakeSet(
+            root=result._data, type=self.type, str_reference=self.str_reference
+        )
 
     def __str__(self):
         match self.type:
             case "role":
-                return ", ".join(str(self.str_reference.get(i) or f"<@&{i}>") for i in self)
+                return ", ".join(
+                    str(self.str_reference.get(i) or f"<@&{i}>") for i in self
+                )
             case "user":
-                return ", ".join(str(self.str_reference.get(i) or f"<@{i}>") for i in self)
+                return ", ".join(
+                    str(self.str_reference.get(i) or f"<@{i}>") for i in self
+                )
         return ", ".join(str(self.str_reference.get(i) or i) for i in self)
 
     def __repr__(self):
@@ -351,7 +389,7 @@ class RoleSerializable(BaseModel):
     is_mentionable: bool = None
 
     @classmethod
-    def from_hikari(cls, role: hikari.Role | Self) -> 'RoleSerializable':
+    def from_hikari(cls, role: hikari.Role | Self) -> "RoleSerializable":
         """Convert a Hikari role into a RoleSerializable object."""
 
         if isinstance(role, RoleSerializable):
@@ -365,7 +403,7 @@ class RoleSerializable(BaseModel):
             position=role.position,
             permissions=role.permissions,
             is_managed=role.is_managed,
-            is_mentionable=role.is_mentionable
+            is_mentionable=role.is_mentionable,
         )
 
     @staticmethod
@@ -387,7 +425,9 @@ class MemberSerializable(BaseModel):
     mention: str = None
 
     @classmethod
-    def from_hikari(cls, member: hikari.InteractionMember | Self) -> 'MemberSerializable':
+    def from_hikari(
+        cls, member: hikari.InteractionMember | Self
+    ) -> "MemberSerializable":
         """Convert a Hikari member into a MemberSerializable object."""
 
         if isinstance(member, MemberSerializable):
@@ -404,11 +444,11 @@ class MemberSerializable(BaseModel):
             role_ids=member.role_ids,
             guild_id=member.guild_id,
             nickname=member.nickname,
-            mention=member.mention
+            mention=member.mention,
         )
 
     @classmethod
-    def from_discordpy(cls, member: discord.Member | Self) -> 'MemberSerializable':
+    def from_discordpy(cls, member: discord.Member | Self) -> "MemberSerializable":
         """Convert a Discord.py member into a MemberSerializable object."""
 
         if isinstance(member, MemberSerializable):
@@ -425,7 +465,7 @@ class MemberSerializable(BaseModel):
             role_ids=[role.id for role in member.roles],
             guild_id=member.guild.id,
             nickname=member.nick,
-            mention=member.mention
+            mention=member.mention,
         )
 
     @staticmethod
@@ -440,25 +480,26 @@ class GuildSerializable(BaseModel):
 
     @field_validator("roles", mode="before")
     @classmethod
-    def transform_roles(cls: Type[Self], roles: list) -> Mapping[Snowflake, RoleSerializable]:
+    def transform_roles(
+        cls: Type[Self], roles: list
+    ) -> Mapping[Snowflake, RoleSerializable]:
         return {int(r_id): RoleSerializable.from_hikari(r) for r_id, r in roles.items()}
 
     @classmethod
-    def from_hikari(cls, guild: hikari.RESTGuild | Self) -> 'GuildSerializable':
+    def from_hikari(cls, guild: hikari.RESTGuild | Self) -> "GuildSerializable":
         """Convert a Hikari guild into a GuildSerializable object."""
 
         if isinstance(guild, GuildSerializable):
             return guild
 
-        return cls(
-            id=guild.id,
-            name=guild.name,
-            roles=guild.roles
-        )
+        return cls(id=guild.id, name=guild.name, roles=guild.roles)
 
 
 def create_entity(
-    category: Literal["asset", "badge", "gamepass", "group", "verified", "unverified"] | str, entity_id: int
+    category: (
+        Literal["asset", "badge", "gamepass", "group", "verified", "unverified"] | str
+    ),
+    entity_id: int,
 ) -> RobloxEntity | None:
     """Create a respective Roblox entity from a category and ID.
 
@@ -472,22 +513,30 @@ def create_entity(
 
     match category:
         case "asset":
-            from bloxlink_lib.models import assets  # pylint: disable=import-outside-toplevel
+            from bloxlink_lib.models import (
+                assets,
+            )  # pylint: disable=import-outside-toplevel
 
             return assets.RobloxAsset(id=entity_id)
 
         case "badge":
-            from bloxlink_lib.models import badges  # pylint: disable=import-outside-toplevel
+            from bloxlink_lib.models import (
+                badges,
+            )  # pylint: disable=import-outside-toplevel
 
             return badges.RobloxBadge(id=entity_id)
 
         case "gamepass":
-            from bloxlink_lib.models import gamepasses  # pylint: disable=import-outside-toplevel
+            from bloxlink_lib.models import (
+                gamepasses,
+            )  # pylint: disable=import-outside-toplevel
 
             return gamepasses.RobloxGamepass(id=entity_id)
 
         case "group":
-            from bloxlink_lib.models import groups  # pylint: disable=import-outside-toplevel
+            from bloxlink_lib.models import (
+                groups,
+            )  # pylint: disable=import-outside-toplevel
 
             return groups.RobloxGroup(id=entity_id)
 

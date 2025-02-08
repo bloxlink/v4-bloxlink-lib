@@ -2,13 +2,30 @@ from __future__ import annotations
 
 import re
 import math
-from typing import TYPE_CHECKING, Any, Literal, NotRequired, TypedDict, Annotated, Self, Type
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Literal,
+    NotRequired,
+    TypedDict,
+    Annotated,
+    Self,
+    Type,
+)
 
 from pydantic import ConfigDict, Field, ValidationError
 
 from bloxlink_lib import database
 
-from ..models.base import BaseModel, CoerciveSet, RobloxEntity, SnowflakeSet, create_entity, RoleSerializable, MemberSerializable
+from ..models.base import (
+    BaseModel,
+    CoerciveSet,
+    RobloxEntity,
+    SnowflakeSet,
+    create_entity,
+    RoleSerializable,
+    MemberSerializable,
+)
 from ..utils import find
 
 if TYPE_CHECKING:
@@ -23,8 +40,9 @@ if TYPE_CHECKING:
 POP_OLD_BINDS: bool = False  # remove old binds from the database
 SAVE_NEW_BINDS: bool = False  # save new binds to the database
 
-VALID_BIND_TYPES = Literal["group", "asset",
-                           "badge", "gamepass", "verified", "unverified"]
+VALID_BIND_TYPES = Literal[
+    "group", "asset", "badge", "gamepass", "verified", "unverified"
+]
 BIND_GROUP_SUBTYPES = Literal["role_bind", "full_group"]
 
 ARBITRARY_GROUP_TEMPLATE = re.compile(r"\{group-rank-(.*?)\}")
@@ -76,7 +94,8 @@ class GroupBindData(BaseModel):
 
         if self.everyone and (self.guest or self.min or self.max or self.roleset):
             raise ValidationError(
-                "Everyone condition cannot have any other conditions.")
+                "Everyone condition cannot have any other conditions."
+            )
 
 
 class BindCriteria(BaseModel):
@@ -112,48 +131,46 @@ class GuildBind(BaseModel):
     # Fields from the database.
     nickname: str | None = None
     roles: Annotated[list[str], Field(default_factory=list)]
-    remove_roles: Annotated[list[str], Field(
-        default_factory=list, alias="removeRoles")]
+    remove_roles: Annotated[list[str], Field(default_factory=list, alias="removeRoles")]
 
     criteria: BindCriteria
     data: BindData | None = Field(default=None)
 
     # Excluded fields. These are used for the bind algorithms.
-    pending_new_roles: Annotated[list[str], Field(
-        exclude=True, default_factory=list)]
+    pending_new_roles: Annotated[list[str], Field(exclude=True, default_factory=list)]
     entity: RobloxEntity | None = Field(exclude=True, default=None)
-    type: VALID_BIND_TYPES | None = Field(
-        exclude=True, default=None
-    )
-    subtype: BIND_GROUP_SUBTYPES | None = Field(
-        exclude=True, default=None)
+    type: VALID_BIND_TYPES | None = Field(exclude=True, default=None)
+    subtype: BIND_GROUP_SUBTYPES | None = Field(exclude=True, default=None)
     highest_role: RoleSerializable | None = Field(
-        exclude=True, default=None)  # highest role in the guild
+        exclude=True, default=None
+    )  # highest role in the guild
 
     def model_post_init(self, __context):
-        self.entity = self.entity or create_entity(
-            self.criteria.type, self.criteria.id)
+        self.entity = self.entity or create_entity(self.criteria.type, self.criteria.id)
         self.type = self.criteria.type
 
         if self.type == "group":
-            self.subtype = "full_group" if self.criteria.group.dynamicRoles else "role_bind"
+            self.subtype = (
+                "full_group" if self.criteria.group.dynamicRoles else "role_bind"
+            )
 
     @classmethod
     def from_V3(cls: Type[Self], guild_data: GuildData | dict):
         """Convert V3 binds to V4 binds."""
 
         whole_group_binds = getattr(
-            guild_data, "groupIDs", guild_data.get("groupIDs", {}))
-        role_binds = getattr(guild_data, "roleBinds",
-                             guild_data.get("roleBinds", {}))
+            guild_data, "groupIDs", guild_data.get("groupIDs", {})
+        )
+        role_binds = getattr(guild_data, "roleBinds", guild_data.get("roleBinds", {}))
 
         converted_binds: list[Self] = []
 
         for group_id, group_data in whole_group_binds.items():
             new_bind = cls(
                 nickname=group_data.get("nickname") or None,
-                criteria=BindCriteria(type="group", id=int(
-                    group_id), group={"dynamicRoles": True}),
+                criteria=BindCriteria(
+                    type="group", id=int(group_id), group={"dynamicRoles": True}
+                ),
                 remove_roles=group_data.get("removeRoles") or [],
                 subtype="full_group",
                 data=BindData(displayName=group_data.get("groupName")),
@@ -165,7 +182,9 @@ class GuildBind(BaseModel):
             match bind_type:
                 case "groups":
                     for group_id, group_bind_data in binds.items():
-                        for rank_id, criteria_data in group_bind_data.get("binds", {}).items():
+                        for rank_id, criteria_data in group_bind_data.get(
+                            "binds", {}
+                        ).items():
                             new_bind = cls(
                                 nickname=criteria_data.get("nickname") or None,
                                 criteria=BindCriteria(
@@ -174,33 +193,37 @@ class GuildBind(BaseModel):
                                     group=GroupBindData(
                                         everyone=rank_id == "all",
                                         guest=rank_id == "0",
-                                        roleset=int(rank_id) if rank_id not in (
-                                            "all", "0") else None,
-                                    )
+                                        roleset=(
+                                            int(rank_id)
+                                            if rank_id not in ("all", "0")
+                                            else None
+                                        ),
+                                    ),
                                 ),
-                                remove_roles=criteria_data.get(
-                                    "removeRoles") or [],
+                                remove_roles=criteria_data.get("removeRoles") or [],
                                 roles=criteria_data.get("roles") or [],
                                 data=BindData(
-                                    displayName=group_bind_data.get("groupName")),
+                                    displayName=group_bind_data.get("groupName")
+                                ),
                             )
 
                             converted_binds.append(new_bind)
 
                         for criteria_data in group_bind_data.get("ranges", []):
                             new_bind = cls(
-                                nickname=group_bind_data.get(
-                                    "nickname") or None,
+                                nickname=group_bind_data.get("nickname") or None,
                                 criteria=BindCriteria(
                                     type="group",
                                     id=int(group_id),
-                                    group={"min": criteria_data.get(
-                                        "low"), "max": criteria_data.get("high")},
+                                    group={
+                                        "min": criteria_data.get("low"),
+                                        "max": criteria_data.get("high"),
+                                    },
                                 ),
-                                remove_roles=group_bind_data.get(
-                                    "removeRoles") or [],
+                                remove_roles=group_bind_data.get("removeRoles") or [],
                                 data=BindData(
-                                    displayName=group_bind_data.get("groupName")),
+                                    displayName=group_bind_data.get("groupName")
+                                ),
                             )
 
                             converted_binds.append(new_bind)
@@ -216,10 +239,8 @@ class GuildBind(BaseModel):
                             nickname=bind_data.get("nickname") or None,
                             roles=bind_data.get("roles") or [],
                             remove_roles=bind_data.get("removeRoles") or [],
-                            criteria=BindCriteria(
-                                type=bind_type, id=int(entity_id)),
-                            data=BindData(
-                                displayName=bind_data.get("displayName")),
+                            criteria=BindCriteria(type=bind_type, id=int(entity_id)),
+                            data=BindData(displayName=bind_data.get("displayName")),
                         )
 
                         converted_binds.append(new_bind)
@@ -231,13 +252,12 @@ class GuildBind(BaseModel):
 
         if self.roles and not self.highest_role:
             filtered_binds = filter(
-                lambda r: str(
-                    r.id) in self.roles and self.nickname, guild_roles.values()
+                lambda r: str(r.id) in self.roles and self.nickname,
+                guild_roles.values(),
             )
 
             if list(filtered_binds):
-                self.highest_role = max(
-                    filtered_binds, key=lambda r: r.position)
+                self.highest_role = max(filtered_binds, key=lambda r: r.position)
 
     async def satisfies_for(
         self,
@@ -289,11 +309,17 @@ class GuildBind(BaseModel):
                     # full group bind. check for a matching roleset
                     if self.criteria.group.dynamicRoles:
                         roleset_role = find(
-                            lambda r: r.name == user_roleset.name, guild_roles.values())
+                            lambda r: r.name == user_roleset.name, guild_roles.values()
+                        )
 
                         if roleset_role:
                             additional_roles.add(roleset_role.id)
-                            return True, additional_roles, missing_roles, ineligible_roles
+                            return (
+                                True,
+                                additional_roles,
+                                missing_roles,
+                                ineligible_roles,
+                            )
 
                         missing_roles.add(user_roleset.name)
 
@@ -304,7 +330,9 @@ class GuildBind(BaseModel):
                         return False, additional_roles, missing_roles, ineligible_roles
 
                     if (self.criteria.group.min and self.criteria.group.max) and (
-                        self.criteria.group.min <= group.user_roleset.rank <= self.criteria.group.max
+                        self.criteria.group.min
+                        <= group.user_roleset.rank
+                        <= self.criteria.group.max
                     ):
                         return True, additional_roles, missing_roles, ineligible_roles
 
@@ -312,7 +340,9 @@ class GuildBind(BaseModel):
                         roleset = self.criteria.group.roleset
                         return (
                             group.user_roleset.rank == roleset
-                            or (roleset < 0 and group.user_roleset.rank >= abs(roleset)),
+                            or (
+                                roleset < 0 and group.user_roleset.rank >= abs(roleset)
+                            ),
                             additional_roles,
                             missing_roles,
                             ineligible_roles,
@@ -322,12 +352,22 @@ class GuildBind(BaseModel):
 
                 # Not in the group.
                 # Return whether the bind is for guests only
-                return self.criteria.group.guest, additional_roles, missing_roles, ineligible_roles
+                return (
+                    self.criteria.group.guest,
+                    additional_roles,
+                    missing_roles,
+                    ineligible_roles,
+                )
 
             case "badge" | "gamepass" | "asset":
                 asset: RobloxBaseAsset = self.entity
 
-                return await roblox_user.owns_asset(asset), additional_roles, missing_roles, ineligible_roles
+                return (
+                    await roblox_user.owns_asset(asset),
+                    additional_roles,
+                    missing_roles,
+                    ineligible_roles,
+                )
 
         return False, additional_roles, missing_roles, ineligible_roles
 
@@ -393,7 +433,8 @@ class GuildBind(BaseModel):
 
                 elif self.criteria.group.roleset:
                     content = group.roleset_name_string(
-                        abs(self.criteria.group.roleset), bold_name=False)
+                        abs(self.criteria.group.roleset), bold_name=False
+                    )
 
             case "verified" | "unverified":
                 content = ""
@@ -438,10 +479,8 @@ class GuildBind(BaseModel):
             return "- _All users in **this** group receive the role matching their group rank name_"
 
         role_mentions = ", ".join(f"<@&{val}>" for val in self.roles)
-        remove_role_mentions = ", ".join(
-            f"<@&{val}>" for val in self.remove_roles)
-        new_roles_list = ", ".join(
-            f"{val} [NEW]" for val in self.pending_new_roles)
+        remove_role_mentions = ", ".join(f"<@&{val}>" for val in self.remove_roles)
+        new_roles_list = ", ".join(f"{val} [NEW]" for val in self.pending_new_roles)
 
         return (
             f"- _{extended_description} receive the "
@@ -466,7 +505,9 @@ class GuildBind(BaseModel):
         )
 
     def __hash__(self) -> int:
-        return hash((self.criteria, tuple(self.roles), tuple(self.remove_roles), self.nickname))
+        return hash(
+            (self.criteria, tuple(self.roles), tuple(self.remove_roles), self.nickname)
+        )
 
 
 async def build_binds_desc(
@@ -519,10 +560,18 @@ async def count_binds(guild_id: int | str, bind_id: int = None) -> int:
 
     guild_data = await get_binds(guild_id)
 
-    return len(guild_data) if not bind_id else sum(1 for b in guild_data if b.id == int(bind_id)) or 0
+    return (
+        len(guild_data)
+        if not bind_id
+        else sum(1 for b in guild_data if b.id == int(bind_id)) or 0
+    )
 
 
-async def check_for_verified_roles(guild_id: int | str, guild_roles: dict[int, RoleSerializable], merge_to: list[GuildBind]):
+async def check_for_verified_roles(
+    guild_id: int | str,
+    guild_roles: dict[int, RoleSerializable],
+    merge_to: list[GuildBind],
+):
     """Check for existing verified/unverified roles and update the database."""
 
     guild_id = str(guild_id)
@@ -544,9 +593,13 @@ async def check_for_verified_roles(guild_id: int | str, guild_roles: dict[int, R
 
     new_verified_binds: list[GuildBind] = []
 
-    if verified_role_enabled and not find(lambda b: b.criteria.type == "verified", merge_to):
-        verified_role = find(lambda r: str(
-            r.id) == verified_role_id or r.name == verified_role_name, guild_roles.values())
+    if verified_role_enabled and not find(
+        lambda b: b.criteria.type == "verified", merge_to
+    ):
+        verified_role = find(
+            lambda r: str(r.id) == verified_role_id or r.name == verified_role_name,
+            guild_roles.values(),
+        )
 
         if verified_role:
             new_bind = GuildBind(
@@ -555,9 +608,13 @@ async def check_for_verified_roles(guild_id: int | str, guild_roles: dict[int, R
             )
             new_verified_binds.append(new_bind)
 
-    if unverified_role_enabled and not find(lambda b: b.criteria.type == "unverified", merge_to):
-        unverified_role = find(lambda r: str(
-            r.id) == unverified_role_id or r.name == unverified_role_name, guild_roles.values())
+    if unverified_role_enabled and not find(
+        lambda b: b.criteria.type == "unverified", merge_to
+    ):
+        unverified_role = find(
+            lambda r: str(r.id) == unverified_role_id or r.name == unverified_role_name,
+            guild_roles.values(),
+        )
 
         if unverified_role:
             new_bind = GuildBind(
@@ -569,11 +626,12 @@ async def check_for_verified_roles(guild_id: int | str, guild_roles: dict[int, R
     if new_verified_binds:
         merge_to.extend(new_verified_binds)
 
-        await database.update_guild_data(guild_id,
-                                         binds=[b.model_dump(
-                                             exclude_unset=True, by_alias=True) for b in merge_to],
-                                         verifiedRoleName=None,
-                                         unverifiedRoleName=None)
+        await database.update_guild_data(
+            guild_id,
+            binds=[b.model_dump(exclude_unset=True, by_alias=True) for b in merge_to],
+            verifiedRoleName=None,
+            unverifiedRoleName=None,
+        )
 
 
 async def get_binds(
@@ -595,19 +653,24 @@ async def get_binds(
     guild_data.binds = await migrate_old_binds_to_v4(guild_id, guild_data.binds)
 
     if guild_roles:
-        await check_for_verified_roles(guild_id, guild_roles=guild_roles, merge_to=guild_data.binds)
+        await check_for_verified_roles(
+            guild_id, guild_roles=guild_roles, merge_to=guild_data.binds
+        )
 
     return list(
         filter(
-            lambda b: b.type == category and (
-                (bind_id and b.criteria.id == bind_id) or not bind_id),
+            lambda b: b.type == category
+            and ((bind_id and b.criteria.id == bind_id) or not bind_id),
             guild_data.binds,
         )
-        if category else guild_data.binds
+        if category
+        else guild_data.binds
     )
 
 
-async def get_nickname_template(guild_id, potential_binds: list[GuildBind], roblox_user: RobloxUser | None = None) -> tuple[str, GuildBind | None]:
+async def get_nickname_template(
+    guild_id, potential_binds: list[GuildBind], roblox_user: RobloxUser | None = None
+) -> tuple[str, GuildBind | None]:
     """Get the unparsed nickname template for the user."""
 
     guild_data = await database.fetch_guild_data(
@@ -617,7 +680,8 @@ async def get_nickname_template(guild_id, potential_binds: list[GuildBind], robl
 
     # first sort the binds by role position
     potential_binds.sort(
-        key=lambda b: b.highest_role.position if b.highest_role else math.inf, reverse=True
+        key=lambda b: b.highest_role.position if b.highest_role else math.inf,
+        reverse=True,
     )  # arbitrary big number
 
     highest_priority_bind: GuildBind = potential_binds[0] if potential_binds else None
@@ -657,10 +721,13 @@ async def parse_template(
     if not template:
         if not guild_id or potential_binds is None:
             raise ValueError(
-                "Guild ID and potential binds must be provided if no template is given.")
+                "Guild ID and potential binds must be provided if no template is given."
+            )
 
         # this is for nickname calculation
-        template, highest_priority_bind = await get_nickname_template(guild_id, potential_binds, roblox_user)
+        template, highest_priority_bind = await get_nickname_template(
+            guild_id, potential_binds, roblox_user
+        )
 
     if template == "{disable-nicknaming}":
         return None
@@ -693,9 +760,13 @@ async def parse_template(
             if "group-rank" in template:
                 if group_bind and group_bind.criteria.id in roblox_user.groups:
                     if highest_priority_bind:
-                        group_roleset_name = roblox_user.groups[highest_priority_bind.criteria.id].role.name
+                        group_roleset_name = roblox_user.groups[
+                            highest_priority_bind.criteria.id
+                        ].role.name
                     else:
-                        group_roleset_name = roblox_user.groups[potential_binds[0].criteria.id].role.name
+                        group_roleset_name = roblox_user.groups[
+                            potential_binds[0].criteria.id
+                        ].role.name
                 else:
                     group_roleset_name = "Guest"
             else:
@@ -707,7 +778,8 @@ async def parse_template(
                 group_role_from_group = group.role.name if group else "Guest"
 
                 template = template.replace(
-                    "{group-rank-" + group_id + "}", group_role_from_group)
+                    "{group-rank-" + group_id + "}", group_role_from_group
+                )
 
     # parse the nickname template
     for outer_nick in NICKNAME_TEMPLATE_REGEX.findall(template):
@@ -739,7 +811,9 @@ async def parse_template(
             case "discord-nick":
                 nick_value = member.nickname if member.nickname else member.username
             case "discord-global-name":
-                nick_value = member.global_name if member.global_name else member.username
+                nick_value = (
+                    member.global_name if member.global_name else member.username
+                )
             case "discord-mention":
                 nick_value = member.mention
             case "discord-id":
@@ -764,14 +838,13 @@ async def parse_template(
                 elif nick_fn == "allL":
                     nick_value = nick_value.lower()
 
-                template = template.replace(
-                    "{{{0}}}".format(outer_nick), nick_value)
+                template = template.replace("{{{0}}}".format(outer_nick), nick_value)
             else:
-                template = template.replace("{{{0}}}".format(
-                    outer_nick), outer_nick)  # remove {} only
+                template = template.replace(
+                    "{{{0}}}".format(outer_nick), outer_nick
+                )  # remove {} only
         else:
-            template = template.replace(
-                "{{{0}}}".format(outer_nick), nick_value)
+            template = template.replace("{{{0}}}".format(outer_nick), nick_value)
 
     if trim_nickname:
         return template[:32]
@@ -779,7 +852,9 @@ async def parse_template(
     return template
 
 
-async def migrate_old_binds_to_v4(guild_id: str, binds: list[GuildBind]) -> list[GuildBind]:
+async def migrate_old_binds_to_v4(
+    guild_id: str, binds: list[GuildBind]
+) -> list[GuildBind]:
     """Migrates binds from the V3 structure to V4 and optionally saves them to the database.
 
     If POP_OLD_BINDS is true, the old binds will be removed from the database.
@@ -794,7 +869,9 @@ async def migrate_old_binds_to_v4(guild_id: str, binds: list[GuildBind]) -> list
 
     new_migrated_binds: list[GuildBind] = []
 
-    if not guild_data.migratedBindsToV4 and (guild_data.roleBinds or guild_data.groupIDs):
+    if not guild_data.migratedBindsToV4 and (
+        guild_data.roleBinds or guild_data.groupIDs
+    ):
         new_migrated_binds = GuildBind.from_V3(guild_data)
 
     if new_migrated_binds:
@@ -804,14 +881,15 @@ async def migrate_old_binds_to_v4(guild_id: str, binds: list[GuildBind]) -> list
         if SAVE_NEW_BINDS:
             await database.update_guild_data(
                 guild_id,
-                binds=[b.model_dump(exclude_unset=True, by_alias=True)
-                       for b in binds],
+                binds=[b.model_dump(exclude_unset=True, by_alias=True) for b in binds],
                 migratedBindsToV4=True,
             )
 
     # if POP_OLD_BINDS, remove v3 binds from the database
     if POP_OLD_BINDS and guild_data.migratedBindsToV4:
-        await database.update_guild_data(guild_id, groupIDs=None, roleBinds=None, migratedBindsToV4=None)
+        await database.update_guild_data(
+            guild_id, groupIDs=None, roleBinds=None, migratedBindsToV4=None
+        )
         return binds
 
     return binds

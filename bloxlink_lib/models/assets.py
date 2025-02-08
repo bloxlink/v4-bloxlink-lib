@@ -26,7 +26,9 @@ class RobloxAsset(RobloxBaseAsset):
         if self.synced:
             return
 
-        asset_data, _ = await fetch_typed(RobloxAssetResponse, f"{ASSET_API}/{self.id}/details")
+        asset_data, _ = await fetch_typed(
+            RobloxAssetResponse, f"{ASSET_API}/{self.id}/details"
+        )
 
         self.name = asset_data.name
         self.description = asset_data.description

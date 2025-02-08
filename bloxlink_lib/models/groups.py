@@ -74,8 +74,7 @@ class RobloxGroup(RobloxEntity):
     user_roleset: GroupRoleset = None
     has_verified_badge: bool = Field(alias="hasVerifiedBadge", default=None)
     owner: RobloxGroupOwner | None = None
-    public_entry_allowed: bool = Field(
-        alias="publicEntryAllowed", default=None)
+    public_entry_allowed: bool = Field(alias="publicEntryAllowed", default=None)
     has_verified_badge: bool = Field(alias="hasVerifiedBadge", default=None)
 
     def model_post_init(self, __context):
@@ -87,9 +86,13 @@ class RobloxGroup(RobloxEntity):
             return
 
         if self.rolesets is None:
-            roleset_data, _ = await fetch_typed(RobloxRoleset, f"{GROUP_API}/{self.id}/roles")
+            roleset_data, _ = await fetch_typed(
+                RobloxRoleset, f"{GROUP_API}/{self.id}/roles"
+            )
             self.rolesets = {
-                int(roleset.rank): roleset for roleset in roleset_data.roles if roleset.name != "Guest"
+                int(roleset.rank): roleset
+                for roleset in roleset_data.roles
+                if roleset.name != "Guest"
             }
 
         group_data, _ = await fetch_typed(RobloxGroup, f"{GROUP_API}/{self.id}")
@@ -115,7 +118,9 @@ class RobloxGroup(RobloxEntity):
             if user_group:
                 self.user_roleset = user_group.role
 
-    def roleset_name_string(self, roleset_id: int, bold_name=True, include_id=True) -> str:
+    def roleset_name_string(
+        self, roleset_id: int, bold_name=True, include_id=True
+    ) -> str:
         """Generate a nice string for a roleset name with failsafe capabilities.
 
         Args:
@@ -146,7 +151,9 @@ class RobloxGroup(RobloxEntity):
         return f"{name} ({self.id})"
 
 
-async def get_group(group_id_or_url: Annotated[str | int, "Group ID or URL"]) -> RobloxGroup:
+async def get_group(
+    group_id_or_url: Annotated[str | int, "Group ID or URL"]
+) -> RobloxGroup:
     """Get and sync a RobloxGroup.
 
     Args:

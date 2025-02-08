@@ -26,7 +26,9 @@ class RobloxGamepass(RobloxBaseAsset):
         if self.synced:
             return
 
-        gamepass_data, _ = await fetch_typed(RobloxGamepassResponse, f"{GAMEPASS_API}/{self.id}/game-pass-product-info")
+        gamepass_data, _ = await fetch_typed(
+            RobloxGamepassResponse, f"{GAMEPASS_API}/{self.id}/game-pass-product-info"
+        )
 
         self.name = gamepass_data.name
         self.description = gamepass_data.description

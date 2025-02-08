@@ -35,7 +35,9 @@ def _bytes_to_str_wrapper(data: Any) -> str:
     return to_json(data).decode("utf-8")
 
 
-async def fetch[T](
+async def fetch[
+    T
+](
     method: str,
     url: str,
     *,
@@ -45,7 +47,13 @@ async def fetch[T](
     parse_as: Literal["JSON", "BYTES", "TEXT"] | BaseModel | Type[T] = "JSON",
     raise_on_failure: bool = True,
     timeout: float = 10,
-) -> Union[Tuple[dict, aiohttp.ClientResponse], Tuple[str, aiohttp.ClientResponse], Tuple[bytes, aiohttp.ClientResponse], Tuple[T, aiohttp.ClientResponse], aiohttp.ClientResponse]:
+) -> Union[
+    Tuple[dict, aiohttp.ClientResponse],
+    Tuple[str, aiohttp.ClientResponse],
+    Tuple[bytes, aiohttp.ClientResponse],
+    Tuple[T, aiohttp.ClientResponse],
+    aiohttp.ClientResponse,
+]:
     """Make a REST request with the ability to proxy.
 
     Only Roblox URLs are proxied, all other requests to other domains are sent as is.
@@ -97,7 +105,9 @@ async def fetch[T](
             params=params,
             headers=headers,
             timeout=aiohttp.ClientTimeout(total=timeout) if timeout else None,
-            proxy=CONFIG.PROXY_URL if CONFIG.PROXY_URL and "roblox.com" in url else None,
+            proxy=(
+                CONFIG.PROXY_URL if CONFIG.PROXY_URL and "roblox.com" in url else None
+            ),
         ) as response:
             if response.status != StatusCodes.OK and raise_on_failure:
                 if response.status == StatusCodes.SERVICE_UNAVAILABLE:
@@ -108,7 +118,9 @@ async def fetch[T](
                     logging.debug(f"{url} not found: {await response.text()}")
                     raise RobloxNotFound()
 
-                logging.debug(f"{url} failed with status {response.status} and body {await response.text()}")
+                logging.debug(
+                    f"{url} failed with status {response.status} and body {await response.text()}"
+                )
                 raise RobloxAPIError()
 
             if parse_as:
@@ -137,7 +149,11 @@ async def fetch[T](
         raise RobloxDown() from None
 
 
-async def fetch_typed[T](parse_as: Type[T], url: str, method="GET", **kwargs) -> Tuple[T, aiohttp.ClientResponse]:
+async def fetch_typed[
+    T
+](parse_as: Type[T], url: str, method="GET", **kwargs) -> Tuple[
+    T, aiohttp.ClientResponse
+]:
     """Fetch data from a URL and parse it as a dataclass.
 
     Args:

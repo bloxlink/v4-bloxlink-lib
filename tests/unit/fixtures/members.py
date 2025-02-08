@@ -3,9 +3,7 @@ from bloxlink_lib import MemberSerializable
 from .guilds import test_guild_1
 
 
-@pytest.fixture(params=[
-    1389419438194318
-])
+@pytest.fixture(params=[1389419438194318])
 def test_discord_member(request, test_guild_1) -> MemberSerializable:
     """Test Discord Member model."""
 
