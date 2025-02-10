@@ -4,7 +4,7 @@ import asyncio
 import datetime
 import json
 from os.path import exists
-from typing import Type, TYPE_CHECKING, Any
+from typing import Type, Any
 
 from motor.motor_asyncio import AsyncIOMotorClient
 from redis.asyncio import Redis
@@ -171,6 +171,7 @@ async def update_item(domain: str, item_id: str, **aspects) -> None:
     unset_aspects = {}
     set_aspects = {}
 
+    # arrange items into set and unset (delete)
     for key, val in aspects.items():
         if val is None:
             unset_aspects[key] = ""

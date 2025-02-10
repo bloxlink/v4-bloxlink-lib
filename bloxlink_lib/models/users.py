@@ -37,7 +37,7 @@ class UserData(BaseModel):
         robloxAccounts (dict): All of the user's linked accounts, and any guild specific verifications.
     """
 
-    id: int
+    id: Annotated[int, Field(alias="_id")]
     robloxID: str | None = None
     robloxAccounts: dict = Field(
         default_factory=lambda: {"accounts": [], "guilds": {}, "confirms": {}}
