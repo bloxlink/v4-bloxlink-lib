@@ -69,7 +69,7 @@ class GuildRestriction(BaseModel):
 class GuildData(BaseModel):
     """Representation of the stored settings for a guild"""
 
-    id: int
+    id: Annotated[int, Field(alias="_id")]
     binds: Annotated[list[binds_module.GuildBind], Field(default_factory=list)]
 
     @field_validator("binds", mode="before")
