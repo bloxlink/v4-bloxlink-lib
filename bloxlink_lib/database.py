@@ -209,7 +209,13 @@ async def update_item(domain: str, item_id: str, **aspects) -> None:
 
     # update database
     await mongo.bloxlink[domain].update_one(
-        {"_id": item_id}, {"$set": set_aspects, "$unset": unset_aspects}, upsert=True
+        {"_id": item_id},
+        {
+            "$set": set_aspects,
+            "$unset": unset_aspects,
+            "$currentDate": {"updatedAt": True},
+        },
+        upsert=True,
     )
 
 
