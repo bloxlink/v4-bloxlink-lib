@@ -15,6 +15,9 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.12"]
+    permissions:
+      contents: write
+      pull-requests: write
 
     steps:
       - name: Checkout code (PR)
@@ -69,3 +72,5 @@ jobs:
             ```plaintext
             $(poetry run coverage report -m)
             ```
+          comment_tag: coverage-report
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
