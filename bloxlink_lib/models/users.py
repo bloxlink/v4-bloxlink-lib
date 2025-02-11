@@ -38,7 +38,6 @@ class UserData(BaseModel):
     """
 
     id: Annotated[int, Field(alias="_id")]
-    updatedAt: datetime
 
     robloxID: str | None = None
     robloxAccounts: dict = Field(
