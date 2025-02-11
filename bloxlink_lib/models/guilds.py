@@ -70,7 +70,6 @@ class GuildData(BaseModel):
     """Representation of the stored settings for a guild"""
 
     id: Annotated[int, Field(alias="_id")]
-    updatedAt: datetime
 
     binds: Annotated[list[binds_module.GuildBind], Field(default_factory=list)]
 
