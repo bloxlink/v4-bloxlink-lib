@@ -1,6 +1,6 @@
 from typing import Mapping, Self, Type, Literal, Annotated
 from pydantic import Field, field_validator
-import hikari
+from datetime import datetime
 from .base import PydanticList, BaseModel, PydanticDict, MemberSerializable
 from ..validators import is_positive_number_as_str
 from .migrators import migrate_restrictions
@@ -70,15 +70,8 @@ class GuildData(BaseModel):
     """Representation of the stored settings for a guild"""
 
     id: Annotated[int, Field(alias="_id")]
+
     binds: Annotated[list[binds_module.GuildBind], Field(default_factory=list)]
-
-    @field_validator("binds", mode="before")
-    @classmethod
-    def transform_binds(cls: Type[Self], binds: list) -> list[binds_module.GuildBind]:
-        if all(isinstance(b, binds_module.GuildBind) for b in binds):
-            return binds
-
-        return [binds_module.GuildBind(**b) for b in binds]
 
     verifiedRoleEnabled: bool = True
     verifiedRoleName: str | None = "Verified"  # deprecated
@@ -106,13 +99,6 @@ class GuildData(BaseModel):
 
     restrictions: PydanticList[GuildRestriction] = Field(default_factory=list)
 
-    @field_validator("restrictions", mode="before")
-    @classmethod
-    def transform_restrictions(
-        cls: Type[Self], restrictions: dict[str, dict[str, GuildRestriction]]
-    ) -> list[GuildRestriction]:
-        return migrate_restrictions(restrictions)
-
     webhooks: Webhooks = None
 
     hasBot: bool = False
@@ -129,6 +115,22 @@ class GuildData(BaseModel):
     roleBinds: PydanticDict = None
     groupIDs: PydanticDict = None
     migratedBindsToV4: bool = False
+
+    # field converters
+    @field_validator("binds", mode="before")
+    @classmethod
+    def transform_binds(cls: Type[Self], binds: list) -> list[binds_module.GuildBind]:
+        if all(isinstance(b, binds_module.GuildBind) for b in binds):
+            return binds
+
+        return [binds_module.GuildBind(**b) for b in binds]
+
+    @field_validator("restrictions", mode="before")
+    @classmethod
+    def transform_restrictions(
+        cls: Type[Self], restrictions: dict[str, dict[str, GuildRestriction]]
+    ) -> list[GuildRestriction]:
+        return migrate_restrictions(restrictions)
 
     def model_post_init(self, __context):
         # merge verified roles into binds
