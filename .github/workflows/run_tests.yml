@@ -59,3 +59,13 @@ jobs:
       - name: Generate Coverage Report
         run: |
           poetry run coverage report -m
+
+      - name: Post Coverage Report on PR
+        if: github.event_name == 'pull_request_target'
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            **Coverage Report:**
+            ```plaintext
+            $(poetry run coverage report -m)
+            ```
