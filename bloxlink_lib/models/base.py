@@ -1,6 +1,4 @@
 from datetime import datetime
-import discord
-from pydantic import BaseModel, RootModel, PrivateAttr, field_validator
 from typing import (
     Callable,
     Iterable,
@@ -20,12 +18,15 @@ from pydantic import (
     WithJsonSchema,
     ConfigDict,
     Field,
-    ConfigDict,
     SkipValidation,
+    PrivateAttr,
+    field_validator,
+    RootModel,
 )
 from pydantic.fields import FieldInfo
 from generics import get_filled_type
 import hikari
+import discord
 
 Snowflake = Annotated[int, BeforeValidator(int), WithJsonSchema({"type": "int"})]
 
@@ -72,7 +73,10 @@ class BaseModel(PydanticBaseModel):
         if self._generic_type_value:
             return self._generic_type_value
 
-        self._generic_type_value = get_filled_type(self, BaseModel, 0)
+        try:
+            self._generic_type_value = get_filled_type(self, BaseModel, 0)
+        except TypeError:
+            pass
 
         return self._generic_type_value
 
@@ -80,7 +84,7 @@ class BaseModel(PydanticBaseModel):
 class PydanticDict[K, V](RootModel[dict[K, V]]):
     """A Pydantic model that represents a dictionary."""
 
-    root: dict[K, V] = Field(default_factory=dict)
+    root: Annotated[dict[K, V], Field(default_factory=dict)]
 
     def __iter__(self):
         return iter(self.root)
@@ -115,9 +119,6 @@ class PydanticDict[K, V](RootModel[dict[K, V]]):
     def update(self, other: dict[K, V]):
         self.root.update(other)
 
-    def __iter__(self):
-        return iter(self.root)
-
     def __len__(self) -> int:
         return len(self.root)
 
@@ -134,7 +135,7 @@ class PydanticDict[K, V](RootModel[dict[K, V]]):
 class PydanticList[T](RootModel[list[T]]):
     """A Pydantic model that represents a list."""
 
-    root: list[T] = Field(default_factory=list)
+    root: Annotated[list[T], Field(default_factory=list)]
 
     def __iter__(self):
         return iter(self.root)
