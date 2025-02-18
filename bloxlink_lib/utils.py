@@ -3,6 +3,7 @@ import logging
 import asyncio
 import enum
 from os import getenv
+import requests
 import sentry_sdk
 from sentry_sdk.integrations.aiohttp import AioHttpIntegration
 from .models.base import BaseModel
@@ -105,6 +106,37 @@ def get_environment() -> Environment:
     return Environment.PRODUCTION
 
 
+def sentry_before_send(event, hint):
+    # Get the DSN
+    dsn = sentry_sdk.Hub.current.client.dsn
+
+    # Extract the URL from the DSN
+    url = dsn.get_endpoint()
+
+    try:
+        # Construct the headers (mimicking what the SDK does)
+        headers = {"X-Sentry-Auth": dsn.get_auth_header()}
+
+        # Make a test request to Sentry (e.g., HEAD request to avoid sending data)
+        response = requests.head(url, headers=headers)
+
+        # Access the rate limit headers
+        limit = response.headers.get("X-Sentry-Rate-Limit-Limit")
+        remaining = response.headers.get("X-Sentry-Rate-Limit-Remaining")
+        reset = response.headers.get("X-Sentry-Rate-Limit-Reset")
+
+        if limit:
+            print(f"Rate Limit: {limit}")
+            print(f"Remaining: {remaining}")
+            print(f"Reset: {reset}")
+            # Do something with this information (e.g., log it)
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error checking rate limits: {e}")
+
+    return event  # Return the event to be sent by the SDK
+
+
 def init_sentry():
     """Initialize Sentry."""
 
@@ -119,7 +151,10 @@ def init_sentry():
         #     attach_stacktrace=True,
         # )
 
-        sentry_sdk.init(CONFIG.SENTRY_DSN)  # Replace with your actual DSN
+        sentry_sdk.init(
+            CONFIG.SENTRY_DSN,
+            before_send=sentry_before_send,
+        )  # Replace with your actual DSN
 
         try:
             1 / 0  # Force an exception
