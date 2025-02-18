@@ -108,14 +108,19 @@ def get_environment() -> Environment:
 
 def sentry_before_send(event, hint):
     # Get the DSN
+    logging.debug("Checking Sentry rate limits...")
     dsn = sentry_sdk.Hub.current.client.dsn
 
     # Extract the URL from the DSN
     url = dsn.get_endpoint()
 
+    logging.debug("Got endpoints")
+
     try:
         # Construct the headers (mimicking what the SDK does)
         headers = {"X-Sentry-Auth": dsn.get_auth_header()}
+
+        logging.debug("Sending request")
 
         # Make a test request to Sentry (e.g., HEAD request to avoid sending data)
         response = requests.head(url, headers=headers)
@@ -125,14 +130,15 @@ def sentry_before_send(event, hint):
         remaining = response.headers.get("X-Sentry-Rate-Limit-Remaining")
         reset = response.headers.get("X-Sentry-Rate-Limit-Reset")
 
+        logging.debug("Limits: %s, %s, %s", limit, remaining, reset)
+
         if limit:
-            print(f"Rate Limit: {limit}")
-            print(f"Remaining: {remaining}")
-            print(f"Reset: {reset}")
-            # Do something with this information (e.g., log it)
+            logging.info(f"Rate Limit: {limit}")
+            logging.info(f"Remaining: {remaining}")
+            logging.info(f"Reset: {reset}")
 
     except requests.exceptions.RequestException as e:
-        print(f"Error checking rate limits: {e}")
+        logging.error(f"Error checking rate limits: {e}")
 
     return event  # Return the event to be sent by the SDK
 
@@ -141,27 +147,23 @@ def init_sentry():
     """Initialize Sentry."""
 
     if CONFIG.SENTRY_DSN:
-        print(CONFIG.SENTRY_DSN)
-        # sentry_sdk.init(
-        #     environment=get_environment().name.lower(),
-        #     dsn=CONFIG.SENTRY_DSN,
-        #     integrations=[AioHttpIntegration()],
-        #     enable_tracing=True,
-        #     debug=True,
-        #     attach_stacktrace=True,
-        # )
-
+        logging.debug(CONFIG.SENTRY_DSN)
         sentry_sdk.init(
-            CONFIG.SENTRY_DSN,
+            dsn=CONFIG.SENTRY_DSN,
+            integrations=[AioHttpIntegration()],
             before_send=sentry_before_send,
-        )  # Replace with your actual DSN
+            environment=get_environment().name.lower(),
+            enable_tracing=True,
+            debug=True,
+            attach_stacktrace=True,
+        )
 
         try:
             1 / 0  # Force an exception
         except Exception as e:
             sentry_sdk.capture_exception(e)
 
-        print("Test event sent (hopefully).")
+        logging.debug("Test event sent.")
 
 
 def NO_OP(*args, **kwargs):
