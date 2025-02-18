@@ -107,23 +107,22 @@ def get_environment() -> Environment:
 
 
 def sentry_before_send(event, hint):
-    # Get the DSN
     logging.debug("Checking Sentry rate limits...")
     dsn = sentry_sdk.Hub.current.client.dsn
 
     # Extract the URL from the DSN
-    url = dsn.get_endpoint()
+    url = dsn.split("@")[-1].split("/")[0]
 
-    logging.debug("Got endpoints")
+    logging.debug("Got endpoint")
 
     try:
         # Construct the headers (mimicking what the SDK does)
-        headers = {"X-Sentry-Auth": dsn.get_auth_header()}
+        headers = {"X-Sentry-Auth": sentry_sdk.Hub.current.client.get_auth_header()}
 
         logging.debug("Sending request")
 
         # Make a test request to Sentry (e.g., HEAD request to avoid sending data)
-        response = requests.head(url, headers=headers)
+        response = requests.head(f"https://{url}", headers=headers)
 
         # Access the rate limit headers
         limit = response.headers.get("X-Sentry-Rate-Limit-Limit")
