@@ -117,7 +117,8 @@ def sentry_before_send(event, hint):
 
     try:
         # Manually construct the Sentry auth header
-        auth_header = f"Sentry sentry_key={dsn.split('@')[0].split(':')[1]}, sentry_version=7, sentry_client=sentry-python/{sentry_sdk.__version__}"
+        sentry_version = "0.19.5"  # Replace with the actual version you are using
+        auth_header = f"Sentry sentry_key={dsn.split('@')[0].split(':')[1]}, sentry_version=7, sentry_client=sentry-python/{sentry_version}"
         headers = {"X-Sentry-Auth": auth_header}
 
         logging.debug("Sending request")
@@ -140,7 +141,7 @@ def sentry_before_send(event, hint):
     except requests.exceptions.RequestException as e:
         logging.error(f"Error checking rate limits: {e}")
 
-    return event
+    return event  # Return the event to be sent by the SDK
 
 
 def init_sentry():
