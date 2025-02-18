@@ -3,7 +3,6 @@ import logging
 import asyncio
 import enum
 from os import getenv
-import requests
 import sentry_sdk
 from sentry_sdk.integrations.aiohttp import AioHttpIntegration
 from .models.base import BaseModel
@@ -106,65 +105,23 @@ def get_environment() -> Environment:
     return Environment.PRODUCTION
 
 
-def sentry_before_send(event, hint):
-    logging.debug("Checking Sentry rate limits...")
-    dsn = sentry_sdk.Hub.current.client.dsn
-
-    # Extract the URL from the DSN
-    url = dsn.split("@")[-1].split("/")[0]
-
-    logging.debug("Got endpoint")
-
-    try:
-        # Manually construct the Sentry auth header
-        sentry_version = "0.19.5"  # Replace with the actual version you are using
-        auth_header = f"Sentry sentry_key={dsn.split('@')[0].split(':')[1]}, sentry_version=7, sentry_client=sentry-python/{sentry_version}"
-        headers = {"X-Sentry-Auth": auth_header}
-
-        logging.debug("Sending request")
-
-        # Make a test request to Sentry (e.g., HEAD request to avoid sending data)
-        response = requests.head(f"https://{url}", headers=headers)
-
-        # Access the rate limit headers
-        limit = response.headers.get("X-Sentry-Rate-Limit-Limit")
-        remaining = response.headers.get("X-Sentry-Rate-Limit-Remaining")
-        reset = response.headers.get("X-Sentry-Rate-Limit-Reset")
-
-        logging.debug("Limits: %s, %s, %s", limit, remaining, reset)
-
-        if limit:
-            logging.info(f"Rate Limit: {limit}")
-            logging.info(f"Remaining: {remaining}")
-            logging.info(f"Reset: {reset}")
-
-    except requests.exceptions.RequestException as e:
-        logging.error(f"Error checking rate limits: {e}")
-
-    return event  # Return the event to be sent by the SDK
-
-
 def init_sentry():
     """Initialize Sentry."""
 
+    environment = get_environment()
+
     if CONFIG.SENTRY_DSN:
-        logging.debug(CONFIG.SENTRY_DSN)
         sentry_sdk.init(
+            environment=environment.name.lower(),
             dsn=CONFIG.SENTRY_DSN,
             integrations=[AioHttpIntegration()],
-            before_send=sentry_before_send,
-            environment=get_environment().name.lower(),
             enable_tracing=True,
-            debug=True,
+            debug=environment in (Environment.LOCAL, Environment.STAGING),
+            traces_sample_rate=(
+                1.0 if environment in (Environment.LOCAL, Environment.STAGING) else 0.2
+            ),
             attach_stacktrace=True,
         )
-
-        try:
-            1 / 0  # Force an exception
-        except Exception as e:
-            sentry_sdk.capture_exception(e)
-
-        logging.debug("Test event sent.")
 
 
 def NO_OP(*args, **kwargs):
