@@ -109,14 +109,24 @@ def init_sentry():
     """Initialize Sentry."""
 
     if CONFIG.SENTRY_DSN:
-        sentry_sdk.init(
-            environment=get_environment().name.lower(),
-            dsn=CONFIG.SENTRY_DSN,
-            integrations=[AioHttpIntegration()],
-            enable_tracing=True,
-            debug=True,
-            attach_stacktrace=True,
-        )
+        print(CONFIG.SENTRY_DSN)
+        # sentry_sdk.init(
+        #     environment=get_environment().name.lower(),
+        #     dsn=CONFIG.SENTRY_DSN,
+        #     integrations=[AioHttpIntegration()],
+        #     enable_tracing=True,
+        #     debug=True,
+        #     attach_stacktrace=True,
+        # )
+
+        sentry_sdk.init(CONFIG.SENTRY_DSN)  # Replace with your actual DSN
+
+        try:
+            1 / 0  # Force an exception
+        except Exception as e:
+            sentry_sdk.capture_exception(e)
+
+        print("Test event sent (hopefully).")
 
 
 def NO_OP(*args, **kwargs):
