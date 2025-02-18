@@ -116,8 +116,9 @@ def sentry_before_send(event, hint):
     logging.debug("Got endpoint")
 
     try:
-        # Construct the headers (mimicking what the SDK does)
-        headers = {"X-Sentry-Auth": sentry_sdk.Hub.current.client.get_auth_header()}
+        # Manually construct the Sentry auth header
+        auth_header = f"Sentry sentry_key={dsn.split('@')[0].split(':')[1]}, sentry_version=7, sentry_client=sentry-python/{sentry_sdk.__version__}"
+        headers = {"X-Sentry-Auth": auth_header}
 
         logging.debug("Sending request")
 
@@ -139,7 +140,7 @@ def sentry_before_send(event, hint):
     except requests.exceptions.RequestException as e:
         logging.error(f"Error checking rate limits: {e}")
 
-    return event  # Return the event to be sent by the SDK
+    return event
 
 
 def init_sentry():
