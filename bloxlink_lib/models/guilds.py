@@ -81,7 +81,7 @@ class GuildData(BaseModel):
     unverifiedRoleName: str | None = "Unverified"  # deprecated
     unverifiedRole: str = None
 
-    verifiedDM: str = (
+    verifiedDM: str | None = (
         ":wave: Welcome to **{server-name}**, {roblox-name}! Visit <{verify-url}> to change your account.\nFind more Roblox Communities at https://blox.link/communities !"
     )
 
@@ -112,7 +112,7 @@ class GuildData(BaseModel):
     premium: PydanticDict = Field(default_factory=PydanticDict)  # deprecated
 
     # Old bind fields.
-    roleBinds: PydanticDict = None
+    roleBinds: PydanticDict | None = None
     groupIDs: PydanticDict = None
     migratedBindsToV4: bool = False
 
