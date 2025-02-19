@@ -96,6 +96,7 @@ class GuildData(BaseModel):
     groupLock: PydanticDict[str, GroupLock] = None
     highTrafficServer: bool = False
     allowOldRoles: bool = False
+    deleteCommands: int | None = None
 
     restrictions: PydanticList[GuildRestriction] = Field(default_factory=list)
 
