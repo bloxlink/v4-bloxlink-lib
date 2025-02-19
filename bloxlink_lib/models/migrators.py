@@ -23,3 +23,7 @@ def migrate_restrictions(
             )
 
     return new_guild_restrictions
+
+
+def migrate_delete_commands(delete_commands: int | None | bool) -> bool:
+    return bool(delete_commands)

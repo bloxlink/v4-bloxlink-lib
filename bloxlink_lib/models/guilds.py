@@ -1,9 +1,8 @@
 from typing import Mapping, Self, Type, Literal, Annotated
 from pydantic import Field, field_validator
-from datetime import datetime
 from .base import PydanticList, BaseModel, PydanticDict, MemberSerializable
 from ..validators import is_positive_number_as_str
-from .migrators import migrate_restrictions
+from .migrators import migrate_restrictions, migrate_delete_commands
 import bloxlink_lib.models.binds as binds_module
 
 
@@ -96,7 +95,10 @@ class GuildData(BaseModel):
     groupLock: PydanticDict[str, GroupLock] = None
     highTrafficServer: bool = False
     allowOldRoles: bool = False
-    deleteCommands: int | None = None
+    deleteCommands: Annotated[
+        bool,
+        Field(alias="ephemeralCommands", default=False),
+    ]
 
     restrictions: PydanticList[GuildRestriction] = Field(default_factory=list)
 
@@ -125,6 +127,13 @@ class GuildData(BaseModel):
             return binds
 
         return [binds_module.GuildBind(**b) for b in binds]
+
+    @field_validator("deleteCommands", mode="before")
+    @classmethod
+    def transform_delete_commands(
+        cls: Type[Self], delete_commands: int | None | bool
+    ) -> bool:
+        return migrate_delete_commands(delete_commands)
 
     @field_validator("restrictions", mode="before")
     @classmethod
