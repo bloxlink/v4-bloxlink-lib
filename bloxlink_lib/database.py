@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import datetime
 import json
-from os.path import exists
+import os
 from typing import Type, Any
 
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -26,13 +26,14 @@ def connect_database():
     mongo_options: dict[str, str | int] = {}
 
     if CONFIG.MONGO_CA_FILE:
-        ca_file = exists("cert.crt")
+        ca_file_path = os.path.join(os.getcwd(), "cert.crt")
+        ca_file = os.path.exists(ca_file_path)
 
         if not ca_file:
-            with open("cert.crt", "w", encoding="utf-8") as f:
+            with open(ca_file_path, "w", encoding="utf-8") as f:
                 f.write(CONFIG.MONGO_CA_FILE)
-
-        mongo_options["tlsCAFile"] = "cert.crt"
+        print(ca_file_path, os.getcwd())
+        mongo_options["tlsCAFile"] = ca_file_path
 
     if CONFIG.MONGO_URL:
         mongo_options["host"] = CONFIG.MONGO_URL
