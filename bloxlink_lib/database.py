@@ -32,7 +32,7 @@ def connect_database():
         if not ca_file:
             with open(ca_file_path, "w", encoding="utf-8") as f:
                 f.write(CONFIG.MONGO_CA_FILE)
-        print(ca_file_path, os.getcwd())
+
         mongo_options["tlsCAFile"] = ca_file_path
 
     if CONFIG.MONGO_URL:
