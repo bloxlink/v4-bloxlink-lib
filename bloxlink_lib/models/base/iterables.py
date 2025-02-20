@@ -1,11 +1,18 @@
 from typing import Annotated, Any, Callable, Iterable, Literal, Self, Sequence, Type
-from pydantic import BaseModel, Field, PrivateAttr, RootModel, SkipValidation, field_validator
+from pydantic import (
+    Field,
+    PrivateAttr,
+    RootModel,
+    SkipValidation,
+    field_validator,
+)
+from .models import BaseModel
 
 
 class PydanticDict[K, V](RootModel[dict[K, V]]):
     """A Pydantic model that represents a dictionary."""
 
-    root: dict[K, V] = Field(default_factory=dict)
+    root: Annotated[dict[K, V], Field(default_factory=dict)]
 
     def __iter__(self):
         return iter(self.root)
@@ -40,9 +47,6 @@ class PydanticDict[K, V](RootModel[dict[K, V]]):
     def update(self, other: dict[K, V]):
         self.root.update(other)
 
-    def __iter__(self):
-        return iter(self.root)
-
     def __len__(self) -> int:
         return len(self.root)
 
@@ -59,7 +63,7 @@ class PydanticDict[K, V](RootModel[dict[K, V]]):
 class PydanticList[T](RootModel[list[T]]):
     """A Pydantic model that represents a list."""
 
-    root: list[T] = Field(default_factory=list)
+    root: Annotated[list[T], Field(default_factory=list)]
 
     def __iter__(self):
         return iter(self.root)
@@ -161,22 +165,20 @@ class CoerciveSet[T: Callable](BaseModel):
             for item in iterable:
                 self._data.add(self._coerce(item))
 
-    def intersection(self, *s: Iterable[T]) -> 'CoerciveSet[T]':
+    def intersection(self, *s: Iterable[T]) -> "CoerciveSet[T]":
         result = self._data.intersection(self._coerce(x) for i in s for x in i)
         return self.__class__(root=result)
 
-    def difference(self, *s: Iterable[T]) -> 'CoerciveSet[T]':
+    def difference(self, *s: Iterable[T]) -> "CoerciveSet[T]":
         result = self._data.difference(self._coerce(x) for i in s for x in i)
         return self.__class__(root=result)
 
-    def symmetric_difference(self, *s: Iterable[T]) -> 'CoerciveSet[T]':
-        result = self._data.symmetric_difference(
-            self._coerce(x) for i in s for x in i)
+    def symmetric_difference(self, *s: Iterable[T]) -> "CoerciveSet[T]":
+        result = self._data.symmetric_difference(self._coerce(x) for i in s for x in i)
         return self.__class__(root=result)
 
-    def union(self, *s: Iterable[T]) -> 'CoerciveSet[T]':
-        result = self._data.union(self._coerce(x)
-                                  for iterable in s for x in iterable)
+    def union(self, *s: Iterable[T]) -> "CoerciveSet[T]":
+        result = self._data.union(self._coerce(x) for iterable in s for x in iterable)
         return self.__class__(root=result)
 
     def contains_all(self, iterable: Iterable[T]) -> bool:
@@ -192,7 +194,9 @@ class CoerciveSet[T: Callable](BaseModel):
         return len(self._data)
 
     def __eq__(self, other) -> bool:
-        return self.contains(x for x in other) if isinstance(other, CoerciveSet) else False
+        return (
+            self.contains(x for x in other) if isinstance(other, CoerciveSet) else False
+        )
 
     def __str__(self) -> str:
         return ", ".join(str(i) for i in self)
@@ -208,7 +212,12 @@ class SnowflakeSet(CoerciveSet[int]):
     type: Literal["role", "user"] | None = Field(default=None)
     str_reference: dict = Field(default_factory=dict)
 
-    def __init__(self, root: Iterable[int] = None, type: Literal["role", "user"] = None, str_reference: dict = None):
+    def __init__(
+        self,
+        root: Iterable[int] = None,
+        type: Literal["role", "user"] = None,
+        str_reference: dict = None,
+    ):
         super().__init__(root=root or [])
         self.type = type
         self.str_reference = str_reference or {}
@@ -219,28 +228,40 @@ class SnowflakeSet(CoerciveSet[int]):
             return super().add(item.id)
         return super().add(item)
 
-    def intersection(self, *s: Iterable[int]) -> 'SnowflakeSet':
+    def intersection(self, *s: Iterable[int]) -> "SnowflakeSet":
         result = super().intersection(*s)
-        return SnowflakeSet(root=result._data, type=self.type, str_reference=self.str_reference)
+        return SnowflakeSet(
+            root=result._data, type=self.type, str_reference=self.str_reference
+        )
 
-    def difference(self, *s: Iterable[int]) -> 'SnowflakeSet':
+    def difference(self, *s: Iterable[int]) -> "SnowflakeSet":
         result = super().difference(*s)
-        return SnowflakeSet(root=result._data, type=self.type, str_reference=self.str_reference)
+        return SnowflakeSet(
+            root=result._data, type=self.type, str_reference=self.str_reference
+        )
 
-    def symmetric_difference(self, *s: Iterable[int]) -> 'SnowflakeSet':
+    def symmetric_difference(self, *s: Iterable[int]) -> "SnowflakeSet":
         result = super().symmetric_difference(*s)
-        return SnowflakeSet(root=result._data, type=self.type, str_reference=self.str_reference)
+        return SnowflakeSet(
+            root=result._data, type=self.type, str_reference=self.str_reference
+        )
 
-    def union(self, *s: Iterable[int]) -> 'SnowflakeSet':
+    def union(self, *s: Iterable[int]) -> "SnowflakeSet":
         result = super().union(*s)
-        return SnowflakeSet(root=result._data, type=self.type, str_reference=self.str_reference)
+        return SnowflakeSet(
+            root=result._data, type=self.type, str_reference=self.str_reference
+        )
 
     def __str__(self):
         match self.type:
             case "role":
-                return ", ".join(str(self.str_reference.get(i) or f"<@&{i}>") for i in self)
+                return ", ".join(
+                    str(self.str_reference.get(i) or f"<@&{i}>") for i in self
+                )
             case "user":
-                return ", ".join(str(self.str_reference.get(i) or f"<@{i}>") for i in self)
+                return ", ".join(
+                    str(self.str_reference.get(i) or f"<@{i}>") for i in self
+                )
         return ", ".join(str(self.str_reference.get(i) or i) for i in self)
 
     def __repr__(self):

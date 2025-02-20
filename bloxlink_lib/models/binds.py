@@ -15,18 +15,16 @@ from typing import (
 
 from pydantic import Field, ValidationError
 
-import bloxlink_lib.database as database
-
-from ..models.base import (
+from bloxlink_lib.database.mongodb import mongo
+from bloxlink_lib.models.base import (
     BaseModel,
     CoerciveSet,
-    RobloxEntity,
     SnowflakeSet,
-    create_entity,
     RoleSerializable,
     MemberSerializable,
 )
-from ..utils import find
+from bloxlink_lib.models.roblox import RobloxEntity, create_entity
+from bloxlink_lib.utils import find
 
 if TYPE_CHECKING:
     from hikari import Member
@@ -571,7 +569,7 @@ async def check_for_verified_roles(
     """Check for existing verified/unverified roles and update the database."""
 
     guild_id = str(guild_id)
-    guild_data = await database.fetch_guild_data(
+    guild_data = await mongo.fetch_guild_data(
         guild_id,
         "verifiedRole",
         "unverifiedRole",
@@ -622,7 +620,7 @@ async def check_for_verified_roles(
     if new_verified_binds:
         merge_to.extend(new_verified_binds)
 
-        await database.update_guild_data(
+        await mongo.update_guild_data(
             guild_id,
             binds=[b.model_dump(exclude_unset=True, by_alias=True) for b in merge_to],
             verifiedRoleName=None,
@@ -644,7 +642,7 @@ async def get_binds(
     """
 
     guild_id = str(guild_id)
-    guild_data = await database.fetch_guild_data(guild_id, "binds")
+    guild_data = await mongo.fetch_guild_data(guild_id, "binds")
 
     guild_data.binds = await migrate_old_binds_to_v4(guild_id, guild_data.binds)
 
@@ -669,7 +667,7 @@ async def get_nickname_template(
 ) -> tuple[str, GuildBind | None]:
     """Get the unparsed nickname template for the user."""
 
-    guild_data = await database.fetch_guild_data(
+    guild_data = await mongo.fetch_guild_data(
         guild_id,
         "nicknameTemplate" if roblox_user else "unverifiedNickname",
     )
@@ -856,7 +854,7 @@ async def migrate_old_binds_to_v4(
     If POP_OLD_BINDS is true, the old binds will be removed from the database.
     """
 
-    guild_data = await database.fetch_guild_data(
+    guild_data = await mongo.fetch_guild_data(
         guild_id,
         "roleBinds",
         "groupIDs",
@@ -875,7 +873,7 @@ async def migrate_old_binds_to_v4(
         binds.extend(b for b in new_migrated_binds if b not in binds)
 
         if SAVE_NEW_BINDS:
-            await database.update_guild_data(
+            await mongo.update_guild_data(
                 guild_id,
                 binds=[b.model_dump(exclude_unset=True, by_alias=True) for b in binds],
                 migratedBindsToV4=True,
@@ -883,7 +881,7 @@ async def migrate_old_binds_to_v4(
 
     # if POP_OLD_BINDS, remove v3 binds from the database
     if POP_OLD_BINDS and guild_data.migratedBindsToV4:
-        await database.update_guild_data(
+        await mongo.update_guild_data(
             guild_id, groupIDs=None, roleBinds=None, migratedBindsToV4=None
         )
         return binds

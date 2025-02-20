@@ -7,13 +7,13 @@ from datetime import datetime
 import hikari
 import discord
 
-from bloxlink_lib.models.schemas import fetch_user_data
-from ...fetch import fetch, fetch_typed, StatusCodes
-from ...config import CONFIG
-from ...exceptions import RobloxNotFound, RobloxAPIError, UserNotVerified
-from ...database import mongo
+from bloxlink_lib.database import fetch_user_data
+from bloxlink_lib.fetch import fetch, fetch_typed, StatusCodes
+from bloxlink_lib.config import CONFIG
+from bloxlink_lib.exceptions import RobloxNotFound, RobloxAPIError, UserNotVerified
+from bloxlink_lib.database.mongodb import mongo
+from bloxlink_lib.models.base import Snowflake, BaseModel
 from .groups import GroupRoleset
-from ..base import Snowflake, BaseModel
 
 if TYPE_CHECKING:
     from .base_assets import RobloxBaseAsset

@@ -1,11 +1,14 @@
-from pydantic import BaseModel
-from typing import Type, Any,  Annotated, Tuple
-from pydantic import BaseModel as PydanticBaseModel, BeforeValidator, WithJsonSchema, ConfigDict
+from typing import Type, Any, Annotated, Tuple
+from pydantic import (
+    BaseModel as PydanticBaseModel,
+    BeforeValidator,
+    WithJsonSchema,
+    ConfigDict,
+)
 from pydantic.fields import FieldInfo
 from generics import get_filled_type
 
-Snowflake = Annotated[int, BeforeValidator(
-    int), WithJsonSchema({"type": 'int'})]
+Snowflake = Annotated[int, BeforeValidator(int), WithJsonSchema({"type": "int"})]
 
 
 class UNDEFINED:
@@ -18,8 +21,9 @@ class UNDEFINED:
 class BaseModelArbitraryTypes(PydanticBaseModel):
     """Base model with arbitrary types allowed."""
 
-    model_config = ConfigDict(arbitrary_types_allowed=True,
-                              populate_by_name=True, validate_assignment=True)
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True, populate_by_name=True, validate_assignment=True
+    )
 
 
 class BaseModel(PydanticBaseModel):
@@ -29,7 +33,9 @@ class BaseModel(PydanticBaseModel):
     _generic_type_value: Any = None
 
     @classmethod
-    def model_fields_index(cls: Type[PydanticBaseModel | BaseModelArbitraryTypes]) -> list[Tuple[str, FieldInfo]]:
+    def model_fields_index(
+        cls: Type[PydanticBaseModel | BaseModelArbitraryTypes],
+    ) -> list[Tuple[str, FieldInfo]]:
         """Returns a list of the model's fields with the name as a tuple.
 
         Useful if the field index is necessary.
