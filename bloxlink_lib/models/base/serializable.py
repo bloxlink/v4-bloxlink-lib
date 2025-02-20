@@ -3,7 +3,7 @@ from typing import Mapping, Self, Sequence, Type
 import discord
 import hikari
 from pydantic import Field, field_validator
-from . import BaseModel, Snowflake
+from bloxlink_lib.models import BaseModel, Snowflake
 
 
 class RoleSerializable(BaseModel):
@@ -17,7 +17,7 @@ class RoleSerializable(BaseModel):
     is_mentionable: bool = None
 
     @classmethod
-    def from_hikari(cls, role: hikari.Role | Self) -> 'RoleSerializable':
+    def from_hikari(cls, role: hikari.Role | Self) -> "RoleSerializable":
         """Convert a Hikari role into a RoleSerializable object."""
 
         if isinstance(role, RoleSerializable):
@@ -31,7 +31,7 @@ class RoleSerializable(BaseModel):
             position=role.position,
             permissions=role.permissions,
             is_managed=role.is_managed,
-            is_mentionable=role.is_mentionable
+            is_mentionable=role.is_mentionable,
         )
 
     @staticmethod
@@ -53,7 +53,9 @@ class MemberSerializable(BaseModel):
     mention: str = None
 
     @classmethod
-    def from_hikari(cls, member: hikari.InteractionMember | Self) -> 'MemberSerializable':
+    def from_hikari(
+        cls, member: hikari.InteractionMember | Self
+    ) -> "MemberSerializable":
         """Convert a Hikari member into a MemberSerializable object."""
 
         if isinstance(member, MemberSerializable):
@@ -70,11 +72,11 @@ class MemberSerializable(BaseModel):
             role_ids=member.role_ids,
             guild_id=member.guild_id,
             nickname=member.nickname,
-            mention=member.mention
+            mention=member.mention,
         )
 
     @classmethod
-    def from_discordpy(cls, member: discord.Member | Self) -> 'MemberSerializable':
+    def from_discordpy(cls, member: discord.Member | Self) -> "MemberSerializable":
         """Convert a Discord.py member into a MemberSerializable object."""
 
         if isinstance(member, MemberSerializable):
@@ -91,7 +93,7 @@ class MemberSerializable(BaseModel):
             role_ids=[role.id for role in member.roles],
             guild_id=member.guild.id,
             nickname=member.nick,
-            mention=member.mention
+            mention=member.mention,
         )
 
     @staticmethod
@@ -106,18 +108,16 @@ class GuildSerializable(BaseModel):
 
     @field_validator("roles", mode="before")
     @classmethod
-    def transform_roles(cls: Type[Self], roles: list) -> Mapping[Snowflake, RoleSerializable]:
+    def transform_roles(
+        cls: Type[Self], roles: list
+    ) -> Mapping[Snowflake, RoleSerializable]:
         return {int(r_id): RoleSerializable.from_hikari(r) for r_id, r in roles.items()}
 
     @classmethod
-    def from_hikari(cls, guild: hikari.RESTGuild | Self) -> 'GuildSerializable':
+    def from_hikari(cls, guild: hikari.RESTGuild | Self) -> "GuildSerializable":
         """Convert a Hikari guild into a GuildSerializable object."""
 
         if isinstance(guild, GuildSerializable):
             return guild
 
-        return cls(
-            id=guild.id,
-            name=guild.name,
-            roles=guild.roles
-        )
+        return cls(id=guild.id, name=guild.name, roles=guild.roles)

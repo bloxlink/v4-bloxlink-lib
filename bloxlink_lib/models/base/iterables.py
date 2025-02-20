@@ -16,7 +16,7 @@ from pydantic import (
     SkipValidation,
     field_validator,
 )
-from .models import BaseModel
+from bloxlink_lib.models import BaseModel
 
 T = TypeVar("T")
 V = TypeVar("V")
