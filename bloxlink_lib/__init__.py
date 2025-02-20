@@ -1,6 +1,7 @@
 import logging
 
 from .models.base import *
+from .models.schemas import *
 from .models.roblox import *
 from .models.binds import *
 from .exceptions import *
