@@ -1,6 +1,6 @@
 import asyncio
 import pytest
-from bloxlink_lib import database
+from bloxlink_lib.database.redis import wait_for_redis as wait_for_redis_
 
 
 @pytest.fixture(scope="session")
@@ -20,4 +20,4 @@ def start_docker_services(docker_services):
 async def wait_for_redis():
     """Wait for Redis to be ready."""
 
-    await database.wait_for_redis()
+    await wait_for_redis_()

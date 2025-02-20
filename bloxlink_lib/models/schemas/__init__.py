@@ -1,116 +1,7 @@
-from __future__ import annotations
-
-import asyncio
-import datetime
-import json
-import os
-from typing import Type, Any
-
-from motor.motor_asyncio import AsyncIOMotorClient
-from redis.asyncio import Redis
-from redis import ConnectionError as RedisConnectionError
-
-from bloxlink_lib.models import users, guilds
-from bloxlink_lib.models.base import MemberSerializable, GuildSerializable
-from bloxlink_lib import BaseModel
-from .config import CONFIG
-
-mongo: AsyncIOMotorClient = None
-redis: Redis = None
-
-
-def connect_database():
-    global mongo  # pylint: disable=global-statement
-    global redis  # pylint: disable=global-statement
-
-    mongo_options: dict[str, str | int] = {}
-
-    if CONFIG.MONGO_CA_FILE:
-        ca_file_path = os.path.join(os.getcwd(), "cert.crt")
-        ca_file = os.path.exists(ca_file_path)
-
-        if not ca_file:
-            with open(ca_file_path, "w", encoding="utf-8") as f:
-                f.write(CONFIG.MONGO_CA_FILE)
-
-        mongo_options["tlsCAFile"] = ca_file_path
-
-    if CONFIG.MONGO_URL:
-        mongo_options["host"] = CONFIG.MONGO_URL
-    else:
-        mongo_options["host"] = CONFIG.MONGO_HOST
-        mongo_options["port"] = int(CONFIG.MONGO_PORT)
-        mongo_options["username"] = CONFIG.MONGO_USER
-        mongo_options["password"] = CONFIG.MONGO_PASSWORD
-
-    mongo = AsyncIOMotorClient(**mongo_options)
-    mongo.get_io_loop = asyncio.get_running_loop
-
-    if CONFIG.REDIS_URL:
-        redis = Redis.from_url(
-            CONFIG.REDIS_URL,
-            decode_responses=True,
-            retry_on_timeout=True,
-            health_check_interval=30,
-        )
-    else:
-        redis = Redis(
-            host=CONFIG.REDIS_HOST,
-            port=CONFIG.REDIS_PORT,
-            password=CONFIG.REDIS_PASSWORD,
-            decode_responses=True,
-            retry_on_timeout=True,
-            health_check_interval=30,
-        )
-
-    # override redis with better set method
-    redis._old_set = redis.set  # pylint: disable=protected-access
-    redis.set = redis_set
-
-    # loop.create_task(_heartbeat_loop()) # TODO: fix this
-
-
-async def redis_set(
-    key: str, value: BaseModel | Any, expire: datetime.timedelta | int = None, **kwargs
-):
-    """Set a value in Redis. Accepts BaseModels and expirations as datetimes."""
-
-    await redis._old_set(
-        key,  # pylint: disable=protected-access
-        (
-            value.model_dump_json()
-            if isinstance(value, BaseModel)
-            else (json.dumps(value) if isinstance(value, (list, dict)) else value)
-        ),
-        ex=(
-            int(expire.total_seconds())
-            if expire and isinstance(expire, datetime.timedelta)
-            else expire
-        ),
-        **kwargs,
-    )
-
-
-async def _heartbeat_loop():
-    while True:
-        try:
-            await asyncio.wait_for(redis.ping(), timeout=10)
-        except RedisConnectionError as e:
-            raise SystemError("Failed to connect to Redis.") from e
-
-        await asyncio.sleep(5)
-
-
-async def wait_for_redis():
-    while True:
-        try:
-            await asyncio.wait_for(redis.ping(), timeout=10)
-        except RedisConnectionError:
-            pass
-        else:
-            break
-
-        await asyncio.sleep(1)
+from bloxlink_lib.database.redis import redis
+from bloxlink_lib.models.base.serializable import GuildSerializable, MemberSerializable
+from bloxlink_lib.models.schemas.guilds import *
+from bloxlink_lib.models.schemas.users import *
 
 
 async def fetch_item[T](domain: str, constructor: Type[T], item_id: str, *aspects) -> T:
@@ -172,7 +63,6 @@ async def update_item(domain: str, item_id: str, **aspects) -> None:
     unset_aspects = {}
     set_aspects = {}
 
-    # arrange items into set and unset (delete)
     for key, val in aspects.items():
         if val is None:
             unset_aspects[key] = ""
@@ -181,9 +71,9 @@ async def update_item(domain: str, item_id: str, **aspects) -> None:
 
     # check if the model is valid
     if domain == "users":
-        users.UserData(id=item_id, **set_aspects)
+        schemas.UserData(id=item_id, **set_aspects)
     elif domain == "guilds":
-        guilds.GuildData(id=item_id, **set_aspects)
+        schemas.GuildData(id=item_id, **set_aspects)
 
     # Update redis cache
     redis_set_aspects = {}
@@ -210,19 +100,13 @@ async def update_item(domain: str, item_id: str, **aspects) -> None:
 
     # update database
     await mongo.bloxlink[domain].update_one(
-        {"_id": item_id},
-        {
-            "$set": set_aspects,
-            "$unset": unset_aspects,
-            "$currentDate": {"updatedAt": True},
-        },
-        upsert=True,
+        {"_id": item_id}, {"$set": set_aspects, "$unset": unset_aspects}, upsert=True
     )
 
 
 async def fetch_user_data(
     user: str | int | dict | MemberSerializable, *aspects
-) -> users.UserData:
+) -> schemas.UserData:
     """
     Fetch a full user from local cache, then redis, then database.
     Will populate caches for later access
@@ -235,12 +119,12 @@ async def fetch_user_data(
     else:
         user_id = str(user)
 
-    return await fetch_item("users", users.UserData, user_id, *aspects)
+    return await fetch_item("users", schemas.UserData, user_id, *aspects)
 
 
 async def fetch_guild_data(
     guild: str | int | dict | GuildSerializable, *aspects
-) -> guilds.GuildData:
+) -> GuildData:
     """
     Fetch a full guild from local cache, then redis, then database.
     Will populate caches for later access
@@ -253,7 +137,7 @@ async def fetch_guild_data(
     else:
         guild_id = str(guild)
 
-    return await fetch_item("guilds", guilds.GuildData, guild_id, *aspects)
+    return await fetch_item("guilds", GuildData, guild_id, *aspects)
 
 
 async def update_user_data(
@@ -288,6 +172,3 @@ async def update_guild_data(
         guild_id = str(guild)
 
     return await update_item("guilds", guild_id, **aspects)
-
-
-connect_database()

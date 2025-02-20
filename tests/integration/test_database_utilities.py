@@ -1,5 +1,5 @@
 import pytest
-from bloxlink_lib import database
+from bloxlink_lib.database import mongodb
 from pydantic import ValidationError
 
 
@@ -10,10 +10,10 @@ class TestUpdatingGuildData:
     async def test_update_guild_data(
         self, test_input, start_docker_services, wait_for_redis
     ):
-        await database.update_guild_data(1, verifiedRoleName=test_input)
+        await mongodb.update_guild_data(1, verifiedRoleName=test_input)
 
         assert (
-            await database.fetch_guild_data(1, "verifiedRoleName")
+            await mongodb.fetch_guild_data(1, "verifiedRoleName")
         ).verifiedRoleName == test_input
 
     @pytest.mark.parametrize("test_input", [5, 0, -1])
@@ -21,6 +21,6 @@ class TestUpdatingGuildData:
         self, test_input, start_docker_services, wait_for_redis
     ):
         with pytest.raises(ValidationError) as e:
-            await database.update_guild_data(1, verifiedRoleName=test_input)
+            await mongodb.update_guild_data(1, verifiedRoleName=test_input)
 
         assert issubclass(e.type, ValidationError)
