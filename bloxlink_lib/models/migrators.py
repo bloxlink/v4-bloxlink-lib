@@ -1,6 +1,7 @@
 from __future__ import annotations
-
-from bloxlink_lib.models.schemas.guilds.guild_types import GuildRestriction
+from bloxlink_lib.models.schemas.guilds import (  # pylint: disable=no-name-in-module
+    GuildRestriction,
+)
 
 
 def migrate_restrictions(

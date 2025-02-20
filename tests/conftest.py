@@ -1,6 +1,8 @@
 import asyncio
 import pytest
-from bloxlink_lib.database.redis import wait_for_redis as wait_for_redis_
+from bloxlink_lib.database.redis import (  # pylint: disable=no-name-in-module
+    wait_for_redis as wait_for_redis_,
+)
 
 
 @pytest.fixture(scope="session")

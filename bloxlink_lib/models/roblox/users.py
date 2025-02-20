@@ -7,11 +7,13 @@ from datetime import datetime
 import hikari
 import discord
 
-from bloxlink_lib.database import fetch_user_data
+from bloxlink_lib.models.schemas.users import (  # pylint: disable=no-name-in-module
+    fetch_user_data,
+)
 from bloxlink_lib.fetch import fetch, fetch_typed, StatusCodes
 from bloxlink_lib.config import CONFIG
 from bloxlink_lib.exceptions import RobloxNotFound, RobloxAPIError, UserNotVerified
-from bloxlink_lib.database.mongodb import mongo
+from bloxlink_lib.database.mongodb import mongo  # pylint: disable=no-name-in-module
 from bloxlink_lib.models.base import Snowflake, BaseModel
 from .groups import GroupRoleset
 

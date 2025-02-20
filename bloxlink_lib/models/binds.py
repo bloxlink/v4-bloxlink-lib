@@ -15,7 +15,7 @@ from typing import (
 
 from pydantic import Field, ValidationError
 
-from bloxlink_lib.database.mongodb import mongo
+from bloxlink_lib.database.mongodb import mongo  # pylint: disable=no-name-in-module
 from bloxlink_lib.models.base import (
     BaseModel,
     CoerciveSet,

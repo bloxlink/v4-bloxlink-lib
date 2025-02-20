@@ -1,13 +1,18 @@
 from __future__ import annotations
 
 import asyncio
+import datetime
 import os
+from typing import Type, TYPE_CHECKING
 
 from motor.motor_asyncio import AsyncIOMotorClient
 from bloxlink_lib.config import CONFIG
 from .redis import redis
 
 mongo: AsyncIOMotorClient = None
+
+if TYPE_CHECKING:
+    from bloxlink_lib.models.schemas import BaseSchema
 
 
 def connect_database():
@@ -42,6 +47,7 @@ async def fetch_item[T](domain: str, constructor: Type[T], item_id: str, *aspect
     Fetch an item from local cache, then redis, then database.
     Will populate caches for later access
     """
+
     # should check local cache but for now just fetch from redis
 
     if aspects:
@@ -88,10 +94,14 @@ async def fetch_item[T](domain: str, constructor: Type[T], item_id: str, *aspect
     return constructor(**item)
 
 
-async def update_item(domain: str, item_id: str, **aspects) -> None:
+async def update_item[
+    T: "BaseSchema"
+](constructor: Type[T], item_id: str, **aspects) -> None:
     """
     Update an item's aspects in local cache, redis, and database.
     """
+
+    database_domain = constructor.database_domain().value
 
     unset_aspects = {}
     set_aspects = {}
@@ -102,12 +112,6 @@ async def update_item(domain: str, item_id: str, **aspects) -> None:
             unset_aspects[key] = ""
         else:
             set_aspects[key] = val
-
-    # check if the model is valid
-    if domain == "users":
-        users.UserData(id=item_id, **set_aspects)
-    elif domain == "guilds":
-        guilds.GuildData(id=item_id, **set_aspects)
 
     # Update redis cache
     redis_set_aspects = {}
@@ -123,17 +127,21 @@ async def update_item(domain: str, item_id: str, **aspects) -> None:
 
     if redis_set_aspects:
         async with redis.pipeline() as pipeline:
-            await pipeline.hset(f"{domain}:{item_id}", mapping=redis_set_aspects)
+            await pipeline.hset(
+                f"{database_domain}:{item_id}", mapping=redis_set_aspects
+            )
             await pipeline.expire(
-                f"{domain}:{item_id}", int(datetime.timedelta(hours=1).total_seconds())
+                f"{database_domain}:{item_id}",
+                int(datetime.timedelta(hours=1).total_seconds()),
             )
             await pipeline.execute()
 
     if redis_unset_aspects:
-        await redis.hdel(f"{domain}:{item_id}", *redis_unset_aspects.keys())
+        await redis.hdel(f"{database_domain}:{item_id}", *redis_unset_aspects.keys())
 
+    print(database_domain)
     # update database
-    await mongo.bloxlink[domain].update_one(
+    await mongo.bloxlink[database_domain].update_one(
         {"_id": item_id},
         {
             "$set": set_aspects,
@@ -142,76 +150,6 @@ async def update_item(domain: str, item_id: str, **aspects) -> None:
         },
         upsert=True,
     )
-
-
-async def fetch_user_data(
-    user: str | int | dict | MemberSerializable, *aspects
-) -> users.UserData:
-    """
-    Fetch a full user from local cache, then redis, then database.
-    Will populate caches for later access
-    """
-
-    if isinstance(user, dict):
-        user_id = str(user["id"])
-    elif isinstance(user, users.MemberSerializable):
-        user_id = str(user.id)
-    else:
-        user_id = str(user)
-
-    return await fetch_item("users", users.UserData, user_id, *aspects)
-
-
-async def fetch_guild_data(
-    guild: str | int | dict | GuildSerializable, *aspects
-) -> guilds.GuildData:
-    """
-    Fetch a full guild from local cache, then redis, then database.
-    Will populate caches for later access
-    """
-
-    if isinstance(guild, dict):
-        guild_id = str(guild["id"])
-    elif isinstance(guild, guilds.GuildSerializable):
-        guild_id = str(guild.id)
-    else:
-        guild_id = str(guild)
-
-    return await fetch_item("guilds", guilds.GuildData, guild_id, *aspects)
-
-
-async def update_user_data(
-    user: str | int | dict | MemberSerializable, **aspects
-) -> None:
-    """
-    Update a user's aspects in local cache, redis, and database.
-    """
-
-    if isinstance(user, dict):
-        user_id = str(user["id"])
-    elif isinstance(user, users.MemberSerializable):
-        user_id = str(user.id)
-    else:
-        user_id = str(user)
-
-    return await update_item("users", user_id, **aspects)
-
-
-async def update_guild_data(
-    guild: str | int | dict | GuildSerializable, **aspects
-) -> None:
-    """
-    Update a guild's aspects in local cache, redis, and database.
-    """
-
-    if isinstance(guild, dict):
-        guild_id = str(guild["id"])
-    elif isinstance(guild, guilds.GuildSerializable):
-        guild_id = str(guild.id)
-    else:
-        guild_id = str(guild)
-
-    return await update_item("guilds", guild_id, **aspects)
 
 
 connect_database()

@@ -1,4 +1,14 @@
-from typing import Annotated, Any, Callable, Iterable, Literal, Self, Sequence, Type
+from typing import (
+    Annotated,
+    Any,
+    Callable,
+    Iterable,
+    Literal,
+    Self,
+    Sequence,
+    Type,
+    TypeVar,
+)
 from pydantic import (
     Field,
     PrivateAttr,
@@ -7,6 +17,10 @@ from pydantic import (
     field_validator,
 )
 from .models import BaseModel
+
+T = TypeVar("T")
+V = TypeVar("V")
+K = TypeVar("K")
 
 
 class PydanticDict[K, V](RootModel[dict[K, V]]):

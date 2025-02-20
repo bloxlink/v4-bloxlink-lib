@@ -5,7 +5,6 @@ import datetime
 import json
 from typing import Any
 
-from motor.motor_asyncio import AsyncIOMotorClient
 from redis.asyncio import Redis
 from redis import ConnectionError as RedisConnectionError
 
