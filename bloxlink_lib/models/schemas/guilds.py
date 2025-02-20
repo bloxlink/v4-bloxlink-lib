@@ -1,9 +1,19 @@
-from typing import Mapping, Self, Type, Literal, Annotated
+from typing import Self, Type, Literal, Annotated
 from pydantic import Field, field_validator
-from .base import PydanticList, BaseModel, PydanticDict, MemberSerializable
-from ..validators import is_positive_number_as_str
-from .migrators import migrate_restrictions, migrate_delete_commands
-import bloxlink_lib.models.binds as binds_module
+from bloxlink_lib.models.base import (
+    PydanticList,
+    BaseModel,
+    PydanticDict,
+    MemberSerializable,
+)
+from bloxlink_lib.models.base.serializable import GuildSerializable
+from bloxlink_lib.models.schemas import BaseSchema, DatabaseDomains
+from bloxlink_lib.validators import is_positive_number_as_str
+from bloxlink_lib.models.binds import GuildBind
+from bloxlink_lib.database.mongodb import (  # pylint: disable=no-name-in-module
+    fetch_item,
+    update_item,
+)
 
 
 class UserInfoFieldMapping(BaseModel):
@@ -65,12 +75,12 @@ class GuildRestriction(BaseModel):
         return self.id == other.id and self.type == other.type
 
 
-class GuildData(BaseModel):
+class GuildData(BaseSchema):
     """Representation of the stored settings for a guild"""
 
     id: Annotated[int, Field(alias="_id")]
 
-    binds: Annotated[list[binds_module.GuildBind], Field(default_factory=list)]
+    binds: Annotated[list[GuildBind], Field(default_factory=list)]
 
     verifiedRoleEnabled: bool = True
     verifiedRoleName: str | None = "Verified"  # deprecated
@@ -122,17 +132,21 @@ class GuildData(BaseModel):
     # field converters
     @field_validator("binds", mode="before")
     @classmethod
-    def transform_binds(cls: Type[Self], binds: list) -> list[binds_module.GuildBind]:
-        if all(isinstance(b, binds_module.GuildBind) for b in binds):
+    def transform_binds(cls: Type[Self], binds: list) -> list[GuildBind]:
+        if all(isinstance(b, GuildBind) for b in binds):
             return binds
 
-        return [binds_module.GuildBind(**b) for b in binds]
+        return [GuildBind(**b) for b in binds]
 
     @field_validator("deleteCommands", mode="before")
     @classmethod
     def transform_delete_commands(
         cls: Type[Self], delete_commands: int | None | bool
     ) -> bool:
+        from bloxlink_lib.models.migrators import (
+            migrate_delete_commands,
+        )
+
         return migrate_delete_commands(delete_commands)
 
     @field_validator("restrictions", mode="before")
@@ -140,12 +154,14 @@ class GuildData(BaseModel):
     def transform_restrictions(
         cls: Type[Self], restrictions: dict[str, dict[str, GuildRestriction]]
     ) -> list[GuildRestriction]:
+        from bloxlink_lib.models.migrators import migrate_restrictions
+
         return migrate_restrictions(restrictions)
 
     def model_post_init(self, __context):
         # merge verified roles into binds
         if self.verifiedRole:
-            verified_role_bind = binds_module.GuildBind(
+            verified_role_bind = GuildBind(
                 criteria={"type": "verified"}, roles=[self.verifiedRole]
             )
 
@@ -153,7 +169,7 @@ class GuildData(BaseModel):
                 self.binds.append(verified_role_bind)
 
         if self.unverifiedRole:
-            unverified_role_bind = binds_module.GuildBind(
+            unverified_role_bind = GuildBind(
                 criteria={"type": "unverified"}, roles=[self.unverifiedRole]
             )
 
@@ -169,6 +185,49 @@ class GuildData(BaseModel):
 
         #     self.roleBinds = None
 
+    @staticmethod
+    def database_domain() -> DatabaseDomains:
+        """The database domain for the schema."""
 
-# RoleSerializable is not defined when the schema is first built, so we need to re-build it. TODO: make better
-binds_module.GuildBind.model_rebuild()
+        return DatabaseDomains.GUILDS
+
+
+async def fetch_guild_data(
+    guild: str | int | dict | GuildSerializable, *aspects
+) -> GuildData:
+    """
+    Fetch a full guild from local cache, then redis, then database.
+    Will populate caches for later access
+    """
+
+    if isinstance(guild, dict):
+        guild_id = str(guild["id"])
+    elif isinstance(guild, GuildSerializable):
+        guild_id = str(guild.id)
+    else:
+        guild_id = str(guild)
+
+    return await fetch_item("guilds", GuildData, guild_id, *aspects)
+
+
+async def update_guild_data(
+    guild: str | int | dict | GuildSerializable, **aspects
+) -> None:
+    """
+    Update a guild's aspects in local cache, redis, and database.
+    """
+
+    if isinstance(guild, dict):
+        guild_id = str(guild["id"])
+    elif isinstance(guild, GuildSerializable):
+        guild_id = str(guild.id)
+    else:
+        guild_id = str(guild)
+
+    GuildData.model_validate({"id": guild_id, **aspects})
+
+    return await update_item(GuildData, guild_id, **aspects)
+
+
+# # RoleSerializable is not defined when the schema is first built, so we need to re-build it. TODO: make better
+# GuildBind.model_rebuild()

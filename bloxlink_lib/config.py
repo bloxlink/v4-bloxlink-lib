@@ -1,7 +1,7 @@
 from os import getcwd, environ
 from typing import Literal
 from dotenv import load_dotenv
-from .models.base import BaseModel
+from .models import BaseModel
 
 load_dotenv(f"{getcwd()}/.env")
 

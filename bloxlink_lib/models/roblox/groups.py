@@ -5,9 +5,10 @@ from typing import TYPE_CHECKING, Annotated
 
 from pydantic import Field
 
-from ..exceptions import RobloxAPIError, RobloxNotFound
-from ..fetch import fetch_typed
-from .base import BaseModel, RobloxEntity
+from bloxlink_lib.exceptions import RobloxAPIError, RobloxNotFound
+from bloxlink_lib.fetch import fetch_typed
+from bloxlink_lib.models.base import BaseModel
+from .base import RobloxEntity
 
 if TYPE_CHECKING:
     from .users import RobloxUser

@@ -13,28 +13,26 @@ from typing import (
     Type,
 )
 
-from pydantic import ConfigDict, Field, ValidationError
+from pydantic import Field, ValidationError
 
-from bloxlink_lib import database
-
-from ..models.base import (
+from bloxlink_lib.database.mongodb import mongo  # pylint: disable=no-name-in-module
+from bloxlink_lib.models.base import (
     BaseModel,
     CoerciveSet,
-    RobloxEntity,
     SnowflakeSet,
-    create_entity,
     RoleSerializable,
     MemberSerializable,
 )
-from ..utils import find
+from bloxlink_lib.models.roblox import RobloxEntity, create_entity
+from bloxlink_lib.utils import find
 
 if TYPE_CHECKING:
     from hikari import Member
 
-    from .base_assets import RobloxBaseAsset
-    from .groups import RobloxGroup
-    from .guilds import GuildData
-    from .users import RobloxUser
+    from .roblox.base_assets import RobloxBaseAsset
+    from .roblox.groups import RobloxGroup
+    from .schemas import GuildData
+    from .roblox.users import MemberSerializable, RobloxUser
 
 
 POP_OLD_BINDS: bool = False  # remove old binds from the database
@@ -73,8 +71,6 @@ class BindDataDict(TypedDict):
 class GroupBindData(BaseModel):
     """Represents the data required for a group bind."""
 
-    model_config = ConfigDict(frozen=True)
-
     # conditions
     everyone: bool | None = False
     guest: bool | None = False
@@ -100,8 +96,6 @@ class GroupBindData(BaseModel):
 
 class BindCriteria(BaseModel):
     """Represents the criteria required for a bind. If anything is set, it must ALL be met."""
-
-    model_config = ConfigDict(frozen=True)
 
     type: VALID_BIND_TYPES
     id: int | None = Field(default=None)
@@ -575,7 +569,7 @@ async def check_for_verified_roles(
     """Check for existing verified/unverified roles and update the database."""
 
     guild_id = str(guild_id)
-    guild_data = await database.fetch_guild_data(
+    guild_data = await mongo.fetch_guild_data(
         guild_id,
         "verifiedRole",
         "unverifiedRole",
@@ -626,7 +620,7 @@ async def check_for_verified_roles(
     if new_verified_binds:
         merge_to.extend(new_verified_binds)
 
-        await database.update_guild_data(
+        await mongo.update_guild_data(
             guild_id,
             binds=[b.model_dump(exclude_unset=True, by_alias=True) for b in merge_to],
             verifiedRoleName=None,
@@ -648,7 +642,7 @@ async def get_binds(
     """
 
     guild_id = str(guild_id)
-    guild_data = await database.fetch_guild_data(guild_id, "binds")
+    guild_data = await mongo.fetch_guild_data(guild_id, "binds")
 
     guild_data.binds = await migrate_old_binds_to_v4(guild_id, guild_data.binds)
 
@@ -673,7 +667,7 @@ async def get_nickname_template(
 ) -> tuple[str, GuildBind | None]:
     """Get the unparsed nickname template for the user."""
 
-    guild_data = await database.fetch_guild_data(
+    guild_data = await mongo.fetch_guild_data(
         guild_id,
         "nicknameTemplate" if roblox_user else "unverifiedNickname",
     )
@@ -860,7 +854,7 @@ async def migrate_old_binds_to_v4(
     If POP_OLD_BINDS is true, the old binds will be removed from the database.
     """
 
-    guild_data = await database.fetch_guild_data(
+    guild_data = await mongo.fetch_guild_data(
         guild_id,
         "roleBinds",
         "groupIDs",
@@ -879,7 +873,7 @@ async def migrate_old_binds_to_v4(
         binds.extend(b for b in new_migrated_binds if b not in binds)
 
         if SAVE_NEW_BINDS:
-            await database.update_guild_data(
+            await mongo.update_guild_data(
                 guild_id,
                 binds=[b.model_dump(exclude_unset=True, by_alias=True) for b in binds],
                 migratedBindsToV4=True,
@@ -887,7 +881,7 @@ async def migrate_old_binds_to_v4(
 
     # if POP_OLD_BINDS, remove v3 binds from the database
     if POP_OLD_BINDS and guild_data.migratedBindsToV4:
-        await database.update_guild_data(
+        await mongo.update_guild_data(
             guild_id, groupIDs=None, roleBinds=None, migratedBindsToV4=None
         )
         return binds
