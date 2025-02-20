@@ -139,7 +139,6 @@ async def update_item[
     if redis_unset_aspects:
         await redis.hdel(f"{database_domain}:{item_id}", *redis_unset_aspects.keys())
 
-    print(database_domain)
     # update database
     await mongo.bloxlink[database_domain].update_one(
         {"_id": item_id},
