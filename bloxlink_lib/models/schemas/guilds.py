@@ -1,4 +1,4 @@
-from typing import Any, Self, Type, Literal, Annotated
+from typing import Self, Type, Literal, Annotated
 from pydantic import Field, field_validator, model_validator
 from bloxlink_lib.models.base import (
     PydanticList,
@@ -132,14 +132,14 @@ class GuildData(BaseSchema):
     # field converters
     @model_validator(mode="before")
     @classmethod
-    def handle_nulls(cls, data: Any) -> Any:
-        """Remove null fields from the data"""
+    def handle_nulls(cls: BaseModel, base_model_data: dict) -> dict:
+        """Remove null fields from the data before Pydantic validates the model"""
 
         from bloxlink_lib.models.migrators import (
             unset_nulls,
         )
 
-        return unset_nulls(cls, data)
+        return unset_nulls(cls, base_model_data)
 
     @field_validator("binds", mode="before")
     @classmethod
