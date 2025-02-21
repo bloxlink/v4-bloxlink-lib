@@ -17,3 +17,7 @@ class BaseSchema(BaseModel, ABC):
     @abstractmethod
     def database_domain() -> Enum:
         """The database domain for the schema."""
+
+
+from .guilds import *
+from .users import *

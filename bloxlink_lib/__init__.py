@@ -1,7 +1,8 @@
 import logging
 
 from .models.base import *
-from .models.schemas import *
+from .models.schemas.guilds import fetch_guild_data, update_guild_data
+from .models.schemas.users import fetch_user_data, update_user_data
 from .models.roblox import *
 from .models.binds import *
 from .exceptions import *
