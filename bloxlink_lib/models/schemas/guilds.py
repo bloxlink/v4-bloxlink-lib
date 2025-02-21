@@ -133,6 +133,8 @@ class GuildData(BaseSchema):
     @field_validator("binds", mode="before")
     @classmethod
     def transform_binds(cls: Type[Self], binds: list) -> list[GuildBind]:
+        """Transforms DB binds to GuildBinds"""
+
         if all(isinstance(b, GuildBind) for b in binds):
             return binds
 
@@ -143,17 +145,34 @@ class GuildData(BaseSchema):
     def transform_delete_commands(
         cls: Type[Self], delete_commands: int | None | bool
     ) -> bool:
+        """Migrate the deleteCommands field."""
+
         from bloxlink_lib.models.migrators import (
             migrate_delete_commands,
         )
 
         return migrate_delete_commands(delete_commands)
 
+    @field_validator("disallowBanEvaders", mode="before")
+    @classmethod
+    def transform_disallow_ban_evaders(
+        cls: Type[Self], disallow_ban_evaders: bool | str | None
+    ) -> bool:
+        """Migrate the disallowBanEvaders field."""
+
+        from bloxlink_lib.models.migrators import (
+            migrate_disallow_ban_evaders,
+        )
+
+        return migrate_disallow_ban_evaders(disallow_ban_evaders)
+
     @field_validator("restrictions", mode="before")
     @classmethod
     def transform_restrictions(
         cls: Type[Self], restrictions: dict[str, dict[str, GuildRestriction]]
     ) -> list[GuildRestriction]:
+        """Migrate the restrictions field."""
+
         from bloxlink_lib.models.migrators import migrate_restrictions
 
         return migrate_restrictions(restrictions)

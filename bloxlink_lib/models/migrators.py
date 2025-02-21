@@ -7,6 +7,8 @@ from bloxlink_lib.models.schemas.guilds import (  # pylint: disable=no-name-in-m
 def migrate_restrictions(
     restrictions: dict[str, dict[str, GuildRestriction]]
 ) -> list[GuildRestriction]:
+    """Migrate the restrictions field."""
+
     if isinstance(restrictions, list):
         return restrictions
 
@@ -28,4 +30,15 @@ def migrate_restrictions(
 
 
 def migrate_delete_commands(delete_commands: int | None | bool) -> bool:
+    """Migrate the deleteCommands field."""
+
     return bool(delete_commands)
+
+
+def migrate_disallow_ban_evaders(disallow_ban_evaders: bool | str | None) -> bool:
+    """Migrate the disallowBanEvaders field."""
+
+    if isinstance(disallow_ban_evaders, bool):
+        return disallow_ban_evaders
+
+    return disallow_ban_evaders in ("ban", "kick")
