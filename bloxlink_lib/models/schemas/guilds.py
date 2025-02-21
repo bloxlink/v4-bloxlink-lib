@@ -1,5 +1,5 @@
-from typing import Self, Type, Literal, Annotated
-from pydantic import Field, field_validator
+from typing import Any, Self, Type, Literal, Annotated
+from pydantic import Field, field_validator, model_validator
 from bloxlink_lib.models.base import (
     PydanticList,
     BaseModel,
@@ -83,25 +83,25 @@ class GuildData(BaseSchema):
     binds: Annotated[list[GuildBind], Field(default_factory=list)]
 
     verifiedRoleEnabled: bool = True
-    verifiedRoleName: str | None = "Verified"  # deprecated
+    verifiedRoleName: str = "Verified"  # deprecated
     verifiedRole: str = None
 
     unverifiedRoleEnabled: bool = True
-    unverifiedRoleName: str | None = "Unverified"  # deprecated
+    unverifiedRoleName: str = "Unverified"  # deprecated
     unverifiedRole: str = None
 
-    verifiedDM: str | None = (
+    verifiedDM: str = (
         ":wave: Welcome to **{server-name}**, {roblox-name}! Visit <{verify-url}> to change your account.\nFind more Roblox Communities at https://blox.link/communities !"
     )
 
     ageLimit: int = None
     autoRoles: bool = True
     autoVerification: bool = True
-    disallowAlts: bool | None = False
-    disallowBanEvaders: bool | None = False
-    banRelatedAccounts: bool | None = False
-    unbanRelatedAccounts: bool | None = False
-    dynamicRoles: bool | None = True
+    disallowAlts: bool = False
+    disallowBanEvaders: bool = False
+    banRelatedAccounts: bool = False
+    unbanRelatedAccounts: bool = False
+    dynamicRoles: bool = True
     groupLock: PydanticDict[str, GroupLock] = None
     highTrafficServer: bool = False
     allowOldRoles: bool = False
@@ -125,11 +125,22 @@ class GuildData(BaseSchema):
     premium: PydanticDict = Field(default_factory=PydanticDict)  # deprecated
 
     # Old bind fields.
-    roleBinds: PydanticDict | None = None
+    roleBinds: PydanticDict = None
     groupIDs: PydanticDict = None
     migratedBindsToV4: bool = False
 
     # field converters
+    @model_validator(mode="before")
+    @classmethod
+    def handle_nulls(cls, data: Any) -> Any:
+        """Remove null fields from the data"""
+
+        from bloxlink_lib.models.migrators import (
+            unset_nulls,
+        )
+
+        return unset_nulls(cls, data)
+
     @field_validator("binds", mode="before")
     @classmethod
     def transform_binds(cls: Type[Self], binds: list) -> list[GuildBind]:

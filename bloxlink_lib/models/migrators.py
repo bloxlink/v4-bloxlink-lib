@@ -2,6 +2,7 @@ from __future__ import annotations
 from bloxlink_lib.models.schemas.guilds import (  # pylint: disable=no-name-in-module
     GuildRestriction,
 )
+from bloxlink_lib.models import BaseModel
 
 
 def migrate_restrictions(
@@ -42,3 +43,14 @@ def migrate_disallow_ban_evaders(disallow_ban_evaders: bool | str | None) -> boo
         return disallow_ban_evaders
 
     return disallow_ban_evaders in ("ban", "kick")
+
+
+def unset_nulls(base_model: BaseModel, base_model_data: dict) -> dict:
+    """Remove null fields from the data before Pydantic validates the model"""
+
+    if isinstance(base_model_data, dict):
+        for field_name in base_model.model_fields:
+            if field_name in base_model_data and base_model_data[field_name] is None:
+                del base_model_data[field_name]  # unset the field
+
+    return base_model_data
