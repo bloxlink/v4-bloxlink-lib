@@ -1,8 +1,11 @@
 import logging
 
 from .models.base import *
-from .models.schemas import *
+from .models import *
+from .models.schemas.guilds import *  # pylint: disable=no-name-in-module
+from .models.schemas.users import *  # pylint: disable=no-name-in-module
 from .models.roblox import *
+from .models.roblox.binds import *
 from .models.binds import *
 from .exceptions import *
 from .utils import *
