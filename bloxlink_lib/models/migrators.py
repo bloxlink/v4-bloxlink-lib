@@ -59,7 +59,7 @@ def migrate_magic_roles(magic_roles: dict) -> dict:
             continue
 
         if not isinstance(magic_role_data, list):
-            magic_roles[magic_role_id] = list(magic_role_data)
+            magic_roles[magic_role_id] = [magic_role_data]
 
     return magic_roles
 
