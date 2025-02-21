@@ -7,7 +7,7 @@ from typing import Type, TYPE_CHECKING
 
 from motor.motor_asyncio import AsyncIOMotorClient
 from bloxlink_lib.config import CONFIG
-from .redis import redis
+from bloxlink_lib.database.redis import redis  # pylint: disable=no-name-in-module
 
 mongo: AsyncIOMotorClient = None
 

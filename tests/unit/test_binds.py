@@ -1,6 +1,6 @@
 import pytest
 import datetime
-from bloxlink_lib.models import binds
+from bloxlink_lib.models.roblox.binds import parse_template
 
 # fixtures
 from pytest_lazy_fixtures import lf, lfc
@@ -68,7 +68,7 @@ class TestNicknames:
 
         test_roblox_user_1.parse_age()
 
-        nickname = await binds.parse_template(
+        nickname = await parse_template(
             guild_id=test_guild_1.id,
             guild_name=test_guild_1.name,
             member=test_discord_member,
