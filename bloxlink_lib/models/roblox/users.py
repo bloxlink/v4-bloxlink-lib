@@ -33,23 +33,6 @@ AVATAR_URLS = {
 }
 
 
-class UserData(BaseModel):
-    """Representation of a User's data in Bloxlink
-
-    Attributes:
-        id (int): The Discord ID of the user.
-        robloxID (str): The roblox ID of the user's primary account.
-        robloxAccounts (dict): All of the user's linked accounts, and any guild specific verifications.
-    """
-
-    id: Annotated[int, Field(alias="_id")]
-
-    robloxID: str | None = None
-    robloxAccounts: dict = Field(
-        default_factory=lambda: {"accounts": [], "guilds": {}, "confirms": {}}
-    )
-
-
 class UserAvatar(BaseModel):
     """Type definition for a Roblox user's avatar from the Bloxlink Info API."""
 
