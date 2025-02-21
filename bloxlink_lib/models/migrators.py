@@ -36,6 +36,34 @@ def migrate_delete_commands(delete_commands: int | None | bool) -> bool:
     return bool(delete_commands)
 
 
+def migrate_dynamic_roles(dynamic_roles: bool | str) -> bool:
+    """Migrate the dynamicRoles field."""
+
+    if isinstance(dynamic_roles, bool):
+        return dynamic_roles
+
+    if dynamic_roles.lower() in ("disable",):  # keeping track of the "false" values
+        return False
+
+    # return dynamic_roles in ()
+
+    return dynamic_roles
+
+
+def migrate_magic_roles(magic_roles: dict) -> dict:
+    """Migrate the magicRoles field."""
+
+    for magic_role_id, magic_role_data in dict(magic_roles).items():
+        if magic_role_id == "undefined":
+            magic_roles.pop(magic_role_id)
+            continue
+
+        if not isinstance(magic_role_data, list):
+            magic_roles[magic_role_id] = list(magic_role_data)
+
+    return magic_roles
+
+
 def migrate_disallow_ban_evaders(disallow_ban_evaders: bool | str | None) -> bool:
     """Migrate the disallowBanEvaders field."""
 

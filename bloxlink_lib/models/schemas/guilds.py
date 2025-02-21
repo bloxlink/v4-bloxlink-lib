@@ -58,6 +58,8 @@ RestrictionSources = Literal[
     "ageLimit", "groupLock", "disallowAlts", "banEvader", "restrictions"
 ]
 
+type MagicRoles = PydanticDict[str, list[MagicRoleTypes]]
+
 
 class GuildRestriction(BaseModel):
     """Server restrictions set by the server owner"""
@@ -163,6 +165,28 @@ class GuildData(BaseSchema):
         )
 
         return migrate_delete_commands(delete_commands)
+
+    @field_validator("dynamicRoles", mode="before")
+    @classmethod
+    def transform_dynamic_roles(cls: Type[Self], dynamic_roles: bool | str) -> bool:
+        """Migrate the deleteCommands field."""
+
+        from bloxlink_lib.models.migrators import (
+            migrate_dynamic_roles,
+        )
+
+        return migrate_dynamic_roles(dynamic_roles)
+
+    @field_validator("magicRoles", mode="before")
+    @classmethod
+    def transform_magic_roles(cls: Type[Self], magic_roles: dict) -> MagicRoles:
+        """Migrate the magicRoles field."""
+
+        from bloxlink_lib.models.migrators import (
+            migrate_magic_roles,
+        )
+
+        return migrate_magic_roles(magic_roles)
 
     @field_validator("disallowBanEvaders", mode="before")
     @classmethod
