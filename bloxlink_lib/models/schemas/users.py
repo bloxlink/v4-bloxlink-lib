@@ -61,4 +61,6 @@ async def update_user_data(
     else:
         user_id = str(user)
 
+    UserData.model_validate({"id": user_id, **aspects})
+
     return await update_item(UserData, user_id, **aspects)
