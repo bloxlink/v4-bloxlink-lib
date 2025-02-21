@@ -4,5 +4,6 @@
     "diffEditor.ignoreTrimWhitespace": false,
     "editor.formatOnSave": true
   },
+  "pylint.args": ["--disable=import-outside-toplevel"],
   "files.trimTrailingWhitespace": true
 }
