@@ -1,9 +1,10 @@
+from __future__ import annotations
+import math
+import re
+from typing import TYPE_CHECKING
 from hikari import Member
 from bloxlink_lib.models.base.serializable import MemberSerializable, RoleSerializable
 from bloxlink_lib.models.binds import (
-    ARBITRARY_GROUP_TEMPLATE,
-    NICKNAME_TEMPLATE_REGEX,
-    VALID_BIND_TYPES,
     BindCriteria,
     GuildBind,
 )
@@ -11,8 +12,18 @@ from bloxlink_lib.models.roblox.users import RobloxUser
 from bloxlink_lib.models.schemas.guilds import fetch_guild_data, update_guild_data
 from bloxlink_lib.utils import find
 
+if TYPE_CHECKING:
+    from bloxlink_lib.models.binds import (
+        VALID_BIND_TYPES,
+    )
+
 POP_OLD_BINDS: bool = False  # remove old binds from the database
 SAVE_NEW_BINDS: bool = False  # save new binds to the database
+
+ARBITRARY_GROUP_TEMPLATE = re.compile(r"\{group-rank-(.*?)\}")
+
+ARBITRARY_GROUP_TEMPLATE = re.compile(r"\{group-rank-(.*?)\}")
+NICKNAME_TEMPLATE_REGEX = re.compile(r"\{(.*?)\}")
 
 
 async def get_binds(

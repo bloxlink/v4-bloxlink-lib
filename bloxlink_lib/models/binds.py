@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import re
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -37,9 +36,6 @@ VALID_BIND_TYPES = Literal[
     "group", "asset", "badge", "gamepass", "verified", "unverified"
 ]
 BIND_GROUP_SUBTYPES = Literal["role_bind", "full_group"]
-
-ARBITRARY_GROUP_TEMPLATE = re.compile(r"\{group-rank-(.*?)\}")
-NICKNAME_TEMPLATE_REGEX = re.compile(r"\{(.*?)\}")
 
 
 # TypedDict definitions used for function kwargs
