@@ -78,7 +78,9 @@ class GuildRestriction(BaseModel):
 class GuildData(BaseSchema):
     """Representation of the stored settings for a guild"""
 
-    id: Annotated[int, Field(alias="_id")]
+    id: Annotated[
+        int | str, Field(alias="_id")
+    ]  # TODO: str is temporary. These entries need to be deleted completely (groups were incorrectly saved)
 
     binds: Annotated[list[GuildBind], Field(default_factory=list)]
 
