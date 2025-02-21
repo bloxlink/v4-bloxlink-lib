@@ -8,6 +8,7 @@ class DatabaseDomains(Enum):
 
     USERS = "users"
     GUILDS = "guilds"
+    V4_MIGRATOR_ERROR_LOGS = "v4_schema_error_log"
 
 
 class BaseSchema(BaseModel, ABC):
