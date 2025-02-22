@@ -308,7 +308,3 @@ async def update_guild_data(
     GuildData.model_validate({"id": guild_id, **aspects})
 
     return await update_item(GuildData, guild_id, **aspects)
-
-
-# # RoleSerializable is not defined when the schema is first built, so we need to re-build it. TODO: make better
-# GuildBind.model_rebuild()
