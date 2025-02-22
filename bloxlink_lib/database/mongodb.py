@@ -113,6 +113,9 @@ async def update_item[
         else:
             set_aspects[key] = val
 
+    # validate the model to ensure no invalid fields are being set
+    constructor.model_validate({"id": item_id, **aspects})
+
     # Update redis cache
     redis_set_aspects = {}
     redis_unset_aspects = {}

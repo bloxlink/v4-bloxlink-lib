@@ -305,6 +305,4 @@ async def update_guild_data(
     else:
         guild_id = str(guild)
 
-    GuildData.model_validate({"id": guild_id, **aspects})
-
     return await update_item(GuildData, guild_id, **aspects)
