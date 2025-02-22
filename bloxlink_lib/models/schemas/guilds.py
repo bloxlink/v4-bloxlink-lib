@@ -50,6 +50,31 @@ class GroupLock(BaseModel):
     unverifiedAction: Literal["kick", "dm"] = "kick"
 
 
+class JoinChannelVerified(BaseModel):
+    """Settings for the join channel when a user is verified"""
+
+    channel: str
+    message: str
+    includes: list[
+        Literal["ping", "robloxAvatar", "robloxUsername", "robloxAge", "embed"]
+    ]
+
+
+class JoinChannelUnverified(BaseModel):
+    """Settings for the join channel when a user is unverified"""
+
+    channel: str
+    message: str
+    includes: list[Literal["ping", "embed"]]
+
+
+class JoinChannel(BaseModel):
+    """Settings for the join channel"""
+
+    verified: JoinChannelVerified | None
+    unverified: JoinChannelUnverified | None
+
+
 MagicRoleTypes = Literal["Bloxlink Admin", "Bloxlink Updater", "Bloxlink Bypass"]
 
 RestrictionTypes = Literal["users", "groups", "robloxAccounts", "roles"]
@@ -111,6 +136,8 @@ class GuildData(BaseSchema):
         bool,
         Field(alias="ephemeralCommands", default=False),
     ]
+
+    joinChannel: JoinChannel
 
     restrictions: PydanticList[GuildRestriction] = Field(default_factory=list)
 
