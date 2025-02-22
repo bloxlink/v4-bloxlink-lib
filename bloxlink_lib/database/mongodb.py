@@ -42,7 +42,9 @@ def connect_database():
     mongo.get_io_loop = asyncio.get_running_loop
 
 
-async def fetch_item[T](domain: str, constructor: Type[T], item_id: str, *aspects) -> T:
+async def fetch_item[
+    T: "BaseSchema"
+](constructor: Type[T], item_id: str, *aspects) -> T:
     """
     Fetch an item from local cache, then redis, then database.
     Will populate caches for later access
@@ -50,14 +52,16 @@ async def fetch_item[T](domain: str, constructor: Type[T], item_id: str, *aspect
 
     # should check local cache but for now just fetch from redis
 
+    database_domain = constructor.database_domain().value
+
     if aspects:
-        item = await redis.hmget(f"{domain}:{item_id}", *aspects)
+        item = await redis.hmget(f"{database_domain}:{item_id}", *aspects)
         item = {x: y for x, y in zip(aspects, item) if y is not None}
     else:
-        item = await redis.hgetall(f"{domain}:{item_id}")
+        item = await redis.hgetall(f"{database_domain}:{item_id}")
 
     if not item:
-        item = await mongo.bloxlink[domain].find_one(
+        item = await mongo.bloxlink[database_domain].find_one(
             {"_id": item_id}, {x: True for x in aspects}
         ) or {"_id": item_id}
 
@@ -71,17 +75,17 @@ async def fetch_item[T](domain: str, constructor: Type[T], item_id: str, *aspect
 
                 if items:
                     async with redis.pipeline() as pipeline:
-                        await pipeline.hmset(f"{domain}:{item_id}", items)
+                        await pipeline.hmset(f"{database_domain}:{item_id}", items)
                         await pipeline.expire(
-                            f"{domain}:{item_id}",
+                            f"{database_domain}:{item_id}",
                             int(datetime.timedelta(hours=1).total_seconds()),
                         )
                         await pipeline.execute()
             else:
                 async with redis.pipeline() as pipeline:
-                    await pipeline.hmset(f"{domain}:{item_id}", item)
+                    await pipeline.hmset(f"{database_domain}:{item_id}", item)
                     await pipeline.expire(
-                        f"{domain}:{item_id}",
+                        f"{database_domain}:{item_id}",
                         int(datetime.timedelta(hours=1).total_seconds()),
                     )
                     await pipeline.execute()

@@ -45,7 +45,7 @@ async def fetch_user_data(
     else:
         user_id = str(user)
 
-    return await fetch_item("users", UserData, user_id, *aspects)
+    return await fetch_item(UserData, user_id, *aspects)
 
 
 async def update_user_data(
