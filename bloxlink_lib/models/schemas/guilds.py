@@ -137,7 +137,7 @@ class GuildData(BaseSchema):
         Field(alias="ephemeralCommands", default=False),
     ]
 
-    joinChannel: JoinChannel
+    joinChannel: JoinChannel = None
 
     restrictions: PydanticList[GuildRestriction] = Field(default_factory=list)
 
