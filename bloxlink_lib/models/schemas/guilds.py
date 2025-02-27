@@ -169,7 +169,7 @@ class GuildData(BaseSchema):
     groupIDs: PydanticDict = None
     migratedBindsToV4: bool = False
 
-    # field converters
+    # model converters
     @model_validator(mode="before")
     @classmethod
     def handle_nulls(cls: BaseModel, base_model_data: dict) -> dict:
@@ -181,6 +181,18 @@ class GuildData(BaseSchema):
 
         return unset_nulls(cls, base_model_data)
 
+    @model_validator(mode="before")
+    @classmethod
+    def handle_empty_dicts(cls: BaseModel, base_model_data: dict) -> dict:
+        """Remove empty dictionaries from the data before Pydantic validates the model"""
+
+        from bloxlink_lib.models.migrators import (
+            unset_empty_dicts,
+        )
+
+        return unset_empty_dicts(cls, base_model_data)
+
+    # field converters
     @field_validator("binds", mode="before")
     @classmethod
     def transform_binds(cls: Type[Self], binds: list) -> list[GuildBind]:
