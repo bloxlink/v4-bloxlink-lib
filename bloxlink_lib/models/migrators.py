@@ -88,10 +88,11 @@ def unset_empty_dicts(base_model: BaseModel, base_model_data: dict) -> dict:
     """Remove empty dictionaries from the data before Pydantic validates the model"""
 
     if isinstance(base_model_data, dict):
-        for field_name in filter(
-            lambda f: isinstance(f, dict), base_model.model_fields
-        ):
-            if field_name in base_model_data and len(base_model_data[field_name]) == 0:
+        for field_name in base_model.model_fields:
+            if (
+                isinstance(base_model_data.get(field_name), dict)
+                and len(base_model_data[field_name]) == 0
+            ):
                 del base_model_data[field_name]  # unset the field
 
     return base_model_data
