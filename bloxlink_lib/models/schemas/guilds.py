@@ -50,14 +50,25 @@ class GroupLock(BaseModel):
     unverifiedAction: Literal["kick", "dm"] = "kick"
 
 
+class JoinChannelVerifiedIncludes(BaseModel):
+    embed: bool = False
+    ping: bool = False
+    robloxAvatar: bool = False
+    robloxUsername: bool = False
+    robloxAge: bool = False
+
+
+class JoinChannelUnverifiedIncludes(BaseModel):
+    embed: bool = False
+    ping: bool = False
+
+
 class JoinChannelVerified(BaseModel):
     """Settings for the join channel when a user is verified"""
 
     channel: str
     message: str
-    includes: list[
-        Literal["ping", "robloxAvatar", "robloxUsername", "robloxAge", "embed"]
-    ]
+    includes: JoinChannelVerifiedIncludes
 
 
 class JoinChannelUnverified(BaseModel):
@@ -65,7 +76,7 @@ class JoinChannelUnverified(BaseModel):
 
     channel: str
     message: str
-    includes: list[Literal["ping", "embed"]]
+    includes: JoinChannelUnverifiedIncludes
 
 
 class JoinChannel(BaseModel):
