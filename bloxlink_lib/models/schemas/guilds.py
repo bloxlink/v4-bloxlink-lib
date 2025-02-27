@@ -82,8 +82,8 @@ class JoinChannelUnverified(BaseModel):
 class JoinChannel(BaseModel):
     """Settings for the join channel"""
 
-    verified: JoinChannelVerified | None
-    unverified: JoinChannelUnverified | None
+    verified: JoinChannelVerified = None
+    unverified: JoinChannelUnverified = None
 
 
 MagicRoleTypes = Literal["Bloxlink Admin", "Bloxlink Updater", "Bloxlink Bypass"]
