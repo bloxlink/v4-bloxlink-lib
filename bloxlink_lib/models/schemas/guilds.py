@@ -67,7 +67,7 @@ class JoinChannelVerified(BaseModel):
     """Settings for the join channel when a user is verified"""
 
     channel: str
-    message: str
+    message: str | None
     includes: JoinChannelVerifiedIncludes
 
 
@@ -75,7 +75,7 @@ class JoinChannelUnverified(BaseModel):
     """Settings for the join channel when a user is unverified"""
 
     channel: str
-    message: str
+    message: str | None
     includes: JoinChannelUnverifiedIncludes
 
 
