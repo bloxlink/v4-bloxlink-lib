@@ -1,9 +1,15 @@
 class BloxlinkException(Exception):
     """Base exception for Bloxlink."""
 
-    def __init__(self, error: str | None = None, ephemeral: bool = False):
-        self.error = error
-        self.ephemeral = ephemeral
+    def __init__(
+        self,
+        error: str | None = None,
+        ephemeral: bool = False,
+        status_code: int | None = None,
+    ) -> None:
+        self.error = error  # used by both the bot and web components
+        self.ephemeral = ephemeral  # used by the bot component
+        self._status_code = status_code  # used by the web component
 
     def __str__(self) -> str:
         return self.error or "An error occurred."
