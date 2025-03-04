@@ -1,9 +1,6 @@
 {
-  "[python]": {
-    "editor.defaultFormatter": "ms-python.black-formatter",
-    "diffEditor.ignoreTrimWhitespace": false,
-    "editor.formatOnSave": true
-  },
   "pylint.args": ["--disable=import-outside-toplevel"],
-  "files.trimTrailingWhitespace": true
+  "files.trimTrailingWhitespace": true,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "ms-python.black-formatter"
 }
