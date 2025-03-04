@@ -56,4 +56,4 @@ class Message(BloxlinkException):
         ephemeral: bool = False,
         status_code: int | None = StatusCodes.OK,
     ) -> None:
-        super().__init__(message, ephemeral, status_code)
+        super().__init__(message, ephemeral=ephemeral, status_code=status_code)
