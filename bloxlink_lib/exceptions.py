@@ -3,7 +3,7 @@ class BloxlinkException(Exception):
 
     def __init__(
         self,
-        message: str | None,
+        message: str | None = None,
         *,
         send_ephemeral: bool = False,
         status_code: int = 400
