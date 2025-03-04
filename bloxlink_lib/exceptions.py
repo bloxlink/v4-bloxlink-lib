@@ -7,7 +7,6 @@ class BloxlinkException(Exception):
     def __init__(
         self,
         message: str | None = None,
-        *,
         ephemeral: bool = False,
         status_code: int | None = None,
     ) -> None:
