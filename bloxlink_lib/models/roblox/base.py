@@ -44,7 +44,10 @@ class BloxlinkEntity(RobloxEntity):
 
 
 def create_entity(
-    category: Literal["asset", "badge", "gamepass", "group", "verified", "unverified"] | str, entity_id: int
+    category: (
+        Literal["asset", "badge", "gamepass", "group", "verified", "unverified"] | str
+    ),
+    entity_id: int,
 ) -> RobloxEntity | None:
     """Create a respective Roblox entity from a category and ID.
 
@@ -58,22 +61,30 @@ def create_entity(
 
     match category:
         case "asset":
-            from bloxlink_lib.models.roblox import assets  # pylint: disable=import-outside-toplevel
+            from bloxlink_lib.models.roblox import (
+                assets,
+            )  # pylint: disable=import-outside-toplevel
 
             return assets.RobloxAsset(id=entity_id)
 
         case "badge":
-            from bloxlink_lib.models.roblox import badges  # pylint: disable=import-outside-toplevel
+            from bloxlink_lib.models.roblox import (
+                badges,
+            )  # pylint: disable=import-outside-toplevel
 
             return badges.RobloxBadge(id=entity_id)
 
         case "gamepass":
-            from bloxlink_lib.models.roblox import gamepasses  # pylint: disable=import-outside-toplevel
+            from bloxlink_lib.models.roblox import (
+                gamepasses,
+            )  # pylint: disable=import-outside-toplevel
 
             return gamepasses.RobloxGamepass(id=entity_id)
 
         case "group":
-            from bloxlink_lib.models.roblox import groups  # pylint: disable=import-outside-toplevel
+            from bloxlink_lib.models.roblox import (
+                groups,
+            )  # pylint: disable=import-outside-toplevel
 
             return groups.RobloxGroup(id=entity_id)
 
