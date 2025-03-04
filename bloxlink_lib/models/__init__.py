@@ -58,4 +58,11 @@ class BaseModel(PydanticBaseModel):
         return self._generic_type_value
 
 
-__all__ = ["BaseModel", "BaseModelArbitraryTypes", "Snowflake", "UNDEFINED"]
+class Response(BaseModel):
+    """Base response model for some endpoints."""
+
+    error: str | None = None
+    success: bool = False
+
+
+__all__ = ["BaseModel", "BaseModelArbitraryTypes", "Snowflake", "UNDEFINED", "Response"]
