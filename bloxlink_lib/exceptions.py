@@ -1,9 +1,16 @@
 class BloxlinkException(Exception):
     """Base exception for Bloxlink."""
 
-    def __init__(self, message: str, send_ephemeral: bool = False):
+    def __init__(
+        self,
+        message: str | None,
+        *,
+        send_ephemeral: bool = False,
+        status_code: int = 400
+    ):
         self.message = message
         self.send_ephemeral = send_ephemeral  # Used exclusively by the bot to send the message as an ephemeral message. Not shown in web responses.
+        self.status_code = status_code  # If this is used by a web component, this will be the status code used.
 
         super().__init__(message)
 
