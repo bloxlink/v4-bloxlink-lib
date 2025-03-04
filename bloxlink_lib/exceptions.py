@@ -1,12 +1,9 @@
 class BloxlinkException(Exception):
     """Base exception for Bloxlink."""
 
-    def __init__(self, error: str | None = None, ephemeral: bool = False):
-        self.error = error
+    def __init__(self, message=None, ephemeral=False):
+        self.message = message
         self.ephemeral = ephemeral
-
-    def __str__(self) -> str:
-        return self.error or "An error occurred."
 
 
 class RobloxNotFound(BloxlinkException):
