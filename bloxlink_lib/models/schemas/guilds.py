@@ -51,14 +51,18 @@ class GroupLock(BaseModel):
 
 
 class JoinChannelVerifiedIncludes(BaseModel):
+    """Display settings for the join channel when a user is verified"""
+
     embed: bool = False
     ping: bool = False
-    robloxAvatar: bool = False
-    robloxUsername: bool = False
-    robloxAge: bool = False
+    robloxAvatar: Annotated[bool, Field(alias="roblox_avatar", default=False)]
+    robloxUsername: Annotated[bool, Field(alias="roblox_username", default=False)]
+    robloxAge: Annotated[bool, Field(alias="roblox_age", default=False)]
 
 
 class JoinChannelUnverifiedIncludes(BaseModel):
+    """Display settings for the join channel when a user is unverified"""
+
     embed: bool = False
     ping: bool = False
 
