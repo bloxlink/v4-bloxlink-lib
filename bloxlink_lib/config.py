@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Config(BaseSettings):
     """Type definition for config values."""
 
-    DISCORD_TOKEN: str = None
+    DISCORD_TOKEN: str | None = None
     BOT_RELEASE: Literal["LOCAL", "CANARY", "MAIN", "PRO"]
     #############################
     # these are optional because we can choose to use MONGO_URL or MONGO_HOST/MONGO_USER/MONGO_PASSWORD/MONGO_PORT
@@ -23,8 +23,8 @@ class Config(BaseSettings):
     #############################
     PROXY_URL: str | None = None
     DISCORD_PROXY_URL: str | None = None
-    BOT_API: str = None
-    BOT_API_AUTH: str = None
+    BOT_API: str | None = None
+    BOT_API_AUTH: str | None = None
     SENTRY_DSN: str | None = None
     #############################
     LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
