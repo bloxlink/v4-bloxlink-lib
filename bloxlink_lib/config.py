@@ -33,7 +33,9 @@ class Config(BaseSettings):
     #############################
     TEST_MODE: bool = False  # if true, skip database and redis connections
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8", extra="ignore"
+    )
 
     def model_post_init(self, __context):
         # easier to validate with python expressions instead of attrs validators
