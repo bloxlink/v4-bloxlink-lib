@@ -91,12 +91,13 @@ async def get_nickname_template(
 
 
 async def parse_template(
+    *,
     guild_id: int,
     guild_name: str,
     member: Member | MemberSerializable,
+    roblox_user: RobloxUser | None = None,
     template: str = None,
     potential_binds: list[GuildBind] | None = None,
-    roblox_user: RobloxUser | None = None,
     trim_nickname=True,
 ) -> str | None:
     """
