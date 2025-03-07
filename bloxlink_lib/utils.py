@@ -1,11 +1,13 @@
-from typing import Callable, Iterable, Awaitable, Type
+from typing import Callable, Coroutine, Iterable, Awaitable, Type
 import logging
 import asyncio
 import enum
 from os import getenv
+import json
 import sentry_sdk
 from sentry_sdk.integrations.aiohttp import AioHttpIntegration
 from .models.base import BaseModel
+from .database.redis import redis
 from .config import CONFIG
 
 
@@ -122,6 +124,38 @@ def init_sentry():
             ),
             attach_stacktrace=True,
         )
+
+
+async def use_cached_request[T](
+    cache_type: enum.Enum,
+    cache_id: str | int,
+    coroutine: Coroutine[any, any, T],
+    ttl_seconds: int = 10,
+) -> T:
+    """
+    Return the cached response if it exists, otherwise run the coroutine and cache the response.
+    The cached item is stored in Redis as JSON.
+    """
+
+    if ttl_seconds is None:
+        raise ValueError("ttl_seconds must be set")
+
+    if ttl_seconds < 1:
+        raise ValueError("ttl_seconds must be greater than 0")
+
+    cache_key = f"requests:{coroutine.__name__}:{
+            cache_type.value}:{cache_id}"
+
+    redis_cache = await redis.get(cache_key)
+
+    if redis_cache:
+        return json.loads(redis_cache)
+
+    result: T = await coroutine
+
+    await redis.set(name=cache_key, value=result, ex=ttl_seconds)
+
+    return result
 
 
 def NO_OP(*args, **kwargs):
