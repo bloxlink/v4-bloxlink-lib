@@ -34,32 +34,7 @@ def connect_redis():
             health_check_interval=30,
         )
 
-    # override redis with better set method
-    redis._old_set = redis.set  # pylint: disable=protected-access
-    redis.set = redis_set
-
     # loop.create_task(_heartbeat_loop()) # TODO: fix this
-
-
-async def redis_set(
-    key: str, value: BaseModel | Any, expire: datetime.timedelta | int = None, **kwargs
-):
-    """Set a value in Redis. Accepts BaseModels and expirations as datetimes."""
-
-    await redis._old_set(
-        key,  # pylint: disable=protected-access
-        (
-            value.model_dump_json()
-            if isinstance(value, BaseModel)
-            else (json.dumps(value) if isinstance(value, (list, dict)) else value)
-        ),
-        ex=(
-            int(expire.total_seconds())
-            if expire and isinstance(expire, datetime.timedelta)
-            else expire
-        ),
-        **kwargs,
-    )
 
 
 async def _heartbeat_loop():
