@@ -127,9 +127,9 @@ def init_sentry():
 
 
 async def use_cached_request[T: BaseModel | dict, V](
-    model: Type[T] | Callable[[V], T],
     cache_type: enum.Enum,
     cache_id: str | int,
+    model: Type[T] | Callable[[V], T],
     coroutine: Coroutine[any, any, V],
     ttl_seconds: int = 10,
 ) -> T:
