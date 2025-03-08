@@ -182,10 +182,10 @@ class JSONDecoder(json.JSONDecoder):
 async def use_cached_request(
     cache_type: enum.Enum,
     cache_id: str | int,
-    model: CachableCallable,
+    model: CachableCallable[T, V],
     request_coroutine: Coroutine[any, any, V],
     *,
-    cache_decoder: Callable[[CachableCallable, dict | str], T] | None = None,
+    cache_decoder: Callable[[CachableCallable[T, V], dict | str], T] | None = None,
     ttl_seconds: int = 10,
 ) -> T:
     """
