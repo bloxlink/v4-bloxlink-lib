@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-from typing import Sequence, Self, Annotated, Literal, TYPE_CHECKING
+from typing import Annotated, Literal, TYPE_CHECKING
 from pydantic import Field
 import math
 from datetime import datetime
 import hikari
-import discord
 
 from bloxlink_lib.models.schemas.users import (  # pylint: disable=no-name-in-module
     fetch_user_data,
@@ -14,7 +13,7 @@ from bloxlink_lib.fetch import fetch, fetch_typed, StatusCodes
 from bloxlink_lib.config import CONFIG
 from bloxlink_lib.exceptions import RobloxNotFound, RobloxAPIError, UserNotVerified
 from bloxlink_lib.database.mongodb import mongo  # pylint: disable=no-name-in-module
-from bloxlink_lib.models.base import Snowflake, BaseModel
+from bloxlink_lib.models.base import BaseModel, MemberSerializable
 from .groups import GroupRoleset
 
 if TYPE_CHECKING:
@@ -495,7 +494,7 @@ async def reverse_lookup(
 
 
 async def get_user_from_string(
-    target: Annotated[str, "Roblox username or ID"]
+    target: Annotated[str, "Roblox username or ID"],
 ) -> RobloxUser:
     """Get a RobloxUser from a given target string (either an ID or username)
 
@@ -532,61 +531,3 @@ async def get_user_from_string(
         raise RobloxNotFound("The Roblox user you were searching for does not exist.")
 
     return account
-
-
-class MemberSerializable(BaseModel):
-    id: Snowflake
-    username: str = None
-    avatar_url: str = None
-    display_name: str = None
-    global_name: str | None = None
-    is_bot: bool = None
-    joined_at: datetime = None
-    role_ids: Sequence[Snowflake] = None
-    guild_id: int | None = None
-    nickname: str | None = None
-    mention: str = None
-
-    @classmethod
-    def from_hikari(
-        cls, member: hikari.InteractionMember | Self
-    ) -> "MemberSerializable":
-        """Convert a Hikari member into a MemberSerializable object."""
-
-        if isinstance(member, MemberSerializable):
-            return member
-
-        return cls(
-            id=member.id,
-            username=member.username,
-            avatar_url=str(member.avatar_url),
-            global_name=member.global_name,
-            display_name=member.display_name,
-            is_bot=member.is_bot,
-            joined_at=member.joined_at,
-            role_ids=member.role_ids,
-            guild_id=member.guild_id,
-            nickname=member.nickname,
-            mention=member.mention,
-        )
-
-    @classmethod
-    def from_discordpy(cls, member: discord.Member | Self) -> "MemberSerializable":
-        """Convert a Discord.py member into a MemberSerializable object."""
-
-        if isinstance(member, MemberSerializable):
-            return member
-
-        return cls(
-            id=member.id,
-            username=member.name,
-            avatar_url=member.display_avatar.url,
-            global_name=member.global_name,
-            display_name=member.display_name,
-            is_bot=member.bot,
-            joined_at=member.joined_at,
-            role_ids=[role.id for role in member.roles],
-            guild_id=member.guild.id,
-            nickname=member.nick,
-            mention=member.mention,
-        )
