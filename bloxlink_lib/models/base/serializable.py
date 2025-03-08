@@ -51,6 +51,7 @@ class MemberSerializable(BaseModel):
     guild_id: int | None = None
     nickname: str | None = None
     mention: str = None
+    created_at: datetime = None
 
     @classmethod
     def from_hikari(
@@ -73,6 +74,7 @@ class MemberSerializable(BaseModel):
             guild_id=member.guild_id,
             nickname=member.nickname,
             mention=member.mention,
+            created_at=member.created_at,
         )
 
     @classmethod
@@ -94,6 +96,7 @@ class MemberSerializable(BaseModel):
             guild_id=member.guild.id,
             nickname=member.nick,
             mention=member.mention,
+            created_at=member.created_at,
         )
 
     @staticmethod
