@@ -126,10 +126,11 @@ def init_sentry():
         )
 
 
-async def use_cached_request[T](
+async def use_cached_request[T: BaseModel | dict](
+    model: Type[T],
     cache_type: enum.Enum,
     cache_id: str | int,
-    coroutine: Coroutine[any, any, T],
+    coroutine: Coroutine,
     ttl_seconds: int = 10,
 ) -> T:
     """
@@ -149,11 +150,13 @@ async def use_cached_request[T](
     redis_cache = await redis.get(cache_key)
 
     if redis_cache:
-        return json.loads(redis_cache)
+        return model(**json.loads(redis_cache))
 
     result: T = await coroutine
 
-    await redis.set(name=cache_key, value=result, ex=ttl_seconds)
+    parsed_model = parse_into(result, model)
+
+    await redis.set(name=cache_key, value=dict(parsed_model), ex=ttl_seconds)
 
     return result
 
