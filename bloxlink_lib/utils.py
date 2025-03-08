@@ -1,4 +1,4 @@
-from typing import Callable, Coroutine, Iterable, Awaitable, Type
+from typing import Callable, Coroutine, Iterable, Awaitable, Type, TypeVar
 import logging
 import asyncio
 import enum
@@ -17,6 +17,12 @@ class Environment(enum.Enum):
     LOCAL = 1
     STAGING = 2
     PRODUCTION = 3
+
+
+T = TypeVar("T")
+V = TypeVar("V")
+
+CachableCallable = Type[T] | Callable[[V], T]
 
 
 def find[T](predicate: Callable[[T], bool], iterable: Iterable[T]) -> T | None:
@@ -126,11 +132,60 @@ def init_sentry():
         )
 
 
-async def use_cached_request[T: BaseModel | dict | any, V](
+class JSONSerializer(json.JSONEncoder):
+    """JSON serializer that serializes BaseModel instances to dictionaries."""
+
+    def default(self, o):
+        """Serialize the object to JSON."""
+
+        match o:
+            case BaseModel():
+                return dict(o)
+            case _:
+                try:
+                    iter(o)
+                except TypeError:
+                    pass
+                else:
+                    if all(isinstance(item, BaseModel) for item in o):
+                        return [dict(item) for item in o]
+
+                    return list(o)
+
+                return super().default(o)
+
+
+class JSONDecoder(json.JSONDecoder):
+    """JSON decoder that deserializes dictionaries to BaseModel instances."""
+
+    def __init__(self, model: CachableCallable, *args, **kwargs):
+        self.model = model
+
+        super().__init__(object_hook=self.custom_object_hook, *args, **kwargs)
+
+    def custom_object_hook(self, obj):
+        """Deserialize the object from JSON."""
+
+        try:
+            iter(obj)
+        except TypeError:
+            pass
+        else:
+            if all(isinstance(item, BaseModel) for item in obj):
+                return [self.model(item) for item in obj]
+
+            return list(obj)
+
+        return self.model(**obj)
+
+
+async def use_cached_request(
     cache_type: enum.Enum,
     cache_id: str | int,
-    model: Type[T] | Callable[[V], T],
-    coroutine: Coroutine[any, any, V],
+    model: CachableCallable,
+    request_coroutine: Coroutine[any, any, V],
+    *,
+    cache_decoder: Callable[[CachableCallable, dict | str], T] | None = None,
     ttl_seconds: int = 10,
 ) -> T:
     """
@@ -146,25 +201,24 @@ async def use_cached_request[T: BaseModel | dict | any, V](
     if ttl_seconds < 1:
         raise ValueError("ttl_seconds must be greater than 0")
 
-    cache_key = f"requests:{coroutine.__name__}:{cache_type.value}:{cache_id}"
+    cache_key = f"requests:{request_coroutine.__name__}:{cache_type.value}:{cache_id}"
     redis_cache = await redis.get(cache_key)
 
     if redis_cache:
         data = json.loads(redis_cache)
+
+        if cache_decoder:
+            return cache_decoder(model, data)
 
         if callable(model):
             return model(data)
 
         return model(**data)
 
-    result: T = await coroutine
+    result: T = await request_coroutine
 
     parsed_model = parse_into(result, model) if not callable(model) else model(result)
-
-    if isinstance(parsed_model, (BaseModel, dict)):
-        serialized_data = json.dumps(dict(parsed_model))
-    else:
-        serialized_data = json.dumps(parsed_model)
+    serialized_data = json.dumps(parsed_model, cls=JSONSerializer)
 
     # TODO: create utility to map to Redis hashmap instead of JSON string
     await redis.set(
