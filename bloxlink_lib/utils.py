@@ -156,7 +156,12 @@ async def use_cached_request[T: BaseModel | dict](
 
     parsed_model = parse_into(result, model)
 
-    await redis.set(name=cache_key, value=dict(parsed_model), ex=ttl_seconds)
+    # TODO: create utility to map to Redis hashmap instead of JSON string
+    await redis.set(
+        name=cache_key,
+        value=json.dumps(dict(parsed_model)),
+        ex=ttl_seconds,
+    )
 
     return result
 
