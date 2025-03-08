@@ -126,7 +126,7 @@ def init_sentry():
         )
 
 
-async def use_cached_request[T: BaseModel | dict](
+async def use_cached_request[T: BaseModel | dict | Callable](
     model: Type[T],
     cache_type: enum.Enum,
     cache_id: str | int,
@@ -136,6 +136,8 @@ async def use_cached_request[T: BaseModel | dict](
     """
     Return the cached response if it exists, otherwise run the coroutine and cache the response.
     The cached item is stored in Redis as JSON.
+
+    If model is callable, the function is executed and then stored in Redis as a string.
     """
 
     if ttl_seconds is None:
@@ -144,22 +146,31 @@ async def use_cached_request[T: BaseModel | dict](
     if ttl_seconds < 1:
         raise ValueError("ttl_seconds must be greater than 0")
 
-    cache_key = f"requests:{coroutine.__name__}:{
-            cache_type.value}:{cache_id}"
+    cache_key = f"requests:{coroutine.__name__}:{cache_type.value}:{cache_id}"
 
     redis_cache = await redis.get(cache_key)
 
     if redis_cache:
-        return model(**json.loads(redis_cache))
+        data = json.loads(redis_cache)
+
+        if callable(model):
+            return model(data)
+
+        return model(**data)
 
     result: T = await coroutine
 
-    parsed_model = parse_into(result, model)
+    parsed_model = parse_into(result, model) if not callable(model) else model(result)
+
+    if isinstance(parsed_model, (BaseModel, dict)):
+        serialized_data = json.dumps(dict(parsed_model))
+    else:
+        serialized_data = json.dumps(parsed_model)
 
     # TODO: create utility to map to Redis hashmap instead of JSON string
     await redis.set(
         name=cache_key,
-        value=json.dumps(dict(parsed_model)),
+        value=serialized_data,
         ex=ttl_seconds,
     )
 
