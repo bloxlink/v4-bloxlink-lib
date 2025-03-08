@@ -126,7 +126,7 @@ def init_sentry():
         )
 
 
-async def use_cached_request[T: BaseModel | dict, V](
+async def use_cached_request[T: BaseModel | dict | any, V](
     cache_type: enum.Enum,
     cache_id: str | int,
     model: Type[T] | Callable[[V], T],
@@ -147,7 +147,6 @@ async def use_cached_request[T: BaseModel | dict, V](
         raise ValueError("ttl_seconds must be greater than 0")
 
     cache_key = f"requests:{coroutine.__name__}:{cache_type.value}:{cache_id}"
-
     redis_cache = await redis.get(cache_key)
 
     if redis_cache:
@@ -174,7 +173,7 @@ async def use_cached_request[T: BaseModel | dict, V](
         ex=ttl_seconds,
     )
 
-    return result
+    return parsed_model
 
 
 def NO_OP(*args, **kwargs):
