@@ -153,6 +153,7 @@ class GuildData(BaseSchema):
     ]
 
     joinChannel: JoinChannel = None
+    leaveChannel: JoinChannel = None
 
     restrictions: PydanticList[GuildRestriction] = Field(default_factory=list)
 
