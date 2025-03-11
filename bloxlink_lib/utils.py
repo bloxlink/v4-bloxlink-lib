@@ -1,6 +1,7 @@
 from typing import Callable, Coroutine, Iterable, Awaitable, Type, TypeVar
 import logging
 import asyncio
+from inspect import isfunction
 import enum
 from os import getenv
 import json
@@ -147,7 +148,7 @@ class JSONSerializer(json.JSONEncoder):
                 except TypeError:
                     pass
                 else:
-                    if all(isinstance(item, BaseModel) for item in o):
+                    if all(issubclass(item, BaseModel) for item in o):
                         return [dict(item) for item in o]
 
                     return list(o)
@@ -171,7 +172,7 @@ class JSONDecoder(json.JSONDecoder):
         except TypeError:
             pass
         else:
-            if all(isinstance(item, BaseModel) for item in obj):
+            if all(issubclass(item, BaseModel) for item in obj):
                 return [self.model(item) for item in obj]
 
             return list(obj)
@@ -185,7 +186,8 @@ async def use_cached_request(
     model: CachableCallable[T, V],
     request_coroutine: Coroutine[any, any, V],
     *,
-    cache_decoder: Callable[[CachableCallable[T, V], dict | str], T] | None = None,
+    cache_encoder: Callable[[T, V], V] | None = None,
+    cache_decoder: Callable[[dict | str], T] | None = None,
     ttl_seconds: int = 10,
 ) -> T:
     """
@@ -208,16 +210,20 @@ async def use_cached_request(
         data = json.loads(redis_cache)
 
         if cache_decoder:
-            return cache_decoder(model, data)
+            return cache_decoder(data)
 
-        if callable(model):
+        if isfunction(model):
             return model(data)
 
         return model(**data)
 
-    result: T = await request_coroutine
+    result = await request_coroutine
 
-    parsed_model = parse_into(result, model) if not callable(model) else model(result)
+    if cache_encoder:
+        parsed_model = cache_encoder(model, result)
+    else:
+        parsed_model = model(result) if isfunction(model) else parse_into(result, model)
+
     serialized_data = json.dumps(parsed_model, cls=JSONSerializer)
 
     # TODO: create utility to map to Redis hashmap instead of JSON string
