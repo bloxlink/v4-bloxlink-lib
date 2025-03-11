@@ -108,6 +108,7 @@ class GuildSerializable(BaseModel):
     id: Snowflake
     name: str = None
     roles: Mapping[Snowflake, RoleSerializable] = Field(default_factory=dict)
+    owner_id: Snowflake | None = None
 
     @field_validator("roles", mode="before")
     @classmethod
@@ -123,4 +124,6 @@ class GuildSerializable(BaseModel):
         if isinstance(guild, GuildSerializable):
             return guild
 
-        return cls(id=guild.id, name=guild.name, roles=guild.roles)
+        return cls(
+            id=guild.id, name=guild.name, roles=guild.roles, owner_id=guild.owner_id
+        )
