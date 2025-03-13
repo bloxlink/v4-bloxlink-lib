@@ -197,6 +197,17 @@ class GuildData(BaseSchema):
 
         return unset_empty_dicts(cls, base_model_data)
 
+    @model_validator(mode="before")
+    @classmethod
+    def handle_empty_joinchannels(cls: BaseModel, base_model_data: dict) -> dict:
+        """Remove joinChannels and leaveChannels if the channel is not set"""
+
+        from bloxlink_lib.models.migrators import (
+            unset_empty_joinchannels,
+        )
+
+        return unset_empty_joinchannels(cls, base_model_data)
+
     # field converters
     @field_validator("binds", mode="before")
     @classmethod

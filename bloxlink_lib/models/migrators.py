@@ -6,7 +6,7 @@ from bloxlink_lib.models import BaseModel
 
 
 def migrate_restrictions(
-    restrictions: dict[str, dict[str, GuildRestriction]]
+    restrictions: dict[str, dict[str, GuildRestriction]],
 ) -> list[GuildRestriction]:
     """Migrate the restrictions field."""
 
@@ -94,5 +94,42 @@ def unset_empty_dicts(base_model: BaseModel, base_model_data: dict) -> dict:
                 and len(base_model_data[field_name]) == 0
             ):
                 del base_model_data[field_name]  # unset the field
+
+    return base_model_data
+
+
+def unset_empty_joinchannels(base_model: BaseModel, base_model_data: dict) -> dict:
+    """Remove empty joinChannels from the data before Pydantic validates the model"""
+
+    if isinstance(base_model_data, dict):
+        if (
+            base_model_data.get("joinChannel")
+            and base_model_data.get("joinChannel").get("verified") is None
+        ):
+            del base_model_data["joinChannel"]["verified"]
+
+        if (
+            base_model_data.get("joinChannel")
+            and base_model_data.get("joinChannel").get("unverified") is None
+        ):
+            del base_model_data["joinChannel"]["unverified"]
+
+        if (
+            base_model_data.get("leaveChannel")
+            and base_model_data.get("leaveChannel").get("verified") is None
+        ):
+            del base_model_data["leaveChannel"]["verified"]
+
+        if (
+            base_model_data.get("leaveChannel")
+            and base_model_data.get("leaveChannel").get("unverified") is None
+        ):
+            del base_model_data["leaveChannel"]["unverified"]
+
+        if not base_model_data.get("joinChannel"):
+            del base_model_data["joinChannel"]
+
+        if not base_model_data.get("leaveChannel"):
+            del base_model_data["leaveChannel"]
 
     return base_model_data
