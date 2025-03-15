@@ -39,8 +39,8 @@ BLOXLINK_VERIFICATION_URL = (
 class BloxlinkVerificationResponse(BaseModel):
     """Type definition for a response from the public Bloxlink API."""
 
-    robloxID: int | None
-    error: str | None
+    robloxID: int | None = None
+    error: str | None = None
 
 
 class UserAvatar(BaseModel):
