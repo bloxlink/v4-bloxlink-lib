@@ -415,7 +415,7 @@ async def get_user_account(
         )[0]
 
         if response_body.robloxID:
-            return RobloxUser(id=response_body["robloxID"])
+            return RobloxUser(id=response_body.robloxID)
 
     if raise_errors:
         raise UserNotVerified()
