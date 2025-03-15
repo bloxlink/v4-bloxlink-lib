@@ -14,6 +14,7 @@ from bloxlink_lib.config import CONFIG
 from bloxlink_lib.exceptions import RobloxNotFound, RobloxAPIError, UserNotVerified
 from bloxlink_lib.database.mongodb import mongo  # pylint: disable=no-name-in-module
 from bloxlink_lib.models.base import BaseModel, MemberSerializable
+from bloxlink_lib.utils import get_environment, Environment
 from .groups import GroupRoleset
 
 if TYPE_CHECKING:
@@ -30,6 +31,16 @@ AVATAR_URLS = {
     "headshotThumbnail": "https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds={roblox_id}&size=420x420&format=Png&isCircular=false",
     "fullBody": "https://thumbnails.roblox.com/v1/users/avatar?userIds={roblox_id}&size=720x720&format=Png&isCircular=false",
 }
+BLOXLINK_VERIFICATION_URL = (
+    "https://api.blox.link/v4/public/discord-to-roblox/{user_id}"
+)
+
+
+class BloxlinkVerificationResponse(BaseModel):
+    """Type definition for a response from the public Bloxlink API."""
+
+    robloxID: int | None = None
+    error: str | None = None
 
 
 class UserAvatar(BaseModel):
@@ -385,6 +396,26 @@ async def get_user_account(
 
     if bloxlink_user.robloxID:
         return RobloxUser(id=bloxlink_user.robloxID)
+
+    # User is not verified in our database
+
+    if CONFIG.STAGING_USE_FALLBACK_VERIFICATION_API and get_environment() in (
+        Environment.STAGING,
+        Environment.LOCAL,
+    ):
+        # Check production API if the user is verified
+        response_body = (
+            await fetch_typed(
+                BloxlinkVerificationResponse,
+                method="GET",
+                url=BLOXLINK_VERIFICATION_URL.format(user_id=user_id),
+                headers={"Authorization": CONFIG.BLOXLINK_PUBLIC_API_KEY},
+                raise_on_failure=False,
+            )
+        )[0]
+
+        if response_body.robloxID:
+            return RobloxUser(id=response_body["robloxID"])
 
     if raise_errors:
         raise UserNotVerified()
