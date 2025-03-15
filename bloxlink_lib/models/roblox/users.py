@@ -399,9 +399,9 @@ async def get_user_account(
 
     # User is not verified in our database
 
-    if (
-        CONFIG.STAGING_USE_FALLBACK_VERIFICATION_API
-        and get_environment() == Environment.PRODUCTION
+    if CONFIG.STAGING_USE_FALLBACK_VERIFICATION_API and get_environment() in (
+        Environment.STAGING,
+        Environment.LOCAL,
     ):
         # Check production API if the user is verified
         response_body = (
