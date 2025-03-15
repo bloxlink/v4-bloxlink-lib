@@ -5,10 +5,28 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Config(BaseSettings):
     """Type definition for config values."""
 
+    #############################
+    # GENERAL SETTINGS
+    #############################
+    LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
+    SENTRY_DSN: str | None = None
+    #############################
+    # BOT SETTINGS
+    #############################
     BOT_TOKEN: str | None = None
     BOT_RELEASE: Literal["LOCAL", "CANARY", "MAIN", "PRO"]
+
+    BOT_API: str | None = None
+    BOT_API_AUTH: str | None = None
+
+    PROXY_URL: str | None = None
+    DISCORD_PROXY_URL: str | None = None
+
+    SHARD_COUNT: int = 1
+    SHARDS_PER_NODE: int = 1
     #############################
-    # these are optional because we can choose to use MONGO_URL or MONGO_HOST/MONGO_USER/MONGO_PASSWORD/MONGO_PORT
+    # DATABASE SETTINGS
+    #############################
     MONGO_URL: str | None = None
     MONGO_HOST: str | None = None
     MONGO_PORT: int | None = 27017
@@ -21,17 +39,17 @@ class Config(BaseSettings):
     REDIS_PORT: str | None = "6379"
     REDIS_PASSWORD: str | None = None
     #############################
-    PROXY_URL: str | None = None
-    DISCORD_PROXY_URL: str | None = None
-    BOT_API: str | None = None
-    BOT_API_AUTH: str | None = None
-    SENTRY_DSN: str | None = None
-    #############################
-    LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
-    SHARD_COUNT: int = 1
-    SHARDS_PER_NODE: int = 1
+    # TEST UTILITIES
     #############################
     TEST_MODE: bool = False  # if true, skip database and redis connections
+    #############################
+    # OPTIONAL BLOXLINK VERIFICATION SETTINGS
+    #############################
+    STAGING_USE_FALLBACK_VERIFICATION_API: bool | None = (
+        False  # if true, use the production verification API if a user is not verified
+    )
+    BLOXLINK_PUBLIC_API_KEY: str | None = None
+    #############################
 
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", extra="ignore"
