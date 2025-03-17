@@ -60,6 +60,8 @@ def get_node_id() -> int:
 
     hostname = getenv("HOSTNAME", "bloxlink-0")
 
+    logging.info("HOSTNAME: %s", getenv("HOSTNAME"))
+
     try:
         node_id = int(hostname.split("-")[-1])
     except ValueError:
