@@ -62,24 +62,43 @@ _node_lock_refresh_task = None
 _NODE_LOCK_TTL = 60  # seconds
 
 
+# Create a separate connection function for node locks to avoid interfering with PubSub
+async def _get_lock_name(index: int) -> str:
+    """Get the lock name for a node index."""
+    return f"bloxlink:{CONFIG.BOT_RELEASE}:node_lock:{index}"
+
+
 async def _refresh_node_lock():
     """Background task to periodically refresh the node lock."""
+    global _node_id, _node_lock
 
-    global _node_lock
+    if _node_id is None or _node_lock is None:
+        return
 
-    while _node_lock is not None:
+    refresh_interval = _NODE_LOCK_TTL * 2 / 3  # Refresh at 2/3 of TTL
+
+    while _node_lock is not None and _node_id is not None:
         try:
-            # Extend the lock before it expires (at 2/3 of the TTL time)
-            await asyncio.sleep(_NODE_LOCK_TTL * 2 / 3)
+            # Sleep first to avoid immediate refresh
+            await asyncio.sleep(refresh_interval)
 
             if _node_lock is not None:
-                # Extend the lock's lifetime
-                await _node_lock.extend(_NODE_LOCK_TTL)
-                logging.debug(f"Extended lock for node ID {_node_id}")
+                # Use extend method which doesn't create a new connection
+                extended = await _node_lock.extend(_NODE_LOCK_TTL)
+                if extended:
+                    logging.debug(f"Extended lock for node ID {_node_id}")
+                else:
+                    logging.warning(
+                        f"Failed to extend lock for node ID {_node_id}, lock may be lost"
+                    )
+                    # Don't break, keep trying to extend in case it was a temporary error
 
+        except asyncio.CancelledError:
+            # Allow proper task cancellation
+            break
         except Exception as e:  # pylint: disable=broad-except
-            logging.exception(f"Failed to refresh node lock: {e}")
-            await asyncio.sleep(5)  # Retry after a short delay
+            logging.exception(f"Error in node lock refresh: {e}")
+            await asyncio.sleep(5)  # Short delay on error
 
 
 async def get_node_id() -> int:
@@ -96,9 +115,9 @@ async def get_node_id() -> int:
     Returns:
         int: The node ID for this process
     """
-
     global _node_id, _node_lock, _node_lock_refresh_task
 
+    # If we already have a node ID, return it
     if _node_id is not None:
         return _node_id
 
@@ -109,25 +128,32 @@ async def get_node_id() -> int:
 
     while True:
         for index in range(node_count):
-            lock_name = f"bloxlink:{CONFIG.BOT_RELEASE}:node_lock:{index}"
+            try:
+                lock_name = await _get_lock_name(index)
 
-            lock = redis.lock(
-                lock_name,
-                timeout=_NODE_LOCK_TTL,
-                blocking=False,
-                blocking_timeout=0,
-            )
-
-            if await lock.acquire():
-                _node_id = index
-                _node_lock = lock
-
-                _node_lock_refresh_task = create_task_log_exception(
-                    _refresh_node_lock()
+                # Create lock with minimal connection impact
+                lock = redis.lock(
+                    lock_name,
+                    timeout=_NODE_LOCK_TTL,
+                    blocking=False,
+                    blocking_timeout=0,
                 )
 
-                logging.info(f"Successfully acquired lock for node ID {index}")
-                return _node_id
+                # Try to acquire the lock (non-blocking)
+                if await lock.acquire(blocking=False):
+                    _node_id = index
+                    _node_lock = lock
+
+                    # Start refresh task
+                    _node_lock_refresh_task = create_task_log_exception(
+                        _refresh_node_lock()
+                    )
+
+                    logging.info(f"Successfully acquired lock for node ID {index}")
+                    return _node_id
+            except Exception as e:
+                logging.warning(f"Error acquiring lock for node {index}: {e}")
+                continue  # Try the next node ID
 
         logging.warning("All node IDs are locked! Waiting to retry...")
         await asyncio.sleep(5)
