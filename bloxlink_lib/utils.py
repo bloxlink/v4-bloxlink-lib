@@ -55,108 +55,30 @@ def create_task_log_exception(awaitable: Awaitable) -> asyncio.Task:
     return asyncio.create_task(_log_exception(awaitable))
 
 
-# Node ID lock management
-_node_id = None
-_node_lock = None
-_node_lock_refresh_task = None
-_NODE_LOCK_TTL = 60  # seconds
-
-
-# Create a separate connection function for node locks to avoid interfering with PubSub
-async def _get_lock_name(index: int) -> str:
-    """Get the lock name for a node index."""
-    return f"bloxlink:{CONFIG.BOT_RELEASE}:node_lock:{index}"
-
-
-async def _refresh_node_lock():
-    """Background task to periodically refresh the node lock."""
-    global _node_id, _node_lock
-
-    if _node_id is None or _node_lock is None:
-        return
-
-    refresh_interval = _NODE_LOCK_TTL * 2 / 3  # Refresh at 2/3 of TTL
-
-    while _node_lock is not None and _node_id is not None:
-        try:
-            # Sleep first to avoid immediate refresh
-            await asyncio.sleep(refresh_interval)
-
-            if _node_lock is not None:
-                # Use extend method which doesn't create a new connection
-                extended = await _node_lock.extend(_NODE_LOCK_TTL)
-                if extended:
-                    logging.debug(f"Extended lock for node ID {_node_id}")
-                else:
-                    logging.warning(
-                        f"Failed to extend lock for node ID {_node_id}, lock may be lost"
-                    )
-                    # Don't break, keep trying to extend in case it was a temporary error
-
-        except asyncio.CancelledError:
-            # Allow proper task cancellation
-            break
-        except Exception as e:  # pylint: disable=broad-except
-            logging.exception(f"Error in node lock refresh: {e}")
-            await asyncio.sleep(5)  # Short delay on error
-
-
 async def get_node_id() -> int:
-    """Gets the node ID for the running process.
-
-    This function will allocate a unique node ID by acquiring a Redis lock
-    for an index between 0 and get_node_count(). A background task will
-    periodically refresh the lock to maintain ownership of the node ID
-    until the process exits or the lock is explicitly released.
-
-    If all node IDs are currently locked, the function will keep retrying
-    until a lock is successfully acquired.
-
-    Returns:
-        int: The node ID for this process
-    """
-    global _node_id, _node_lock, _node_lock_refresh_task
-
-    # If we already have a node ID, return it
-    if _node_id is not None:
-        return _node_id
-
-    node_count = get_node_count()
-    logging.info(
-        f"Attempting to acquire a node ID lock. Total node count: {node_count}"
+    lock = redis.lock(
+        f"bloxlink:{CONFIG.BOT_RELEASE}:node_id",
+        blocking=True,
+        timeout=CONFIG.NODE_LOCK_TTL,
     )
 
-    while True:
-        for index in range(node_count):
-            try:
-                lock_name = await _get_lock_name(index)
+    if await lock.acquire():
+        # it's our turn to get the node ID
+        node_id = (
+            await redis.incr(f"bloxlink:{CONFIG.BOT_RELEASE}:node_id_counter")
+        ) - 1
 
-                # Create lock with minimal connection impact
-                lock = redis.lock(
-                    lock_name,
-                    timeout=_NODE_LOCK_TTL,
-                    blocking=False,
-                    blocking_timeout=0,
-                )
+        if node_id >= get_node_count():
+            node_id = 0
 
-                # Try to acquire the lock (non-blocking)
-                if await lock.acquire(blocking=False):
-                    _node_id = index
-                    _node_lock = lock
+        await redis.set(
+            f"bloxlink:{CONFIG.BOT_RELEASE}:node_id_counter",
+            str(node_id),
+        )
 
-                    # Start refresh task
-                    _node_lock_refresh_task = create_task_log_exception(
-                        _refresh_node_lock()
-                    )
+        await lock.release()
 
-                    logging.info(f"Successfully acquired lock for node ID {index}")
-                    return _node_id
-            except Exception as e:
-                logging.warning(f"Error acquiring lock for node {index}: {e}")
-                continue  # Try the next node ID
-
-        logging.warning("All node IDs are locked! Waiting to retry...")
-        await asyncio.sleep(5)
+        return int(node_id)
 
 
 def get_node_count() -> int:
