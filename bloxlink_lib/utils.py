@@ -103,25 +103,31 @@ async def get_node_id() -> int:
 
     print("node_count", node_count)
 
-    while True:
-        for index in range(node_count):
-            lock_key = f"bloxlink:{CONFIG.BOT_RELEASE}:node_lock:{index}"
-            print(lock_key)
-            # Try to acquire the lock with NX (only if it doesn't exist) and set a TTL
-            acquired = await redis.set(lock_key, "1", nx=True, ex=_NODE_LOCK_TTL)
-            print("acquired", acquired)
+    try:
 
-            if acquired:
-                _node_id = index
-                logging.info(f"Acquired lock for node ID {index}")
+        while True:
+            for index in range(node_count):
+                lock_key = f"bloxlink:{CONFIG.BOT_RELEASE}:node_lock:{index}"
+                print(lock_key)
+                # Try to acquire the lock with NX (only if it doesn't exist) and set a TTL
+                acquired = await redis.set(lock_key, "1", nx=True, ex=_NODE_LOCK_TTL)
+                print("acquired", acquired)
 
-                # Start background task to refresh the lock
-                create_task_log_exception(_refresh_node_lock(index))
+                if acquired:
+                    _node_id = index
+                    logging.info(f"Acquired lock for node ID {index}")
 
-                return _node_id
+                    # Start background task to refresh the lock
+                    create_task_log_exception(_refresh_node_lock(index))
 
-        logging.warning("All node IDs are locked! Waiting to retry...")
-        await asyncio.sleep(5)
+                    return _node_id
+
+            logging.warning("All node IDs are locked! Waiting to retry...")
+            await asyncio.sleep(5)
+    except Exception as e:
+        print(e)
+        logging.exception(f"Failed to acquire node lock: {e}")
+        raise
 
 
 def get_node_count() -> int:
