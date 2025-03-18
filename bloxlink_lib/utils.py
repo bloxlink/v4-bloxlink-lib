@@ -63,13 +63,17 @@ async def get_node_id() -> int:
     )
 
     if await lock.acquire():
+        print(f"Got lock for node ID")
         # it's our turn to get the node ID
         node_id = (
             await redis.incr(f"bloxlink:{CONFIG.BOT_RELEASE}:node_id_counter")
         ) - 1
 
+        print(f"Node ID: {node_id}")
+
         if node_id >= get_node_count():
             node_id = 0
+            print(f"Setting node ID to 0")
 
         await redis.set(
             f"bloxlink:{CONFIG.BOT_RELEASE}:node_id_counter",
