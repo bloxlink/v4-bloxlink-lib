@@ -57,35 +57,17 @@ def create_task_log_exception(awaitable: Awaitable) -> asyncio.Task:
 
 # Node ID lock management
 _node_id = None
+_node_lock = None
 _NODE_LOCK_TTL = 60  # seconds
-
-
-async def _refresh_node_lock(node_id: int):
-    """Background task to periodically refresh the node lock."""
-
-    while True:
-        try:
-            lock_key = f"bloxlink:{CONFIG.BOT_RELEASE}:node_lock:{node_id}"
-
-            # Extend the lock
-            await redis.expire(lock_key, _NODE_LOCK_TTL)
-
-            logging.debug(f"Refreshed lock for node ID {node_id}")
-
-            await asyncio.sleep(_NODE_LOCK_TTL // 2)  # Refresh at half the TTL time
-
-        except Exception as e:  # pylint: disable=broad-except
-            logging.exception(f"Failed to refresh node lock: {e}")
-
-            await asyncio.sleep(5)  # Retry after a short delay
 
 
 async def get_node_id() -> int:
     """Gets the node ID for the running process.
 
     This function will allocate a unique node ID by acquiring a Redis lock
-    for an index between 0 and get_node_count(). The lock will be periodically
-    refreshed to maintain ownership of the node ID until the process exits.
+    for an index between 0 and get_node_count(). The Redis lock will be
+    automatically refreshed to maintain ownership of the node ID until
+    the process exits or the lock is explicitly released.
 
     If all node IDs are currently locked, the function will keep retrying
     until a lock is successfully acquired.
@@ -93,41 +75,46 @@ async def get_node_id() -> int:
     Returns:
         int: The node ID for this process
     """
+    global _node_id, _node_lock
 
-    global _node_id
-
+    # If we already have a node ID, return it
     if _node_id is not None:
         return _node_id
 
     node_count = get_node_count()
-
-    print("node_count", node_count)
+    logging.info(
+        f"Attempting to acquire a node ID lock. Total node count: {node_count}"
+    )
 
     try:
-
         while True:
             for index in range(node_count):
-                lock_key = f"bloxlink:{CONFIG.BOT_RELEASE}:node_lock:{index}"
-                print(lock_key)
-                # Try to acquire the lock with NX (only if it doesn't exist) and set a TTL
-                acquired = await redis.set(lock_key, "1", nx=True, ex=_NODE_LOCK_TTL)
-                print("acquired", acquired)
+                lock_name = f"bloxlink:{CONFIG.BOT_RELEASE}:node_lock:{index}"
 
-                if acquired:
+                lock = redis.lock(
+                    lock_name,
+                    timeout=_NODE_LOCK_TTL,
+                    blocking=False,
+                    blocking_timeout=0,
+                )
+
+                if await lock.acquire():
                     _node_id = index
-                    logging.info(f"Acquired lock for node ID {index}")
+                    _node_lock = lock
 
-                    # Start background task to refresh the lock
-                    create_task_log_exception(_refresh_node_lock(index))
-
+                    logging.info(f"Successfully acquired lock for node ID {index}")
                     return _node_id
 
             logging.warning("All node IDs are locked! Waiting to retry...")
             await asyncio.sleep(5)
+
     except Exception as e:
-        print(e)
         logging.exception(f"Failed to acquire node lock: {e}")
         raise
+
+    finally:
+        if _node_lock:
+            await _node_lock.release()
 
 
 def get_node_count() -> int:
