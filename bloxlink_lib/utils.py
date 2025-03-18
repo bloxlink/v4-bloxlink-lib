@@ -59,6 +59,7 @@ def create_task_log_exception(awaitable: Awaitable) -> asyncio.Task:
 _node_id = None
 _NODE_LOCK_TTL = 60  # seconds
 
+
 async def _refresh_node_lock(node_id: int):
     """Background task to periodically refresh the node lock."""
 
@@ -100,11 +101,15 @@ async def get_node_id() -> int:
 
     node_count = get_node_count()
 
+    print(node_count)
+
     while True:
         for index in range(node_count):
             lock_key = f"bloxlink:{CONFIG.BOT_RELEASE}:node_lock:{index}"
+            print(lock_key)
             # Try to acquire the lock with NX (only if it doesn't exist) and set a TTL
             acquired = await redis.set(lock_key, "1", nx=True, ex=_NODE_LOCK_TTL)
+            print(acquired)
 
             if acquired:
                 _node_id = index
