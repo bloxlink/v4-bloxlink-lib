@@ -101,7 +101,7 @@ async def get_node_id() -> int:
 
     node_count = get_node_count()
 
-    print(node_count)
+    print("node_count", node_count)
 
     while True:
         for index in range(node_count):
@@ -109,7 +109,7 @@ async def get_node_id() -> int:
             print(lock_key)
             # Try to acquire the lock with NX (only if it doesn't exist) and set a TTL
             acquired = await redis.set(lock_key, "1", nx=True, ex=_NODE_LOCK_TTL)
-            print(acquired)
+            print("acquired", acquired)
 
             if acquired:
                 _node_id = index
