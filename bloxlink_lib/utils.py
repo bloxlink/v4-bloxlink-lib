@@ -72,24 +72,26 @@ async def get_node_id() -> int:
 
     try:
         if await lock.acquire():
-            logging.info("Acquired lock for node ID allocation")
+            logging.debug("Acquired lock for node ID allocation")
 
             counter_key = f"bloxlink:{CONFIG.BOT_RELEASE}:node_id_counter"
             node_id = await redis.incr(counter_key)
             node_id -= 1
 
             node_count = get_node_count()
-            logging.info(f"Allocated Node ID: {node_id}, Max Node Count: {node_count}")
+            logging.debug(f"Allocated Node ID: {node_id}, Max Node Count: {node_count}")
 
             if node_id >= node_count - 1:
-                logging.info(f"Resetting node ID counter (reached max of {node_count})")
+                logging.debug(
+                    f"Resetting node ID counter (reached max of {node_count})"
+                )
                 await redis.set(counter_key, "0")
 
             return int(node_id % node_count)
     finally:
-        if lock and lock.locked():
+        if lock and await lock.locked():
             await lock.release()
-            logging.info("Released node ID allocation lock")
+            logging.debug("Released node ID allocation lock")
 
 
 def get_node_count() -> int:
