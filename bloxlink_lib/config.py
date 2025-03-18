@@ -10,6 +10,7 @@ class Config(BaseSettings):
     #############################
     LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
     SENTRY_DSN: str | None = None
+    NODE_LOCK_TTL: int = 600
     #############################
     # BOT SETTINGS
     #############################

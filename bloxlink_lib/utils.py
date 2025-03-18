@@ -55,19 +55,44 @@ def create_task_log_exception(awaitable: Awaitable) -> asyncio.Task:
     return asyncio.create_task(_log_exception(awaitable))
 
 
-def get_node_id() -> int:
-    """Gets the node ID from the hostname."""
+async def get_node_id() -> int:
+    """Gets a unique node ID by atomically incrementing a Redis counter.
 
-    hostname = getenv("HOSTNAME", "bloxlink-0")
+    This function uses a Redis lock to ensure only one process increments the counter at a time.
+    When the counter reaches the node count, it wraps around to 0.
 
-    logging.info("HOSTNAME: %s", getenv("HOSTNAME"))
+    Returns:
+        int: The node ID for this process
+    """
+    lock = redis.lock(
+        f"bloxlink:{CONFIG.BOT_RELEASE}:node_id",
+        blocking=True,
+        timeout=CONFIG.NODE_LOCK_TTL,
+    )
 
     try:
-        node_id = int(hostname.split("-")[-1])
-    except ValueError:
-        node_id = 0
+        if await lock.acquire():
+            logging.debug("Acquired lock for node ID allocation")
 
-    return node_id
+            counter_key = f"bloxlink:{CONFIG.BOT_RELEASE}:node_id_counter"
+            node_id = await redis.incr(counter_key)
+            node_id -= 1
+
+            node_count = get_node_count()
+            logging.debug(f"Allocated Node ID: {node_id}, Max Node Count: {node_count}")
+
+            if node_id >= node_count - 1:
+                logging.debug(
+                    f"Resetting node ID counter (reached max of {node_count})"
+                )
+                await redis.set(counter_key, "0")
+
+            return int(node_id % node_count)
+
+    finally:
+        if lock and await lock.locked():
+            await lock.release()
+            logging.debug("Released node ID allocation lock")
 
 
 def get_node_count() -> int:
