@@ -55,7 +55,7 @@ def load_module(import_name: str, *args) -> ModuleType:
     if hasattr(module, "__setup__"):
         try:
             if iscoroutinefunction(module.__setup__):
-                asyncio.run(module.__setup__(*args))
+                asyncio.create_task(module.__setup__(*args))
             else:
                 module.__setup__(*args)
 

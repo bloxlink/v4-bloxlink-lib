@@ -88,6 +88,7 @@ async def get_node_id() -> int:
                 await redis.set(counter_key, "0")
 
             return int(node_id % node_count)
+
     finally:
         if lock and await lock.locked():
             await lock.release()
