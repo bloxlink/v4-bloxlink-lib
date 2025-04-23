@@ -121,7 +121,12 @@ class GuildSerializable(BaseModel):
             case RoleSerializable():
                 return {Snowflake(r.id): r for r in roles}
             case dict():
-                print(roles)
+                if isinstance(roles, dict):
+                    return {
+                        Snowflake(r["id"]): RoleSerializable(**r)
+                        for r in roles.values()
+                    }
+
                 return {Snowflake(r["id"]): RoleSerializable(**r) for r in roles}
             case hikari.Role():
                 return {
