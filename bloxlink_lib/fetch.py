@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from enum import IntEnum
+from http import HTTPStatus
 from typing import Literal, Type, Union, Tuple, Any
 from requests.utils import requote_uri
 import aiohttp
@@ -11,33 +11,17 @@ from bloxlink_lib.utils import parse_into
 from .exceptions import RobloxAPIError, RobloxDown, RobloxNotFound
 from .config import CONFIG
 
-__all__ = ("StatusCodes", "fetch", "fetch_typed")
+__all__ = ("fetch", "fetch_typed")
 
 
 session = None
-
-
-class StatusCodes(IntEnum):
-    """Status codes for requests"""
-
-    OK = 200
-    NOT_FOUND = 404
-    BAD_REQUEST = 400
-    UNAUTHORIZED = 401
-    FORBIDDEN = 403
-    TOO_MANY_REQUESTS = 429
-    INTERNAL_SERVER_ERROR = 500
-    SERVICE_UNAVAILABLE = 503
-    GATEWAY_TIMEOUT = 504
 
 
 def _bytes_to_str_wrapper(data: Any) -> str:
     return to_json(data).decode("utf-8")
 
 
-async def fetch[
-    T
-](
+async def fetch[T](
     method: str,
     url: str,
     *,
@@ -109,12 +93,12 @@ async def fetch[
                 CONFIG.PROXY_URL if CONFIG.PROXY_URL and "roblox.com" in url else None
             ),
         ) as response:
-            if response.status != StatusCodes.OK and raise_on_failure:
-                if response.status == StatusCodes.SERVICE_UNAVAILABLE:
+            if response.status != HTTPStatus.OK and raise_on_failure:
+                if response.status == HTTPStatus.SERVICE_UNAVAILABLE:
                     raise RobloxDown()
 
                 # Roblox APIs sometimes use 400 as not found
-                if response.status in (StatusCodes.BAD_REQUEST, StatusCodes.NOT_FOUND):
+                if response.status in (HTTPStatus.BAD_REQUEST, HTTPStatus.NOT_FOUND):
                     logging.debug(f"{url} not found: {await response.text()}")
                     raise RobloxNotFound()
 
@@ -149,11 +133,9 @@ async def fetch[
         raise RobloxDown() from None
 
 
-async def fetch_typed[
-    T
-](parse_as: Type[T], url: str, method="GET", **kwargs) -> Tuple[
-    T, aiohttp.ClientResponse
-]:
+async def fetch_typed[T](
+    parse_as: Type[T], url: str, method="GET", **kwargs
+) -> Tuple[T, aiohttp.ClientResponse]:
     """Fetch data from a URL and parse it as a dataclass.
 
     Args:

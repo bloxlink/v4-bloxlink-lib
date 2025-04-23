@@ -3,13 +3,14 @@ from __future__ import annotations
 from typing import Annotated, Literal, TYPE_CHECKING
 from pydantic import Field
 import math
+from http import HTTPStatus
 from datetime import datetime
 import hikari
 
 from bloxlink_lib.models.schemas.users import (  # pylint: disable=no-name-in-module
     fetch_user_data,
 )
-from bloxlink_lib.fetch import fetch, fetch_typed, StatusCodes
+from bloxlink_lib.fetch import fetch, fetch_typed
 from bloxlink_lib.config import CONFIG
 from bloxlink_lib.exceptions import RobloxNotFound, RobloxAPIError, UserNotVerified
 from bloxlink_lib.database.mongodb import mongo  # pylint: disable=no-name-in-module
@@ -169,7 +170,7 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
             },
         )
 
-        if user_data_response.status == StatusCodes.OK:
+        if user_data_response.status == HTTPStatus.OK:
             self.id = roblox_user_data.id or self.id
             self.description = roblox_user_data.description or self.description
             self.username = roblox_user_data.username or self.username
@@ -192,7 +193,7 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
             if avatar:
                 avatar_url, avatar_response = await fetch("GET", avatar.bust_thumbnail)
 
-                if avatar_response.status == StatusCodes.OK:
+                if avatar_response.status == HTTPStatus.OK:
                     self.avatar_url = (
                         avatar_url.get("data", [{}])[0].get("imageUrl") or None
                     )
@@ -260,7 +261,7 @@ async def fetch_roblox_id(roblox_username: str) -> int | None:
         body={"usernames": [roblox_username], "excludeBannedUsers": False},
     )
 
-    if username_response.status != StatusCodes.OK:
+    if username_response.status != HTTPStatus.OK:
         return None
 
     roblox_id = username_data.data[0].id if username_data.data else None
@@ -277,7 +278,7 @@ async def fetch_base_data(roblox_id: int) -> dict | None:
         raise_on_failure=False,
     )
 
-    if user_base_data_response.status != StatusCodes.OK:
+    if user_base_data_response.status != HTTPStatus.OK:
         return None
 
     return user_base_data.model_dump(exclude_unset=True)
@@ -299,7 +300,7 @@ async def fetch_user_groups(
         raise_on_failure=False,
     )
 
-    if user_groups_response.status != StatusCodes.OK:
+    if user_groups_response.status != HTTPStatus.OK:
         return None
 
     return {
@@ -328,7 +329,7 @@ async def fetch_user_avatars(
                 avatar_url.format(roblox_id=roblox_id),
                 raise_on_failure=False,
             )
-            if avatar_data_response.status == StatusCodes.OK:
+            if avatar_data_response.status == HTTPStatus.OK:
                 avatars[avatar_name] = avatar_data.data[0].imageUrl
             else:
                 avatars[avatar_name] = None
@@ -354,7 +355,7 @@ async def fetch_user_badges(roblox_id: int) -> list[RobloxUserBadge] | None:
         raise_on_failure=False,
     )
 
-    if user_badges_response.status != StatusCodes.OK:
+    if user_badges_response.status != HTTPStatus.OK:
         return None
 
     return {"badges": user_badges.RobloxBadges}

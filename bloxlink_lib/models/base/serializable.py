@@ -119,6 +119,9 @@ class GuildSerializable(BaseModel):
 
         match role_type:
             case RoleSerializable():
+                if isinstance(roles, dict):
+                    return {Snowflake(r.id): r for r in roles.values()}
+
                 return {Snowflake(r.id): r for r in roles}
             case dict():
                 if isinstance(roles, dict):
