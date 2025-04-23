@@ -115,7 +115,7 @@ class GuildSerializable(BaseModel):
     def transform_roles(
         cls: Type[Self], roles: list[RoleSerializable | hikari.Role | dict]
     ) -> Mapping[Snowflake, RoleSerializable]:
-        match roles[0]:
+        match next(iter(roles), None):
             case RoleSerializable():
                 return {int(r.id): r for r in roles}
             case dict():
