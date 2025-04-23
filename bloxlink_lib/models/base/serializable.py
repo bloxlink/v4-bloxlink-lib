@@ -113,17 +113,20 @@ class GuildSerializable(BaseModel):
     @field_validator("roles", mode="before")
     @classmethod
     def transform_roles(
-        cls: Type[Self], roles: list[RoleSerializable | hikari.Role | dict]
+        cls: Type[Self], roles: list[RoleSerializable | hikari.Role | dict] | dict
     ) -> Mapping[Snowflake, RoleSerializable]:
         role_type = next(iter(roles.values())) if isinstance(roles, dict) else roles[0]
 
         match role_type:
             case RoleSerializable():
-                return {int(r.id): r for r in roles}
+                return {Snowflake(r.id): r for r in roles}
             case dict():
-                return {int(r["id"]): RoleSerializable(**r) for r in roles}
+                return {Snowflake(r["id"]): RoleSerializable(**r) for r in roles}
             case hikari.Role():
-                return {int(r.id): RoleSerializable.from_hikari(r) for r in roles}
+                return {
+                    Snowflake(i): RoleSerializable.from_hikari(r)
+                    for i, r in roles.items()
+                }
             case _:
                 raise ValueError("Invalid role type")
 
