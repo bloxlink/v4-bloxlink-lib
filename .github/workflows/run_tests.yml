@@ -1,6 +1,12 @@
 name: Run Tests via Pytest
 
-on: [pull_request, push]
+on:
+  pull_request_target:
+    branches:
+      - "**"
+  push:
+    branches:
+      - "**"
 
 jobs:
   build:
@@ -11,7 +17,16 @@ jobs:
         python-version: ["3.12"]
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code (PR)
+        if: github.event_name == 'pull_request_target'
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Checkout code (Push)
+        if: github.event_name == 'push'
+        uses: actions/checkout@v3
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:

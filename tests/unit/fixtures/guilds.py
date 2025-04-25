@@ -1,5 +1,5 @@
 import pytest
-from bloxlink_lib.models.guilds import GuildSerializable, RoleSerializable
+from bloxlink_lib.models.base import GuildSerializable, RoleSerializable
 
 
 @pytest.fixture
@@ -18,7 +18,7 @@ def test_guild_1() -> GuildSerializable:
                 position=1,
                 permissions=0,
                 is_managed=False,
-                is_mentionable=True
+                is_mentionable=True,
             )
-        }
+        },
     )
