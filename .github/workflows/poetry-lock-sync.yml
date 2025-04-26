@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'poetry.lock'
+      - 'pyproject.toml'
   workflow_dispatch:
 
 jobs:

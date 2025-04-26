@@ -45,4 +45,13 @@ jobs:
         uses: MishaKav/pytest-coverage-comment@main
         with:
           pytest-coverage-path: ./pytest-coverage.txt
-          junitxml-path: ./pytest.xml
+          pytest-xml-coverage-path: ./pytest.xml
+          title: Coverage Report
+          hide-badge: false
+          hide-report: false
+          create-new-comment: false
+          hide-comment: false
+          report-only-changed-files: false
+          remove-link-from-badge: false
+          unique-id-for-comment: bloxlink-lib
+          junitxml-title: JUnit Xml Summary
