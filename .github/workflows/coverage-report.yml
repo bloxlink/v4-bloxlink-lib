@@ -1,0 +1,44 @@
+name: Generate Coverage Report
+
+on:
+  push:
+    branches:
+      - "**"
+
+permissions:
+  pull-requests: write
+
+jobs:
+  build:
+    name: Build and Run Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12"]
+
+    steps:
+      - name: Checkout code (Push)
+        if: github.event_name == 'push'
+        uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install poetry
+        run: pipx install poetry==2.1.2
+
+      - name: Install dependencies
+        run: |
+          poetry install --sync
+
+      - name: Build coverage file
+        run: |
+          pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=app tests/ | tee pytest-coverage.txt
+
+      - name: Pytest coverage comment
+        uses: MishaKav/pytest-coverage-comment@main
+        with:
+          pytest-coverage-path: ./pytest-coverage.txt
+          junitxml-path: ./pytest.xml

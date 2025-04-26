@@ -33,18 +33,12 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Install poetry
         run: pipx install poetry==2.1.2
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: "poetry"
 
       - name: Install dependencies
         run: |
@@ -60,13 +54,3 @@ jobs:
           MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
         run: |
           poetry run coverage run -m pytest  -v -s
-
-      - name: Build coverage file
-        run: |
-          pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=app tests/ | tee pytest-coverage.txt
-
-      - name: Pytest coverage comment
-        uses: MishaKav/pytest-coverage-comment@main
-        with:
-          pytest-coverage-path: ./pytest-coverage.txt
-          junitxml-path: ./pytest.xml
