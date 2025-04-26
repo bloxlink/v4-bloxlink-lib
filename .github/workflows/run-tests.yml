@@ -28,22 +28,16 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Install poetry
-        run: pipx install poetry==1.7.1
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: "poetry"
+        run: pipx install poetry==2.1.2
 
       - name: Install dependencies
         run: |
-          poetry install --sync
+          poetry install --with test
 
       - name: Test with pytest
         env:
@@ -54,8 +48,9 @@ jobs:
           MONGO_USER: ${{ secrets.MONGO_USER }}
           MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
         run: |
-          poetry run coverage run -m pytest  -v -s
+          poetry run pytest --cov=bloxlink_lib --cov-branch --cov-report=xml
 
-      - name: Generate Coverage Report
-        run: |
-          poetry run coverage report -m
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
