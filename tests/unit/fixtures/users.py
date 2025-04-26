@@ -4,7 +4,7 @@ from .guilds import test_guild_1
 
 
 @pytest.fixture(params=[1389419438194318])
-def test_discord_member(request, test_guild_1) -> MemberSerializable:
+def test_discord_user_1(request, test_guild_1) -> MemberSerializable:
     """Test Discord Member model."""
 
     return MemberSerializable(
