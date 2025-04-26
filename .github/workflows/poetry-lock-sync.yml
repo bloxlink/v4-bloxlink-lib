@@ -9,9 +9,12 @@ on:
 jobs:
   sync_requirements:
     runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+
     permissions:
       contents: write
       pull-requests: write
+
     steps:
       - uses: actions/checkout@v4
         with:
