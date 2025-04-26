@@ -35,7 +35,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          poetry install --sync
+          poetry install --sync --with test
 
       - name: Build coverage file
         run: |
