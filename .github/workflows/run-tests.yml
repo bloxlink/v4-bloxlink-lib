@@ -8,6 +8,11 @@ on:
     branches:
       - "**"
 
+permissions:
+  contents: write
+  checks: write
+  pull-requests: write
+
 jobs:
   build:
     name: Build and Run Tests
@@ -33,7 +38,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install poetry
-        run: pipx install poetry==1.7.1
+        run: pipx install poetry==2.1.2
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
@@ -56,6 +61,12 @@ jobs:
         run: |
           poetry run coverage run -m pytest  -v -s
 
-      - name: Generate Coverage Report
+      - name: Build coverage file
         run: |
-          poetry run coverage report -m
+          pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=app tests/ | tee pytest-coverage.txt
+
+      - name: Pytest coverage comment
+        uses: MishaKav/pytest-coverage-comment@main
+        with:
+          pytest-coverage-path: ./pytest-coverage.txt
+          junitxml-path: ./pytest.xml
