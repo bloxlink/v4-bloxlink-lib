@@ -1,13 +1,12 @@
 import pytest
-import datetime
 from bloxlink_lib.models.roblox.binds import parse_template
 
+from .utils.nickname_helpers import nickname_formatter
+
 # fixtures
-from pytest_lazy_fixtures import lf, lfc
 from .fixtures.users import test_discord_user_1
 from .fixtures.roblox_users import test_roblox_user_1
 from .fixtures.guilds import test_guild_1
-from .utils.nickname_helpers import nickname_formatter
 
 
 class TestNicknames:
