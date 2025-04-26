@@ -55,8 +55,6 @@ class TestNicknames:
             discord_user=test_discord_user_1,
         )
 
-        # test_roblox_user_1.parse_age()
-
         nickname = await parse_template(
             guild_id=test_guild_1.id,
             guild_name=test_guild_1.name,
