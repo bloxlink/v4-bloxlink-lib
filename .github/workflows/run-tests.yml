@@ -9,8 +9,6 @@ on:
       - "**"
 
 permissions:
-  contents: write
-  checks: write
   pull-requests: write
 
 jobs:
@@ -42,7 +40,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          poetry install --sync --with test
+          poetry install --with test
 
       - name: Test with pytest
         env:
@@ -53,4 +51,10 @@ jobs:
           MONGO_USER: ${{ secrets.MONGO_USER }}
           MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
         run: |
-          poetry run coverage run -m pytest  -v -s
+          poetry run pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=bloxlink_lib tests/ | tee pytest-coverage.txt
+
+      - name: Pytest coverage comment
+        uses: MishaKav/pytest-coverage-comment@main
+        with:
+          pytest-coverage-path: ./pytest-coverage.txt
+          junitxml-path: ./pytest.xml
