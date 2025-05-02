@@ -42,7 +42,11 @@ class Config(BaseSettings):
     #############################
     # TEST UTILITIES
     #############################
-    TEST_MODE: bool = False  # if true, skip database and redis connections
+    TEST_MODE: bool = (
+        False  # if true, some library features can be manipulated via the settings below
+    )
+    SKIP_MONGO_LOAD: bool = False
+    SKIP_REDIS_LOAD: bool = False
     #############################
     # OPTIONAL BLOXLINK VERIFICATION SETTINGS
     #############################
@@ -57,7 +61,8 @@ class Config(BaseSettings):
     )
 
     def model_post_init(self, __context):
-        # easier to validate with python expressions instead of attrs validators
+        if any([self.SKIP_MONGO_LOAD, self.SKIP_REDIS_LOAD]) and not self.TEST_MODE:
+            raise ValueError("TEST_MODE must be enabled to use test env vars")
 
         if self.TEST_MODE:
             return

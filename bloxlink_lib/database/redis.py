@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import datetime
 import json
+import logging
 from typing import Any
 
 from redis.asyncio import Redis
@@ -15,7 +16,13 @@ redis: Redis = None
 
 
 def connect_redis():
+    """Connect to Redis"""
+
     global redis  # pylint: disable=global-statement
+
+    if CONFIG.SKIP_REDIS_LOAD and CONFIG.TEST_MODE:
+        logging.info("Skipping Redis initialization in test mode")
+        return
 
     if CONFIG.REDIS_URL:
         redis = Redis.from_url(
@@ -48,6 +55,8 @@ async def _heartbeat_loop():
 
 
 async def wait_for_redis():
+    """Block until Redis connects"""
+
     while True:
         try:
             await asyncio.wait_for(redis.ping(), timeout=10)

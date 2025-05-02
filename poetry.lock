@@ -150,6 +150,21 @@ files = [
 ]
 
 [[package]]
+name = "asyncmock"
+version = "0.4.2"
+description = "Extension to the standard mock framework to support support async"
+optional = false
+python-versions = ">=3.6"
+groups = ["main"]
+files = [
+    {file = "asyncmock-0.4.2-py3-none-any.whl", hash = "sha256:fd8bc4e7813251a8959d1140924ccba3adbbc7af885dba7047c67f73c0b664b1"},
+    {file = "asyncmock-0.4.2.tar.gz", hash = "sha256:c251889d542e98fe5f7ece2b5b8643b7d62b50a5657d34a4cbce8a1d5170d750"},
+]
+
+[package.dependencies]
+mock = "*"
+
+[[package]]
 name = "attrs"
 version = "24.3.0"
 description = "Classes Without Boilerplate"
@@ -684,6 +699,23 @@ files = [
     {file = "mccabe-0.7.0-py2.py3-none-any.whl", hash = "sha256:6c2d30ab6be0e4a46919781807b4f0d834ebdd6c6e3dca0bda5a15f863427b6e"},
     {file = "mccabe-0.7.0.tar.gz", hash = "sha256:348e0240c33b60bbdf4e523192ef919f28cb2c3d7d5c7794f74009290f236325"},
 ]
+
+[[package]]
+name = "mock"
+version = "5.2.0"
+description = "Rolling backport of unittest.mock for all Pythons"
+optional = false
+python-versions = ">=3.6"
+groups = ["main"]
+files = [
+    {file = "mock-5.2.0-py3-none-any.whl", hash = "sha256:7ba87f72ca0e915175596069dbbcc7c75af7b5e9b9bc107ad6349ede0819982f"},
+    {file = "mock-5.2.0.tar.gz", hash = "sha256:4e460e818629b4b173f32d08bf30d3af8123afbb8e04bb5707a1fd4799e503f0"},
+]
+
+[package.extras]
+build = ["blurb", "twine", "wheel"]
+docs = ["sphinx"]
+test = ["pytest", "pytest-cov"]
 
 [[package]]
 name = "motor"
@@ -1276,6 +1308,24 @@ docs = ["sphinx (>=5.3)", "sphinx-rtd-theme (>=1.0)"]
 testing = ["coverage (>=6.2)", "hypothesis (>=5.7.1)"]
 
 [[package]]
+name = "pytest-asyncio-concurrent"
+version = "0.5.0"
+description = "Pytest plugin to execute python async tests concurrently."
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "pytest_asyncio_concurrent-0.5.0-py3-none-any.whl", hash = "sha256:54d7f43b7243caf5774627788561361b99e561766a5ff193ce9a928dfa27a4e3"},
+    {file = "pytest_asyncio_concurrent-0.5.0.tar.gz", hash = "sha256:4d9107325b4be3009e170986cacfe6eb33b51ae5921f429df052cf8756a6c760"},
+]
+
+[package.dependencies]
+pytest = ">=6.2.0"
+
+[package.extras]
+testing = ["coverage (>=7.6.0)"]
+
+[[package]]
 name = "pytest-cov"
 version = "6.1.1"
 description = "Pytest plugin for measuring coverage."
@@ -1620,4 +1670,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.1"
 python-versions = "<3.13, >=3.12"
-content-hash = "f003803b16a149b28a8052cf029062983dfc440b009427614a837ea5ca5778e7"
+content-hash = "d5a440c4660478890ff41834898c0c686f799d33618f5bd5a1b84f3272e567e0"
