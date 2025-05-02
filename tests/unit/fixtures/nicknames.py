@@ -98,43 +98,36 @@ def nickname_test_data(
         NicknameTestData(
             nickname_template="{prefix}",
             expected_nickname="/",
-            valid_roblox_user=False,
             valid_discord_user=True,
         ),
         NicknameTestData(
             nickname_template="{server-name}",
             expected_nickname="{guild.name}",
-            valid_roblox_user=False,
             valid_discord_user=True,
         ),
         NicknameTestData(
             nickname_template="{discord-mention}",
             expected_nickname="{discord_user.mention}",
-            valid_roblox_user=False,
             valid_discord_user=True,
         ),
         NicknameTestData(
             nickname_template="{discord-name}",
             expected_nickname="{discord_user.username}",
-            valid_roblox_user=False,
             valid_discord_user=True,
         ),
         NicknameTestData(
             nickname_template="{discord-nick}",
             expected_nickname="{discord_user.nickname}",
-            valid_roblox_user=False,
             valid_discord_user=True,
         ),
         NicknameTestData(
             nickname_template="{discord-global-name}",
             expected_nickname="{discord_user.global_name}",
-            valid_roblox_user=False,
             valid_discord_user=True,
         ),
         NicknameTestData(
             nickname_template="{discord-id}",
             expected_nickname="{discord_user.id}",
-            valid_roblox_user=False,
             valid_discord_user=True,
         ),
     ]

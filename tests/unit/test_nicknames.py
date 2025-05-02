@@ -1,7 +1,6 @@
+from typing import TYPE_CHECKING
 import pytest
 from bloxlink_lib.models.roblox.binds import parse_template
-
-from .utils.nickname_helpers import nickname_formatter, NicknameTestData
 
 # fixtures
 from .fixtures.users import test_discord_user_1
@@ -12,6 +11,9 @@ from .fixtures.nicknames import (
     generic_template_test_data,
     NicknameTestCaseData,
 )
+
+if TYPE_CHECKING:
+    from bloxlink_lib import GuildSerializable, RobloxUser, MemberSerializable
 
 
 class TestNicknames:
@@ -47,10 +49,13 @@ class TestNicknames:
         ), f"Expected nickname to be {expected_nickname}, got {nickname}"
 
     @pytest.mark.asyncio_concurrent(group="nickname_generic_tests")
+    @pytest.mark.parametrize("include_roblox_user", [False, True])
     async def test_generic_templates(
         self,
-        test_guild_1,
-        test_discord_user_1,
+        test_guild_1: "GuildSerializable",
+        test_discord_user_1: "MemberSerializable",
+        include_roblox_user: bool,
+        test_roblox_user_1: "RobloxUser",
         generic_template_test_data: NicknameTestCaseData,
     ):
         """Test that the template is correctly parsed regardless if a Roblox account is linked."""
@@ -58,9 +63,6 @@ class TestNicknames:
         expected_nickname = generic_template_test_data.expected_nickname
         nickname_template = (
             generic_template_test_data.nickname_fixture.nickname_template
-        )
-        valid_roblox_user = (
-            generic_template_test_data.nickname_fixture.valid_roblox_user
         )
         valid_discord_user = (
             generic_template_test_data.nickname_fixture.valid_discord_user
@@ -72,7 +74,7 @@ class TestNicknames:
             member=test_discord_user_1 if valid_discord_user else None,
             template=nickname_template,
             potential_binds=[],
-            roblox_user=test_roblox_user_1 if valid_roblox_user else None,
+            roblox_user=test_roblox_user_1 if include_roblox_user else None,
             trim_nickname=False,  # Parse the entire template
         )
 
