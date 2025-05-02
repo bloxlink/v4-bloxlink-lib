@@ -130,6 +130,11 @@ def nickname_test_data(
             expected_nickname="{discord_user.id}",
             valid_discord_user=True,
         ),
+        NicknameTestData(
+            nickname_template="{verify-url}",
+            expected_nickname="https://blox.link/verify",
+            valid_discord_user=True,
+        ),
     ]
 )
 def generic_template_test_data(
