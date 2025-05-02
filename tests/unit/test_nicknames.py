@@ -50,6 +50,7 @@ class TestNicknames:
     async def test_generic_templates(
         self,
         test_guild_1,
+        test_discord_user_1,
         generic_template_test_data: NicknameTestCaseData,
     ):
         """Test that the template is correctly parsed regardless if a Roblox account is linked."""
