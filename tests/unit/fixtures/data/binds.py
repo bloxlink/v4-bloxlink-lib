@@ -1,4 +1,3 @@
-import pytest
 from bloxlink_lib.models import binds
 
 ########################################################

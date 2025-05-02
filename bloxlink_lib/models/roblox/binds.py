@@ -1,7 +1,8 @@
 from __future__ import annotations
 import math
+from enum import Enum
 import re
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 from hikari import Member
 from bloxlink_lib.models.base.serializable import MemberSerializable, RoleSerializable
 from bloxlink_lib.models.binds import (
@@ -27,6 +28,34 @@ ARBITRARY_GROUP_TEMPLATE = re.compile(r"\{group-rank-(.*?)\}")
 
 ARBITRARY_GROUP_TEMPLATE = re.compile(r"\{group-rank-(.*?)\}")
 NICKNAME_TEMPLATE_REGEX = re.compile(r"\{(.*?)\}")
+
+
+class RobloxUserNicknames(Enum):
+    """Valid nickname templates for a Roblox user"""
+
+    ROBLOX_NAME = "roblox-name"
+    ROBLOX_ID = "roblox-id"
+    ROBLOX_DISPLAY_NAME = "display-name"
+    ROBLOX_AGE = "roblox-age"
+    SMART_NAME = "smart-name"
+    ROBLOX_CREATION_AGE = "roblox-age"
+    ROBLOX_GROUP_RANK = "group-rank"
+
+
+class GenericTemplates(Enum):
+    """Valid templates regardless if a user has a Roblox account linked"""
+
+    DISCORD_ID = "discord-id"
+    DISCORD_NICKNAME = "discord-nick"
+    DISCORD_GLOBAL_NAME = "discord-global-name"
+    DISCORD_NAME = "discord-name"
+    DISCORD_MENTION = "discord-mention"
+    SERVER_NAME = "server-name"
+    PREFIX = "prefix"
+    GROUP_URL = "group-url"
+    GROUP_NAME = "group-name"
+    SMART_NAME = "smart-name"
+    VERIFY_URL = "verify-url"
 
 
 async def get_binds(
@@ -113,6 +142,7 @@ async def parse_template(
     highest_priority_bind: GuildBind | None = None
     smart_name: str = ""
     group_bind: GuildBind | None = None
+    group_roleset_name: str | None = None
 
     if not template:
         if not guild_id or potential_binds is None:
@@ -152,30 +182,29 @@ async def parse_template(
             smart_name = roblox_user.username
 
         # parse {group-rank}
-        if roblox_user:
-            if "group-rank" in template:
-                if group_bind and group_bind.criteria.id in roblox_user.groups:
-                    if highest_priority_bind:
-                        group_roleset_name = roblox_user.groups[
-                            highest_priority_bind.criteria.id
-                        ].role.name
-                    else:
-                        group_roleset_name = roblox_user.groups[
-                            potential_binds[0].criteria.id
-                        ].role.name
+        if "group-rank" in template:
+            if group_bind and group_bind.criteria.id in roblox_user.groups:
+                if highest_priority_bind:
+                    group_roleset_name = roblox_user.groups[
+                        highest_priority_bind.criteria.id
+                    ].role.name
                 else:
-                    group_roleset_name = "Guest"
+                    group_roleset_name = roblox_user.groups[
+                        potential_binds[0].criteria.id
+                    ].role.name
             else:
                 group_roleset_name = "Guest"
+        else:
+            group_roleset_name = "Guest"
 
-            # parse {group-rank-<group_id>} in the nickname template
-            for group_id in ARBITRARY_GROUP_TEMPLATE.findall(template):
-                group = roblox_user.groups.get(group_id)
-                group_role_from_group = group.role.name if group else "Guest"
+        # parse {group-rank-<group_id>} in the nickname template
+        for group_id in ARBITRARY_GROUP_TEMPLATE.findall(template):
+            group = roblox_user.groups.get(group_id)
+            group_role_from_group = group.role.name if group else "Guest"
 
-                template = template.replace(
-                    "{group-rank-" + group_id + "}", group_role_from_group
-                )
+            template = template.replace(
+                "{group-rank-" + group_id + "}", group_role_from_group
+            )
 
     # parse the nickname template
     for outer_nick in NICKNAME_TEMPLATE_REGEX.findall(template):
@@ -188,44 +217,45 @@ async def parse_template(
 
         if roblox_user:
             match nick_value:
-                case "roblox-name":
+                case RobloxUserNicknames.ROBLOX_NAME.value:
                     nick_value = roblox_user.username
-                case "display-name":
+                case RobloxUserNicknames.ROBLOX_DISPLAY_NAME.value:
                     nick_value = roblox_user.display_name
-                case "smart-name":
+                case RobloxUserNicknames.SMART_NAME.value:
                     nick_value = smart_name
-                case "roblox-id":
+                case RobloxUserNicknames.ROBLOX_ID.value:
                     nick_value = str(roblox_user.id)
-                case "roblox-age":
+                case RobloxUserNicknames.ROBLOX_AGE.value:
                     nick_value = str(roblox_user.age_days)
-                case "group-rank":
-                    nick_value = group_roleset_name
+                case RobloxUserNicknames.ROBLOX_GROUP_RANK.value:
+                    nick_value = group_roleset_name or "Guest"
 
-        match nick_value:
-            case "discord-name":
-                nick_value = member.username
-            case "discord-nick":
-                nick_value = member.nickname if member.nickname else member.username
-            case "discord-global-name":
-                nick_value = (
-                    member.global_name if member.global_name else member.username
-                )
-            case "discord-mention":
-                nick_value = member.mention
-            case "discord-id":
-                nick_value = str(member.id)
-            case "server-name":
-                nick_value = guild_name
-            case "prefix":
-                nick_value = "/"
-            case "group-url":
-                nick_value = group_bind.entity.url if group_bind else ""
-            case "group-name":
-                nick_value = group_bind.entity.name if group_bind else ""
-            case "smart-name":
-                nick_value = smart_name
-            case "verify-url":
-                nick_value = "https://blox.link/verify"
+        if member:
+            match nick_value:
+                case GenericTemplates.DISCORD_NAME.value:
+                    nick_value = member.username
+                case GenericTemplates.DISCORD_NICKNAME.value:
+                    nick_value = member.nickname if member.nickname else member.username
+                case GenericTemplates.DISCORD_GLOBAL_NAME.value:
+                    nick_value = (
+                        member.global_name if member.global_name else member.username
+                    )
+                case GenericTemplates.DISCORD_MENTION.value:
+                    nick_value = member.mention
+                case GenericTemplates.DISCORD_ID.value:
+                    nick_value = str(member.id)
+                case GenericTemplates.SERVER_NAME.value:
+                    nick_value = guild_name
+                case GenericTemplates.PREFIX.value:
+                    nick_value = "/"
+                case GenericTemplates.GROUP_URL.value:
+                    nick_value = group_bind.entity.url if group_bind else ""
+                case GenericTemplates.GROUP_NAME.value:
+                    nick_value = group_bind.entity.name if group_bind else ""
+                case GenericTemplates.SMART_NAME.value:
+                    nick_value = smart_name
+                case GenericTemplates.VERIFY_URL.value:
+                    nick_value = "https://blox.link/verify"
 
         if nick_fn:
             if nick_fn in ("allC", "allL"):
