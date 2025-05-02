@@ -40,7 +40,6 @@ pytest-cov = "^6.1.1"
 addopts = [
     "--import-mode=importlib",
 ]
-asyncio_mode = "auto"
 
 [tool.pytest_env]
 BOT_RELEASE = "CANARY"
