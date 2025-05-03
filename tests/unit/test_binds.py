@@ -5,7 +5,7 @@ from bloxlink_lib.models import binds
 # fixtures
 from .fixtures.binds import entire_group_bind
 from .fixtures.guilds import military_guild, guild_roles
-from .fixtures.users import test_military_member, User
+from .fixtures.users import test_military_member, MockUser
 
 
 class TestBinds:
@@ -16,7 +16,7 @@ class TestBinds:
         self,
         entire_group_bind: binds.GuildBind,
         military_guild: GuildSerializable,
-        test_military_member: User,
+        test_military_member: MockUser,
     ):
         """Test that a user in a group with everyone=True binding receives the roles."""
 

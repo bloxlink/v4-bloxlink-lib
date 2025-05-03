@@ -16,7 +16,7 @@ from .guilds import military_guild
 from .groups import GroupRolesets, test_military_group, member_roleset
 
 
-class User(BaseModel):
+class MockUser(BaseModel):
     """Discord user model with optional linked Roblox account"""
 
     discord_user: MemberSerializable  # The Discord user
@@ -64,7 +64,7 @@ def _mock_discord_user(
 
 def _mock_user(
     mocker, username: str, guild: GuildSerializable, groups: RobloxUserGroup
-) -> User:
+) -> MockUser:
     user_id = generate_snowflake()
 
     member = _mock_discord_user(user_id=user_id, username=username, guild=guild)
@@ -73,7 +73,7 @@ def _mock_user(
         mocker, user_id=user_id, username=username, groups=groups
     )
 
-    return User(discord_user=member, roblox_user=roblox_user)
+    return MockUser(discord_user=member, roblox_user=roblox_user)
 
 
 @pytest.fixture()
@@ -82,7 +82,7 @@ def test_military_member(
     military_guild: GuildSerializable,
     test_military_group: RobloxGroup,
     member_roleset: GroupRoleset,
-) -> User:
+) -> MockUser:
     """Test Discord Member model."""
 
     user = _mock_user(

@@ -3,7 +3,7 @@ import pytest
 from bloxlink_lib.models.roblox.binds import parse_template
 
 # fixtures
-from .fixtures.users import test_military_member, User
+from .fixtures.users import test_military_member, MockUser
 from .fixtures.guilds import military_guild
 from .fixtures.nicknames import (
     nickname_test_data,
@@ -22,7 +22,7 @@ class TestNicknames:
     async def test_nicknames(
         self,
         military_guild: "GuildSerializable",
-        test_military_member: User,
+        test_military_member: MockUser,
         nickname_test_data: NicknameTestCaseData,
     ):
         """Test that the nickname is correctly parsed with a valid Roblox user."""
@@ -53,7 +53,7 @@ class TestNicknames:
     async def test_generic_templates(
         self,
         military_guild: "GuildSerializable",
-        test_military_member: User,
+        test_military_member: MockUser,
         include_roblox_user: bool,
         generic_template_test_data: NicknameTestCaseData,
     ):

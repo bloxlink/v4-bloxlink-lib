@@ -4,7 +4,7 @@ import pytest
 from tests.unit.utils.nickname_helpers import NicknameTestData, nickname_formatter
 
 # fixtures
-from .users import test_military_member, User
+from .users import test_military_member, MockUser
 from .guilds import military_guild
 
 if TYPE_CHECKING:
@@ -75,7 +75,7 @@ NicknameTestCaseData = namedtuple(
 )
 def nickname_test_data(
     request,
-    test_military_member: User,
+    test_military_member: MockUser,
 ) -> NicknameTestCaseData:
     expected_nickname = request.param.expected_nickname
     valid_roblox_user = request.param.valid_roblox_user
@@ -139,7 +139,7 @@ def nickname_test_data(
 )
 def generic_template_test_data(
     request,
-    test_military_member: User,
+    test_military_member: MockUser,
     military_guild: "GuildSerializable",
 ) -> NicknameTestCaseData:
     expected_nickname = request.param.expected_nickname
