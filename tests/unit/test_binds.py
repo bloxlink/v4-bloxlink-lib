@@ -23,7 +23,7 @@ class TestBinds:
         result = await entire_group_bind.satisfies_for(
             roblox_user=test_military_member.roblox_user,
             member=test_military_member.discord_user,
-            guild_roles=military_guild.ro,
+            guild_roles=military_guild.roles,
         )
 
         print(result)

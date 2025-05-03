@@ -21,6 +21,7 @@ class TestNicknames:
     @pytest.mark.asyncio_concurrent(group="nickname_tests")
     async def test_nicknames(
         self,
+        military_guild: "GuildSerializable",
         test_military_member: User,
         nickname_test_data: NicknameTestCaseData,
     ):
@@ -52,9 +53,8 @@ class TestNicknames:
     async def test_generic_templates(
         self,
         military_guild: "GuildSerializable",
-        test_discord_user_1: "MemberSerializable",
+        test_military_member: User,
         include_roblox_user: bool,
-        test_military_group_member: "RobloxUser",
         generic_template_test_data: NicknameTestCaseData,
     ):
         """Test that the template is correctly parsed regardless if a Roblox account is linked."""
@@ -70,10 +70,12 @@ class TestNicknames:
         nickname = await parse_template(
             guild_id=military_guild.id,
             guild_name=military_guild.name,
-            member=test_discord_user_1 if valid_discord_user else None,
+            member=test_military_member.discord_user if valid_discord_user else None,
             template=nickname_template,
             potential_binds=[],
-            roblox_user=(test_military_group_member if include_roblox_user else None),
+            roblox_user=(
+                test_military_member.roblox_user if include_roblox_user else None
+            ),
             trim_nickname=False,  # Parse the entire template
         )
 

@@ -2,4 +2,4 @@
 
 from .fixtures.guilds import guild_roles, military_guild
 from .fixtures.binds import entire_group_bind
-from .fixtures.roblox.groups import test_military_group, group_rolesets, member_roleset
+from .fixtures.groups import test_military_group, group_rolesets, member_roleset

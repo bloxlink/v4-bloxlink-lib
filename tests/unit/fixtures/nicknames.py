@@ -4,8 +4,7 @@ import pytest
 from tests.unit.utils.nickname_helpers import NicknameTestData, nickname_formatter
 
 # fixtures
-from .users import test_discord_user_1
-from .roblox.roblox_users import test_military_group_member
+from .users import test_military_member, User
 from .guilds import military_guild
 
 if TYPE_CHECKING:
@@ -75,7 +74,8 @@ NicknameTestCaseData = namedtuple(
     ]
 )
 def nickname_test_data(
-    request, test_military_group_member, test_discord_user_1
+    request,
+    test_military_member: User,
 ) -> NicknameTestCaseData:
     expected_nickname = request.param.expected_nickname
     valid_roblox_user = request.param.valid_roblox_user
@@ -83,8 +83,8 @@ def nickname_test_data(
 
     expected_nickname = nickname_formatter(
         expected_nickname_format=expected_nickname,
-        roblox_user=(test_military_group_member if valid_roblox_user else None),
-        discord_user=test_discord_user_1 if valid_discord_user else None,
+        roblox_user=(test_military_member.roblox_user if valid_roblox_user else None),
+        discord_user=test_military_member.discord_user if valid_discord_user else None,
     )
 
     return NicknameTestCaseData(
@@ -139,8 +139,7 @@ def nickname_test_data(
 )
 def generic_template_test_data(
     request,
-    test_military_group_member: "RobloxUser",
-    test_discord_user_1: "MemberSerializable",
+    test_military_member: User,
     military_guild: "GuildSerializable",
 ) -> NicknameTestCaseData:
     expected_nickname = request.param.expected_nickname
@@ -149,8 +148,8 @@ def generic_template_test_data(
 
     expected_nickname = nickname_formatter(
         expected_nickname_format=expected_nickname,
-        roblox_user=(test_military_group_member if valid_roblox_user else None),
-        discord_user=test_discord_user_1 if valid_discord_user else None,
+        roblox_user=(test_military_member.roblox_user if valid_roblox_user else None),
+        discord_user=test_military_member.discord_user if valid_discord_user else None,
         guild=military_guild,
     )
 

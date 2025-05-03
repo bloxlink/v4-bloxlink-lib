@@ -4,7 +4,7 @@ from bloxlink_lib.models.base import GuildSerializable, RoleSerializable
 from tests.unit.utils import generate_snowflake
 
 # fixtures
-from .roblox.groups import group_rolesets, GroupRolesets
+from .groups import group_rolesets, GroupRolesets
 
 
 @pytest.fixture()

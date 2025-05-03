@@ -4,7 +4,7 @@ from bloxlink_lib import RobloxGroup, GroupBindData
 
 # fixtures
 from .guilds import guild_roles
-from .roblox.groups import test_military_group
+from .groups import test_military_group
 
 
 # Bind scenarios (user does/does not meet bind condition)
