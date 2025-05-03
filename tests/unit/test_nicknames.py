@@ -3,9 +3,8 @@ import pytest
 from bloxlink_lib.models.roblox.binds import parse_template
 
 # fixtures
-from .fixtures.users import test_discord_user_1
-from .fixtures.roblox_users import test_roblox_user_1
-from .fixtures.guilds import test_guild_1
+from .fixtures.users import test_military_member, User
+from .fixtures.guilds import military_guild
 from .fixtures.nicknames import (
     nickname_test_data,
     generic_template_test_data,
@@ -22,9 +21,7 @@ class TestNicknames:
     @pytest.mark.asyncio_concurrent(group="nickname_tests")
     async def test_nicknames(
         self,
-        test_roblox_user_1,
-        test_discord_user_1,
-        test_guild_1,
+        test_military_member: User,
         nickname_test_data: NicknameTestCaseData,
     ):
         """Test that the nickname is correctly parsed with a valid Roblox user."""
@@ -35,12 +32,14 @@ class TestNicknames:
         valid_discord_user = nickname_test_data.nickname_fixture.valid_discord_user
 
         nickname = await parse_template(
-            guild_id=test_guild_1.id,
-            guild_name=test_guild_1.name,
-            member=test_discord_user_1 if valid_discord_user else None,
+            guild_id=military_guild.id,
+            guild_name=military_guild.name,
+            member=test_military_member.discord_user if valid_discord_user else None,
             template=nickname_template,
             potential_binds=[],
-            roblox_user=test_roblox_user_1 if valid_roblox_user else None,
+            roblox_user=(
+                test_military_member.roblox_user if valid_roblox_user else None
+            ),
             trim_nickname=True,
         )
 
@@ -52,10 +51,10 @@ class TestNicknames:
     @pytest.mark.parametrize("include_roblox_user", [False, True])
     async def test_generic_templates(
         self,
-        test_guild_1: "GuildSerializable",
+        military_guild: "GuildSerializable",
         test_discord_user_1: "MemberSerializable",
         include_roblox_user: bool,
-        test_roblox_user_1: "RobloxUser",
+        test_military_group_member: "RobloxUser",
         generic_template_test_data: NicknameTestCaseData,
     ):
         """Test that the template is correctly parsed regardless if a Roblox account is linked."""
@@ -69,12 +68,12 @@ class TestNicknames:
         )
 
         nickname = await parse_template(
-            guild_id=test_guild_1.id,
-            guild_name=test_guild_1.name,
+            guild_id=military_guild.id,
+            guild_name=military_guild.name,
             member=test_discord_user_1 if valid_discord_user else None,
             template=nickname_template,
             potential_binds=[],
-            roblox_user=test_roblox_user_1 if include_roblox_user else None,
+            roblox_user=(test_military_group_member if include_roblox_user else None),
             trim_nickname=False,  # Parse the entire template
         )
 

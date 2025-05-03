@@ -83,6 +83,7 @@ class RobloxGroup(RobloxEntity):
 
     async def sync(self):
         """Retrieve the roblox group information, consisting of rolesets, name, description, and member count."""
+
         if self.synced:
             return
 
@@ -153,7 +154,7 @@ class RobloxGroup(RobloxEntity):
 
 
 async def get_group(
-    group_id_or_url: Annotated[str | int, "Group ID or URL"]
+    group_id_or_url: Annotated[str | int, "Group ID or URL"],
 ) -> RobloxGroup:
     """Get and sync a RobloxGroup.
 

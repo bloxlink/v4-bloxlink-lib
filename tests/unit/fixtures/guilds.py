@@ -1,46 +1,31 @@
+from typing import Final
 import pytest
 from bloxlink_lib.models.base import GuildSerializable, RoleSerializable
+from tests.unit.utils import generate_snowflake
+
+# fixtures
+from .roblox.groups import group_rolesets, GroupRolesets
 
 
-@pytest.fixture
-def test_guild_1() -> GuildSerializable:
-    """Test Guild model."""
+@pytest.fixture()
+def guild_roles(group_rolesets: GroupRolesets) -> dict[int, RoleSerializable]:
+    """Test Discord roles for the Military guild."""
+
+    new_roles: dict[int, RoleSerializable] = {}
+
+    for i, roleset in enumerate(group_rolesets.values()):
+        new_snowflake = generate_snowflake()
+        new_roles[new_snowflake] = RoleSerializable(
+            id=new_snowflake, name=roleset.name, position=i
+        )
+
+    return new_roles
+
+
+@pytest.fixture()
+def military_guild(guild_roles) -> GuildSerializable:
+    """Military Roleplay server."""
 
     return GuildSerializable(
-        id=7323844246044188672,
-        name="My awesome server",
-        roles={
-            1: RoleSerializable(
-                id=1,
-                name="Admin",
-                color=0xFF0000,
-                is_hoisted=True,
-                position=1,
-                permissions=0,
-                is_managed=False,
-                is_mentionable=True,
-            )
-        },
-    )
-
-
-@pytest.fixture
-def test_role_1() -> GuildSerializable:
-    """Test Guild model."""
-
-    return RoleSerializable(
-        id=987654321,
-        name="My awesome server",
-        roles={
-            1: RoleSerializable(
-                id=1,
-                name="Admin",
-                color=0xFF0000,
-                is_hoisted=True,
-                position=1,
-                permissions=0,
-                is_managed=False,
-                is_mentionable=True,
-            )
-        },
+        id=generate_snowflake(), name="Military Roleplay Community", roles=guild_roles
     )

@@ -1,28 +1,32 @@
 import pytest
 from bloxlink_lib.models import binds
+from bloxlink_lib import RobloxGroup, GroupBindData
 
-from .data.binds import *
+# fixtures
+from .guilds import guild_roles
+from .roblox.groups import test_military_group
 
 
+# Bind scenarios (user does/does not meet bind condition)
 @pytest.fixture()
-def v3_rolebinds_1() -> tuple[dict[str, dict[str, dict]], list[binds.GuildBind]]:
-    return V3_ROLEBIND_1, V4_ROLEBIND_1
-
-
-@pytest.fixture()
-def v3_rolebinds_2() -> tuple[dict[str, dict[str, dict]], list[binds.GuildBind]]:
-    return V3_ROLEBIND_2, V4_ROLEBIND_2
-
-
-@pytest.fixture()
-def v3_group_conversion_1() -> tuple[dict[str, dict[str, dict]], list[binds.GuildBind]]:
-    """Whole group binds for V3 with 2 groups linked."""
-
-    return V3_WHOLE_GROUP_BIND_1, V4_WHOLE_GROUP_BIND_1
-
-
-@pytest.fixture()
-def v3_group_conversion_2() -> tuple[dict[str, dict[str, dict]], list[binds.GuildBind]]:
+def entire_group_bind(
+    mocker,
+    guild_roles,
+    test_military_group: RobloxGroup,
+) -> binds.GuildBind:
     """Whole group binds for V3 with 1 group linked."""
 
-    return V3_WHOLE_GROUP_BIND_2, V4_WHOLE_GROUP_BIND_2
+    # everyone in the group will receive guild_roles
+    new_bind = binds.GuildBind(
+        nickname="{roblox-name}",
+        roles=[str(role_id) for role_id in guild_roles.keys()],
+        criteria=binds.BindCriteria(
+            type="group", id=test_military_group.id, group=GroupBindData(everyone=True)
+        ),
+    )
+
+    # Mock the sync method to prevent actual API calls
+    mocked_sync = mocker.AsyncMock(return_value=None)
+    mocker.patch.object(RobloxGroup, "sync", new=mocked_sync)
+
+    return new_bind

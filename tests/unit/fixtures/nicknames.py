@@ -5,8 +5,8 @@ from tests.unit.utils.nickname_helpers import NicknameTestData, nickname_formatt
 
 # fixtures
 from .users import test_discord_user_1
-from .roblox_users import test_roblox_user_1
-from .guilds import test_guild_1
+from .roblox.roblox_users import test_military_group_member
+from .guilds import military_guild
 
 if TYPE_CHECKING:
     from bloxlink_lib import GuildSerializable, RobloxUser, MemberSerializable
@@ -75,7 +75,7 @@ NicknameTestCaseData = namedtuple(
     ]
 )
 def nickname_test_data(
-    request, test_roblox_user_1, test_discord_user_1
+    request, test_military_group_member, test_discord_user_1
 ) -> NicknameTestCaseData:
     expected_nickname = request.param.expected_nickname
     valid_roblox_user = request.param.valid_roblox_user
@@ -83,7 +83,7 @@ def nickname_test_data(
 
     expected_nickname = nickname_formatter(
         expected_nickname_format=expected_nickname,
-        roblox_user=test_roblox_user_1 if valid_roblox_user else None,
+        roblox_user=(test_military_group_member if valid_roblox_user else None),
         discord_user=test_discord_user_1 if valid_discord_user else None,
     )
 
@@ -139,9 +139,9 @@ def nickname_test_data(
 )
 def generic_template_test_data(
     request,
-    test_roblox_user_1: "RobloxUser",
+    test_military_group_member: "RobloxUser",
     test_discord_user_1: "MemberSerializable",
-    test_guild_1: "GuildSerializable",
+    military_guild: "GuildSerializable",
 ) -> NicknameTestCaseData:
     expected_nickname = request.param.expected_nickname
     valid_roblox_user = request.param.valid_roblox_user
@@ -149,9 +149,9 @@ def generic_template_test_data(
 
     expected_nickname = nickname_formatter(
         expected_nickname_format=expected_nickname,
-        roblox_user=test_roblox_user_1 if valid_roblox_user else None,
+        roblox_user=(test_military_group_member if valid_roblox_user else None),
         discord_user=test_discord_user_1 if valid_discord_user else None,
-        guild=test_guild_1,
+        guild=military_guild,
     )
 
     return NicknameTestCaseData(

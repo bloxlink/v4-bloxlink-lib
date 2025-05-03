@@ -1,5 +1,5 @@
 from bloxlink_lib.models import binds
-from .fixtures.binds import *
+from .fixtures.bind_conversions import *
 
 
 class TestConvertV3WholeGroupBindsToV4:
