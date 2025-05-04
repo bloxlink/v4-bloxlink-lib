@@ -16,8 +16,11 @@ class GuildRoles(Enum):
         return self.value
 
 
+GuildRolesType = dict[int, RoleSerializable]
+
+
 @pytest.fixture(scope="module")
-def guild_roles() -> dict[int, RoleSerializable]:
+def guild_roles() -> GuildRolesType:
     """Test Discord roles for the test Discord server."""
 
     new_roles: dict[int, RoleSerializable] = {}
@@ -32,7 +35,7 @@ def guild_roles() -> dict[int, RoleSerializable]:
 
 
 @pytest.fixture(scope="module")
-def test_guild(guild_roles) -> GuildSerializable:
+def test_guild(guild_roles: GuildRolesType) -> GuildSerializable:
     """Test Discord server."""
 
     return GuildSerializable(

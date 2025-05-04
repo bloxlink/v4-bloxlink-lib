@@ -1,21 +1,41 @@
+from typing import TYPE_CHECKING, Callable
 import pytest
 from bloxlink_lib.models import binds
-from bloxlink_lib import RobloxGroup, GroupBindData, RoleSerializable
+from bloxlink_lib import RobloxGroup, GroupBindData, find
+from bloxlink_lib.models.base.serializable import RoleSerializable
+from tests.unit.fixtures.guilds import GuildRoles
+
+if TYPE_CHECKING:
+    from .guilds import GuildRolesType
+
+
+# Bind utility fixtures
+@pytest.fixture(scope="module")
+def find_discord_roles(guild_roles: "GuildRolesType") -> list[RoleSerializable]:
+    """Retrieve the Discord roles from the GuildRoles enum"""
+
+    def _find_discord_roles(*role_enums: GuildRoles) -> list[RoleSerializable]:
+        return [
+            find(lambda r: r.name == role_enum.value, guild_roles.values())
+            for role_enum in role_enums
+        ]
+
+    return _find_discord_roles
 
 
 # Bind scenarios (user does/does not meet bind condition)
 @pytest.fixture(scope="module")
-def entire_group_bind(
+def everyone_group_bind(
     module_mocker,
-    guild_roles: dict[int, RoleSerializable],
+    find_discord_roles: Callable[[GuildRoles, ...], list[RoleSerializable]],
     test_group: RobloxGroup,
 ) -> binds.GuildBind:
-    """Whole group binds for V3 with 1 group linked."""
+    """Bind everyone to receive these specific roles"""
 
     # everyone in the group will receive guild_roles
     new_bind = binds.GuildBind(
         nickname="{roblox-name}",
-        roles=[str(role_id) for role_id in guild_roles.keys()],
+        roles=[str(role.id) for role in find_discord_roles(GuildRoles.RANK_1)],
         criteria=binds.BindCriteria(
             type="group", id=test_group.id, group=GroupBindData(everyone=True)
         ),

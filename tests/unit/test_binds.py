@@ -1,6 +1,5 @@
 import pytest
 from bloxlink_lib import GuildSerializable, BindCalculationResult
-from bloxlink_lib.models import binds
 from .fixtures import GuildRoles, GroupRolesets, MockUser, MockUserData
 
 
@@ -13,26 +12,27 @@ class TestBinds:
             MockUserData(
                 current_discord_roles=[GuildRoles.MEMBER],
                 current_group_roleset=GroupRolesets.RANK_1,
+                test_against_bind_fixtures=["everyone_group_bind", "verified_bind"],
             )
         ],
         indirect=True,
     )
-    @pytest.mark.asyncio_concurrent(group="bind_tests_entire_group_bind")
-    async def test_entire_group_bind(
+    @pytest.mark.asyncio_concurrent(group="bind_tests_group_bind")
+    async def test_group_bind(
         self,
-        entire_group_bind: binds.GuildBind,
         test_guild: GuildSerializable,
         mock_user: MockUser,
     ):
         """Test that a user in a group with everyone=True binding satisfies the condition."""
 
-        result = await entire_group_bind.satisfies_for(
-            roblox_user=mock_user.roblox_user,
-            member=mock_user.discord_user,
-            guild_roles=test_guild.roles,
-        )
+        for group_bind in mock_user.test_against_bind_fixtures:
+            result = await group_bind.satisfies_for(
+                roblox_user=mock_user.roblox_user,
+                member=mock_user.discord_user,
+                guild_roles=test_guild.roles,
+            )
 
-        _assert_successful_bind_result(result)
+            _assert_successful_bind_result(result)
 
 
 def _assert_successful_bind_result(result: BindCalculationResult):

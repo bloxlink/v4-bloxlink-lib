@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 import pytest
 from bloxlink_lib import (
     MemberSerializable,
@@ -8,11 +9,14 @@ from bloxlink_lib import (
     RobloxUserGroup,
     RobloxGroup,
     GroupRoleset,
-    RoleSerializable,
     find,
+    GuildBind,
 )
-from tests.unit.utils import generate_snowflake, filter_enum_list
-from . import GuildRoles, GroupRolesetsType, GroupRolesets
+from tests.unit.fixtures import GroupRolesets, GuildRoles
+from tests.unit.utils import generate_snowflake, enum_list_to_value_list
+
+if TYPE_CHECKING:
+    from . import GuildRolesType, GroupRolesetsType
 
 
 class MockUserData(BaseModel):
@@ -20,6 +24,8 @@ class MockUserData(BaseModel):
 
     current_group_roleset: GroupRolesets
     current_discord_roles: list[GuildRoles]  # Set the user's current Discord roles
+    test_against_bind_fixtures: list[str]  # Passed to MockUser to use in the test case
+
     # expected_discord_roles: Annotated[
     #     list[GuildRoles], Field(default_factory=list)
     # ]  # Passed to MockUser to use in the test case. Defaults to empty array.
@@ -32,6 +38,9 @@ class MockUser(BaseModel):
     roblox_user: RobloxUser | None  # The Roblox account of the user. Optional.
     expected_discord_roles: list[int] = (
         None  # Used by the test case. Injected by mock_user fixture. Optional.
+    )
+    test_against_bind_fixtures: list[GuildBind] | None = (
+        None  # Used by the test case. Injected by mock_user fixture.
     )
 
 
@@ -63,7 +72,7 @@ def _mock_discord_user(
     user_id: int,
     username: str,
     guild: GuildSerializable,
-    current_discord_roles: list[GuildRoles],
+    current_discord_roles: list["GuildRoles"],
 ) -> MemberSerializable:
 
     discord_user = MemberSerializable(
@@ -131,8 +140,8 @@ def mock_user(
     request,
     test_guild: GuildSerializable,
     test_group: RobloxGroup,
-    group_rolesets: GroupRolesetsType,
-    guild_roles: dict[int, RoleSerializable],
+    group_rolesets: "GroupRolesetsType",
+    guild_roles: "GuildRolesType",
 ) -> MockUser:
     """Mock a user for a test case."""
 
@@ -141,7 +150,7 @@ def mock_user(
     current_discord_roles: list[int] = [
         r.id
         for r in guild_roles.values()
-        if r.name in filter_enum_list(mock_data.current_discord_roles)
+        if r.name in enum_list_to_value_list(mock_data.current_discord_roles)
     ]
     # expected_discord_roles: list[int] = [
     #     r.id
@@ -165,6 +174,11 @@ def mock_user(
         },
         current_discord_roles=current_discord_roles,
     )
+
+    user.test_against_bind_fixtures = [
+        request.getfixturevalue(fixture)
+        for fixture in mock_data.test_against_bind_fixtures
+    ]
 
     # user.expected_discord_roles = expected_discord_roles  # For the test case to use
 

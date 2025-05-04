@@ -1,6 +1,5 @@
 from bloxlink_lib.models.base.serializable import MemberSerializable, GuildSerializable
 from bloxlink_lib.models.roblox.users import RobloxUser
-from pydantic import BaseModel
 
 
 def nickname_formatter(
