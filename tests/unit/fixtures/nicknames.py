@@ -4,6 +4,12 @@ from bloxlink_lib import BaseModel, GuildSerializable
 from tests.unit.utils import nickname_formatter
 from . import MockUser
 
+__all__ = [
+    "NicknameTestCaseData",
+    "NicknameTestData",
+    "nickname_test_data",
+    "generic_template_test_data",
+]
 
 NicknameTestCaseData = namedtuple(
     "NicknameTestCaseData", ["nickname_fixture", "expected_nickname"]

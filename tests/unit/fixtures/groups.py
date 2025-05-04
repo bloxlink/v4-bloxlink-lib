@@ -3,6 +3,14 @@ import pytest
 from bloxlink_lib import RobloxGroup, GroupRoleset, find
 from tests.unit.utils import generate_snowflake
 
+__all__ = [
+    "GroupRolesets",
+    "GroupRolesetsType",
+    "member_roleset",
+    "group_rolesets",
+    "test_group",
+]
+
 
 class GroupRolesets(Enum):
     """The Rolesets for the test group"""

@@ -1,7 +1,9 @@
 from enum import Enum
 import pytest
-from bloxlink_lib.models.base import GuildSerializable, RoleSerializable
+from bloxlink_lib import GuildSerializable, RoleSerializable
 from tests.unit.utils import generate_snowflake
+
+__all__ = ["GuildRoles", "GuildRolesType", "guild_roles", "test_guild"]
 
 
 class GuildRoles(Enum):

@@ -1,30 +1,51 @@
 import pytest
 from bloxlink_lib import GuildSerializable, SnowflakeSet
 from bloxlink_lib.models.base.serializable import RoleSerializable
-from .fixtures import GuildRoles, GroupRolesets, MockUser, MockUserData
+from .fixtures import (
+    GuildRoles,
+    GroupRolesets,
+    MockUserData,
+    MockBindScenario,
+    ExpectedBinds,
+    MockedBindScenarioResult,
+)
 
 
 class TestBinds:
     """Test the logic of binds"""
 
     @pytest.mark.parametrize(
-        "mock_verified_user",
+        "mock_bind_scenario",
         [
-            MockUserData(
-                current_discord_roles=[GuildRoles.MEMBER],
-                current_group_roleset=GroupRolesets.RANK_1,
+            MockBindScenario(
+                mock_user=MockUserData(
+                    current_discord_roles=[GuildRoles.MEMBER],
+                    current_group_roleset=GroupRolesets.RANK_1,
+                ),
                 test_against_bind_fixtures=["everyone_group_bind"],
+                expected_binds=ExpectedBinds(
+                    expected_bind_success=True,
+                ),
             ),
-            MockUserData(
-                current_discord_roles=[GuildRoles.RANK_2],
-                current_group_roleset=GroupRolesets.RANK_1,
-                expected_remove_roles=[GuildRoles.RANK_2],
+            MockBindScenario(
                 test_against_bind_fixtures=["dynamic_roles_group_bind"],
+                mock_user=MockUserData(
+                    current_discord_roles=[GuildRoles.RANK_2],
+                    current_group_roleset=GroupRolesets.RANK_1,
+                ),
+                expected_binds=ExpectedBinds(
+                    expected_remove_roles=[GuildRoles.RANK_2],
+                ),
             ),
-            MockUserData(
-                current_discord_roles=[GuildRoles.VERIFIED],
-                current_group_roleset=None,
+            MockBindScenario(
                 test_against_bind_fixtures=["guest_group_bind"],
+                mock_user=MockUserData(
+                    current_discord_roles=[GuildRoles.VERIFIED],
+                    current_group_roleset=None,
+                ),
+                expected_binds=ExpectedBinds(
+                    expected_bind_success=True,
+                ),
             ),
         ],
         indirect=True,
@@ -33,23 +54,41 @@ class TestBinds:
     async def test_group_binds(
         self,
         test_guild: GuildSerializable,
-        mock_verified_user: MockUser,
+        mock_bind_scenario: MockedBindScenarioResult,
     ):
         """Test that a user in a group with everyone=True binding satisfies the condition."""
 
         await _assert_successful_binds_results(
-            mocked_user=mock_verified_user,
+            mocked_bind_scenario=mock_bind_scenario,
             guild_roles=test_guild.roles,
         )
 
     @pytest.mark.parametrize(
-        "mock_verified_user",
+        "mock_bind_scenario",
         [
-            MockUserData(
-                current_discord_roles=[GuildRoles.UNVERIFIED],
-                current_group_roleset=None,
+            MockBindScenario(
                 test_against_bind_fixtures=["verified_bind"],
-            )
+                mock_user=MockUserData(
+                    current_discord_roles=[GuildRoles.UNVERIFIED],
+                    current_group_roleset=None,
+                    verified=True,
+                ),
+                expected_binds=ExpectedBinds(
+                    expected_bind_success=True,
+                ),
+            ),
+            MockBindScenario(
+                test_against_bind_fixtures=["verified_bind"],
+                mock_user=MockUserData(
+                    current_discord_roles=[GuildRoles.VERIFIED],
+                    current_group_roleset=None,
+                    verified=False,
+                ),
+                expected_binds=ExpectedBinds(
+                    expected_remove_roles=[GuildRoles.VERIFIED],
+                    expected_bind_success=False,
+                ),
+            ),
         ],
         indirect=True,
     )
@@ -57,29 +96,28 @@ class TestBinds:
     async def test_verified_bind(
         self,
         test_guild: GuildSerializable,
-        mock_verified_user: MockUser,
+        mock_bind_scenario: MockedBindScenarioResult,
     ):
         """Test that a verified user satisfies the verified bind."""
 
         await _assert_successful_binds_results(
-            mocked_user=mock_verified_user,
+            mocked_bind_scenario=mock_bind_scenario,
             guild_roles=test_guild.roles,
-            expected_remove_roles=mock_verified_user.expected_remove_roles,
         )
 
     @pytest.mark.parametrize(
-        "mock_unverified_user",
+        "mock_bind_scenario",
         [
-            MockUserData(
-                current_discord_roles=[],
-                current_group_roleset=None,
+            MockBindScenario(
                 test_against_bind_fixtures=["unverified_bind"],
-            ),
-            MockUserData(
-                current_discord_roles=[GuildRoles.RANK_1],
-                expected_remove_roles=[GuildRoles.RANK_1],
-                current_group_roleset=None,
-                test_against_bind_fixtures=["unverified_bind"],
+                mock_user=MockUserData(
+                    current_discord_roles=[],
+                    current_group_roleset=None,
+                    verified=False,
+                ),
+                expected_binds=ExpectedBinds(
+                    expected_bind_success=True,
+                ),
             ),
         ],
         indirect=True,
@@ -88,35 +126,35 @@ class TestBinds:
     async def test_unverified_bind(
         self,
         test_guild: GuildSerializable,
-        mock_unverified_user: MockUser,
+        mock_bind_scenario: MockedBindScenarioResult,
     ):
         """Test that a user in a group with everyone=True binding satisfies the condition."""
 
         await _assert_successful_binds_results(
-            mocked_user=mock_unverified_user,
+            mocked_bind_scenario=mock_bind_scenario,
             guild_roles=test_guild.roles,
         )
 
 
 async def _assert_successful_binds_results(
-    mocked_user: MockUser,
+    mocked_bind_scenario: MockedBindScenarioResult,
     guild_roles: list[RoleSerializable],
-    expected_additional_roles: list[int] | None = None,
-    expected_missing_roles: list[int] | None = None,
-    expected_remove_roles: list[int] | None = None,
 ):
-    expected_additional_roles = expected_additional_roles or []
-    expected_missing_roles = expected_missing_roles or []
-    expected_ineligible_roles = expected_remove_roles or []
+    expected_remove_roles = (
+        mocked_bind_scenario.expected_binds.expected_remove_roles or []
+    )
+    expected_bind_success = mocked_bind_scenario.expected_binds.expected_bind_success
+    expected_additional_roles = []
+    expected_missing_roles = []
 
-    for bind in mocked_user.test_against_bind_fixtures:
+    for bind in mocked_bind_scenario.test_against_bind_fixtures:
         result = await bind.satisfies_for(
-            roblox_user=mocked_user.roblox_user,
-            member=mocked_user.discord_user,
+            roblox_user=mocked_bind_scenario.mock_user.roblox_user,
+            member=mocked_bind_scenario.mock_user.discord_user,
             guild_roles=guild_roles,
         )
 
-        assert result.successful, "The user must satisfy this bind condition"
+        assert result.successful == expected_bind_success
         assert result.additional_roles == SnowflakeSet(expected_additional_roles)
         assert result.missing_roles == SnowflakeSet(expected_missing_roles)
-        assert result.ineligible_roles == SnowflakeSet(expected_ineligible_roles)
+        assert result.ineligible_roles == SnowflakeSet(expected_remove_roles)
