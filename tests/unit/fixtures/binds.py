@@ -29,6 +29,7 @@ __all__ = [
     "mock_bind_scenario",
     "dynamic_roles_group_bind",
     "roleset_group_bind",
+    "min_max_group_bind",
     "guest_group_bind",
     "verified_bind",
     "unverified_bind",
@@ -252,6 +253,28 @@ def roleset_group_bind(
             type="group",
             id=test_group.id,
             group=GroupBindData(roleset=GroupRolesets.COMMANDER.value),
+        ),
+        entity=test_group,
+    )
+
+    return mocked_bind
+
+
+@pytest.fixture()
+def min_max_group_bind(
+    mocker,
+    test_group: RobloxGroup,
+    find_discord_roles: Callable[[GuildRoles], list[RoleSerializable]],
+) -> binds.GuildBind:
+    """Bind a range of rolesets to receive these specific roles"""
+
+    mocked_bind = _mock_bind(
+        mocker,
+        discord_roles=find_discord_roles(GuildRoles.COMMANDER, GuildRoles.ADMIN),
+        criteria=binds.BindCriteria(
+            type="group",
+            id=test_group.id,
+            group=GroupBindData(min=GroupRolesets.COMMANDER, max=GroupRolesets.ADMIN),
         ),
         entity=test_group,
     )

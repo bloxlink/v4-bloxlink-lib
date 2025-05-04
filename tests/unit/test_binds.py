@@ -77,6 +77,36 @@ class TestBinds:
                     expected_bind_success=False,
                 ),
             ),
+            MockBindScenario(
+                test_against_bind_fixtures=["min_max_group_bind"],
+                mock_user=MockUserData(
+                    current_discord_roles=[GuildRoles.VERIFIED],
+                    current_group_roleset=GroupRolesets.COMMANDER,
+                ),
+                expected_binds=ExpectedBinds(
+                    expected_bind_success=True,
+                ),
+            ),
+            MockBindScenario(
+                test_against_bind_fixtures=["min_max_group_bind"],
+                mock_user=MockUserData(
+                    current_discord_roles=[GuildRoles.VERIFIED],
+                    current_group_roleset=GroupRolesets.ADMIN,
+                ),
+                expected_binds=ExpectedBinds(
+                    expected_bind_success=True,
+                ),
+            ),
+            MockBindScenario(
+                test_against_bind_fixtures=["min_max_group_bind"],
+                mock_user=MockUserData(
+                    current_discord_roles=[GuildRoles.VERIFIED],
+                    current_group_roleset=GroupRolesets.MEMBER,
+                ),
+                expected_binds=ExpectedBinds(
+                    expected_bind_success=False,
+                ),
+            ),
         ],
         indirect=True,
     )
