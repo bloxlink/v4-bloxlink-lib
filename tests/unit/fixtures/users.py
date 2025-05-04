@@ -98,11 +98,12 @@ def _mock_user(
     verified: bool,
     username: str,
     guild: GuildSerializable,
-    groups: RobloxUserGroup,
+    groups: dict[int, RobloxUserGroup] | None = None,
     current_discord_roles: list[int] | None = None,
 ) -> MockUser:
     user_id = generate_snowflake()
     current_discord_roles = current_discord_roles or []
+    groups = groups or {}
 
     member = _mock_discord_user(
         user_id=user_id,

@@ -21,6 +21,11 @@ class TestBinds:
                 expected_removed_roles=[GuildRoles.RANK_2],
                 test_against_bind_fixtures=["dynamic_roles_group_bind"],
             ),
+            MockUserData(
+                current_discord_roles=[GuildRoles.VERIFIED],
+                current_group_roleset=None,
+                test_against_bind_fixtures=["guest_group_bind"],
+            ),
         ],
         indirect=True,
     )

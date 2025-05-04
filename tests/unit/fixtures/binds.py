@@ -92,11 +92,31 @@ def dynamic_roles_group_bind(
     return mocked_bind
 
 
+@pytest.fixture(scope="module")
+def guest_group_bind(
+    module_mocker,
+    test_group: RobloxGroup,
+    find_discord_roles: Callable[[GuildRoles], list[RoleSerializable]],
+) -> binds.GuildBind:
+    """Bind a non-group member to receive these specific roles"""
+
+    mocked_bind = _mock_bind(
+        module_mocker,
+        discord_roles=find_discord_roles(GuildRoles.NOT_IN_GROUP),
+        criteria=binds.BindCriteria(
+            type="group", id=test_group.id, group=GroupBindData(guest=True)
+        ),
+        entity=test_group,
+    )
+
+    return mocked_bind
+
+
 # Verified bind fixtures
 @pytest.fixture(scope="module")
 def verified_bind(
     module_mocker,
-    find_discord_roles: Callable[[GuildRoles, ...], list[RoleSerializable]],
+    find_discord_roles: Callable[[GuildRoles], list[RoleSerializable]],
 ) -> binds.GuildBind:
     """Bind everyone to receive these specific roles"""
 

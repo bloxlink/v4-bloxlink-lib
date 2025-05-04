@@ -9,6 +9,7 @@ class GuildRoles(Enum):
 
     VERIFIED = "Verified"
     UNVERIFIED = "Unverified"
+    NOT_IN_GROUP = "Not in Group"
     MEMBER = "Member"
     RANK_1 = "Officer"
     RANK_2 = "Commander"
