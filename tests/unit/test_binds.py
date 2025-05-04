@@ -36,7 +36,6 @@ class TestBinds:
         [
             MockUserData(
                 current_discord_roles=[GuildRoles.UNVERIFIED],
-                expected_removed_roles=[GuildRoles.UNVERIFIED],
                 current_group_roleset=None,
                 test_against_bind_fixtures=["verified_bind"],
             )
