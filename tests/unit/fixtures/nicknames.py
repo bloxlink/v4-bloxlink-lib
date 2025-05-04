@@ -1,18 +1,22 @@
-from typing import TYPE_CHECKING
 from collections import namedtuple
 import pytest
-from tests.unit.utils.nickname_helpers import NicknameTestData, nickname_formatter
+from bloxlink_lib import BaseModel, GuildSerializable
+from tests.unit.utils import nickname_formatter
+from . import MockUser
 
-# fixtures
-from .users import test_group_member, MockUser
-from .guilds import test_guild
-
-if TYPE_CHECKING:
-    from bloxlink_lib import GuildSerializable, RobloxUser, MemberSerializable
 
 NicknameTestCaseData = namedtuple(
     "NicknameTestCaseData", ["nickname_fixture", "expected_nickname"]
 )
+
+
+class NicknameTestData(BaseModel):
+    """Represents a scenario for a user's nickname"""
+
+    nickname_template: str
+    expected_nickname: str | None
+    include_roblox_user: bool = None
+    include_discord_user: bool = None
 
 
 @pytest.fixture(

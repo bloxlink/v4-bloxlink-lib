@@ -1,12 +1,7 @@
 import pytest
-from bloxlink_lib import GuildSerializable
+from bloxlink_lib import GuildSerializable, BindCalculationResult
 from bloxlink_lib.models import binds
-
-# fixtures
-from .fixtures.binds import entire_group_bind
-from .fixtures.guilds import test_guild, guild_roles, GuildRoles
-from .fixtures.groups import GroupRolesets
-from .fixtures.users import test_group_member, MockUser, MockUserData, mock_user
+from .fixtures import GuildRoles, GroupRolesets, MockUser, MockUserData
 
 
 class TestBinds:
@@ -29,7 +24,7 @@ class TestBinds:
         test_guild: GuildSerializable,
         mock_user: MockUser,
     ):
-        """Test that a user in a group with everyone=True binding receives the roles."""
+        """Test that a user in a group with everyone=True binding satisfies the condition."""
 
         result = await entire_group_bind.satisfies_for(
             roblox_user=mock_user.roblox_user,
@@ -37,4 +32,15 @@ class TestBinds:
             guild_roles=test_guild.roles,
         )
 
-        assert result.successful, "The user must satisfy this bind condition"
+        _assert_successful_bind_result(result)
+
+
+def _assert_successful_bind_result(result: BindCalculationResult):
+    assert result.successful, "The user must satisfy this bind condition"
+    assert (
+        not result.additional_roles
+    ), "The user should not receive any additional roles"
+    assert not result.missing_roles, "The guild should not be missing any roles"
+    assert (
+        not result.ineligible_roles
+    ), "The user should not be ineligible for any roles"

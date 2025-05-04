@@ -1,7 +1,5 @@
 from datetime import datetime
-from typing import Annotated
 import pytest
-from pydantic import Field
 from bloxlink_lib import (
     MemberSerializable,
     BaseModel,
@@ -14,16 +12,7 @@ from bloxlink_lib import (
     find,
 )
 from tests.unit.utils import generate_snowflake, filter_enum_list
-
-# fixtures
-from .guilds import test_guild, GuildRoles, guild_roles
-from .groups import (
-    GroupRolesetsType,
-    test_group,
-    member_roleset,
-    GroupRolesets,
-    group_rolesets,
-)
+from . import GuildRoles, GroupRolesetsType, GroupRolesets
 
 
 class MockUserData(BaseModel):

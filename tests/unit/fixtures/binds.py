@@ -1,19 +1,13 @@
 import pytest
-from pydantic import field_validator
 from bloxlink_lib.models import binds
-from bloxlink_lib import RobloxGroup, GroupBindData, BaseModel
-
-# fixtures
-from .guilds import guild_roles
-from .groups import test_group
-from .users import MockUser
+from bloxlink_lib import RobloxGroup, GroupBindData, RoleSerializable
 
 
 # Bind scenarios (user does/does not meet bind condition)
 @pytest.fixture(scope="module")
 def entire_group_bind(
     module_mocker,
-    guild_roles,
+    guild_roles: dict[int, RoleSerializable],
     test_group: RobloxGroup,
 ) -> binds.GuildBind:
     """Whole group binds for V3 with 1 group linked."""

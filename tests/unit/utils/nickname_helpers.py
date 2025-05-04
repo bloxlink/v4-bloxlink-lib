@@ -3,15 +3,6 @@ from bloxlink_lib.models.roblox.users import RobloxUser
 from pydantic import BaseModel
 
 
-class NicknameTestData(BaseModel):
-    """Represents a scenario for a user's nickname"""
-
-    nickname_template: str
-    expected_nickname: str | None
-    include_roblox_user: bool = None
-    include_discord_user: bool = None
-
-
 def nickname_formatter(
     expected_nickname_format: str | None = None,
     roblox_user: RobloxUser | None = None,

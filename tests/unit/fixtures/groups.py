@@ -1,5 +1,4 @@
-from typing import Final
-from enum import Enum, auto
+from enum import Enum
 import pytest
 from bloxlink_lib import RobloxGroup, GroupRoleset, find
 from tests.unit.utils import generate_snowflake

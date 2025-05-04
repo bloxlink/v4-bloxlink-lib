@@ -3,13 +3,7 @@ import pytest
 from bloxlink_lib.models.roblox.binds import parse_template
 
 # fixtures
-from .fixtures.users import test_group_member, MockUser
-from .fixtures.guilds import test_guild
-from .fixtures.nicknames import (
-    nickname_test_data,
-    generic_template_test_data,
-    NicknameTestCaseData,
-)
+from .fixtures import NicknameTestCaseData, MockUser
 
 if TYPE_CHECKING:
     from bloxlink_lib import GuildSerializable, RobloxUser, MemberSerializable
