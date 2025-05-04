@@ -7,6 +7,8 @@ from tests.unit.utils import generate_snowflake
 class GuildRoles(Enum):
     """The Discord roles in the test server"""
 
+    VERIFIED = "Verified"
+    UNVERIFIED = "Unverified"
     MEMBER = "Member"
     RANK_1 = "Officer"
     RANK_2 = "Commander"

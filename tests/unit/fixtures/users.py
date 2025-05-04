@@ -1,5 +1,6 @@
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Annotated
+from pydantic import Field
 import pytest
 from bloxlink_lib import (
     MemberSerializable,
@@ -22,13 +23,13 @@ if TYPE_CHECKING:
 class MockUserData(BaseModel):
     """Data to use for the mocked user"""
 
-    current_group_roleset: GroupRolesets
+    current_group_roleset: GroupRolesets | None
     current_discord_roles: list[GuildRoles]  # Set the user's current Discord roles
     test_against_bind_fixtures: list[str]  # Passed to MockUser to use in the test case
 
-    # expected_discord_roles: Annotated[
-    #     list[GuildRoles], Field(default_factory=list)
-    # ]  # Passed to MockUser to use in the test case. Defaults to empty array.
+    expected_removed_roles: Annotated[
+        list[GuildRoles], Field(default_factory=list)
+    ]  # Passed to MockUser to use in the test case. Defaults to empty array.
 
 
 class MockUser(BaseModel):
@@ -36,11 +37,11 @@ class MockUser(BaseModel):
 
     discord_user: MemberSerializable  # The Discord user
     roblox_user: RobloxUser | None  # The Roblox account of the user. Optional.
-    expected_discord_roles: list[int] = (
-        None  # Used by the test case. Injected by mock_user fixture. Optional.
+    expected_removed_roles: list[int] = (
+        None  # Used by the test case. Injected by mock_verified_user fixture. Optional.
     )
     test_against_bind_fixtures: list[GuildBind] | None = (
-        None  # Used by the test case. Injected by mock_user fixture.
+        None  # Used by the test case. Injected by mock_verified_user fixture.
     )
 
 
@@ -93,6 +94,8 @@ def _mock_discord_user(
 
 def _mock_user(
     module_mocker,
+    *,
+    verified: bool,
     username: str,
     guild: GuildSerializable,
     groups: RobloxUserGroup,
@@ -108,9 +111,12 @@ def _mock_user(
         current_discord_roles=current_discord_roles,
     )
 
-    roblox_user = _mock_roblox_user(
-        module_mocker, user_id=user_id, username=username, groups=groups
-    )
+    if verified:
+        roblox_user = _mock_roblox_user(
+            module_mocker, user_id=user_id, username=username, groups=groups
+        )
+    else:
+        roblox_user = None
 
     return MockUser(discord_user=member, roblox_user=roblox_user)
 
@@ -126,6 +132,7 @@ def test_group_member(
 
     user = _mock_user(
         module_mocker,
+        verified=True,
         username="john",
         guild=test_guild,
         groups={test_group.id: RobloxUserGroup(group=test_group, role=member_roleset)},
@@ -135,7 +142,7 @@ def test_group_member(
 
 
 @pytest.fixture(scope="module")
-def mock_user(
+def mock_verified_user(
     module_mocker,
     request,
     test_guild: GuildSerializable,
@@ -152,26 +159,41 @@ def mock_user(
         for r in guild_roles.values()
         if r.name in enum_list_to_value_list(mock_data.current_discord_roles)
     ]
-    # expected_discord_roles: list[int] = [
-    #     r.id
-    #     for r in guild_roles.values()
-    #     if r.name in filter_enum_list(mock_data.expected_discord_roles)
-    # ]
-    current_group_roleset = find(
-        lambda r: r.name in mock_data.current_group_roleset.value,
-        group_rolesets.values(),
-    )
+    expected_removed_roles: list[int] = [
+        r.id
+        for r in guild_roles.values()
+        if r.name in enum_list_to_value_list(mock_data.expected_removed_roles)
+    ]
 
-    if not current_group_roleset:
-        raise ValueError("Unable to find matching Roleset from Mocked Group")
+    if mock_data.current_group_roleset:
+        current_group_roleset = (
+            find(
+                lambda r: r.name in mock_data.current_group_roleset.value,
+                group_rolesets.values(),
+            )
+            if mock_data.current_group_roleset
+            else None
+        )
+
+        if not current_group_roleset:
+            raise ValueError("Unable to find matching Roleset from Mocked Group")
+    else:
+        current_group_roleset = None
 
     user = _mock_user(
         module_mocker,
+        verified=True,
         username="john",
         guild=test_guild,
-        groups={
-            test_group.id: RobloxUserGroup(group=test_group, role=current_group_roleset)
-        },
+        groups=(
+            {
+                test_group.id: RobloxUserGroup(
+                    group=test_group, role=current_group_roleset
+                )
+            }
+            if current_group_roleset
+            else None
+        ),
         current_discord_roles=current_discord_roles,
     )
 
@@ -180,6 +202,47 @@ def mock_user(
         for fixture in mock_data.test_against_bind_fixtures
     ]
 
-    # user.expected_discord_roles = expected_discord_roles  # For the test case to use
+    user.expected_removed_roles = expected_removed_roles  # For the test case to use
+
+    return user
+
+
+@pytest.fixture(scope="module")
+def mock_unverified_user(
+    module_mocker,
+    request,
+    test_guild: GuildSerializable,
+    guild_roles: "GuildRolesType",
+) -> MockUser:
+    """Mock a non-verified user for a test case."""
+
+    mock_data: MockUserData = request.param
+
+    current_discord_roles: list[int] = [
+        r.id
+        for r in guild_roles.values()
+        if r.name in enum_list_to_value_list(mock_data.current_discord_roles)
+    ]
+    expected_removed_roles: list[int] = [
+        r.id
+        for r in guild_roles.values()
+        if r.name in enum_list_to_value_list(mock_data.expected_removed_roles)
+    ]
+
+    user = _mock_user(
+        module_mocker,
+        verified=False,
+        username="john",
+        guild=test_guild,
+        groups=None,
+        current_discord_roles=current_discord_roles,
+    )
+
+    user.test_against_bind_fixtures = [
+        request.getfixturevalue(fixture)
+        for fixture in mock_data.test_against_bind_fixtures
+    ]
+
+    user.expected_removed_roles = expected_removed_roles  # For the test case to use
 
     return user

@@ -46,6 +46,9 @@ def _mock_bind(
 
 
 # Bind scenarios (user does/does not meet bind condition)
+
+
+# Group bind fixtures
 @pytest.fixture(scope="module")
 def everyone_group_bind(
     module_mocker,
@@ -60,6 +63,40 @@ def everyone_group_bind(
         criteria=binds.BindCriteria(
             type="group", id=test_group.id, group=GroupBindData(everyone=True)
         ),
+    )
+
+    return mocked_bind
+
+
+# Verified bind fixtures
+@pytest.fixture(scope="module")
+def verified_bind(
+    module_mocker,
+    find_discord_roles: Callable[[GuildRoles, ...], list[RoleSerializable]],
+) -> binds.GuildBind:
+    """Bind everyone to receive these specific roles"""
+
+    mocked_bind = _mock_bind(
+        module_mocker,
+        discord_roles=find_discord_roles(GuildRoles.VERIFIED),
+        criteria=binds.BindCriteria(type="verified"),
+    )
+
+    return mocked_bind
+
+
+# Unverified bind fixtures
+@pytest.fixture(scope="module")
+def unverified_bind(
+    module_mocker,
+    find_discord_roles: Callable[[GuildRoles, ...], list[RoleSerializable]],
+) -> binds.GuildBind:
+    """Bind everyone to receive these specific roles"""
+
+    mocked_bind = _mock_bind(
+        module_mocker,
+        discord_roles=find_discord_roles(GuildRoles.UNVERIFIED),
+        criteria=binds.BindCriteria(type="unverified"),
     )
 
     return mocked_bind

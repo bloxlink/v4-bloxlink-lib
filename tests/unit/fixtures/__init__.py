@@ -6,8 +6,19 @@ from .groups import (
     member_roleset,
     group_rolesets,
 )
-from .users import MockUser, MockUserData, mock_user, test_group_member
-from .binds import find_discord_roles, everyone_group_bind
+from .users import (
+    MockUser,
+    MockUserData,
+    mock_verified_user,
+    mock_unverified_user,
+    test_group_member,
+)
+from .binds import (
+    find_discord_roles,
+    everyone_group_bind,
+    verified_bind,
+    unverified_bind,
+)
 from .nicknames import (
     NicknameTestCaseData,
     generic_template_test_data,

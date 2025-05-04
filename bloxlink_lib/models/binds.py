@@ -270,7 +270,7 @@ class GuildBind(BaseModel):
             if self.criteria.type == "unverified":
                 successful = True
             else:
-                # user is unverified, so remove Verified role
+                # user is unverified, so remove every role from this bind if they have it
                 if self.criteria.type == "verified":
                     for role_id in filter(
                         lambda r: int(r) in member.role_ids, self.roles
