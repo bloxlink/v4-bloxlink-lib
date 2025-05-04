@@ -438,6 +438,7 @@ disable=raw-checker-failed,
         logging-fstring-interpolation,
         too-few-public-methods,
         too-many-arguments,
+        redefined-outer-name,
         import-error
 
 # Enable the message, report, category or checker with the given id(s). You can

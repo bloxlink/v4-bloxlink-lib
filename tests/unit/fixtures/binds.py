@@ -23,6 +23,28 @@ def find_discord_roles(guild_roles: "GuildRolesType") -> list[RoleSerializable]:
     return _find_discord_roles
 
 
+def _mock_bind(
+    module_mocker,
+    *,
+    discord_roles: list[RoleSerializable],
+    criteria: binds.BindCriteria,
+    nickname: str = "{roblox-name}",
+) -> binds.GuildBind:
+    """Mock a bind"""
+
+    new_bind = binds.GuildBind(
+        nickname=nickname,
+        roles=[str(role.id) for role in discord_roles],
+        criteria=criteria,
+    )
+
+    # Mock the sync method to prevent actual API calls
+    mocked_sync = module_mocker.AsyncMock(return_value=None)
+    module_mocker.patch.object(RobloxGroup, "sync", new=mocked_sync)
+
+    return new_bind
+
+
 # Bind scenarios (user does/does not meet bind condition)
 @pytest.fixture(scope="module")
 def everyone_group_bind(
@@ -32,17 +54,12 @@ def everyone_group_bind(
 ) -> binds.GuildBind:
     """Bind everyone to receive these specific roles"""
 
-    # everyone in the group will receive guild_roles
-    new_bind = binds.GuildBind(
-        nickname="{roblox-name}",
-        roles=[str(role.id) for role in find_discord_roles(GuildRoles.RANK_1)],
+    mocked_bind = _mock_bind(
+        module_mocker,
+        discord_roles=find_discord_roles(GuildRoles.RANK_1),
         criteria=binds.BindCriteria(
             type="group", id=test_group.id, group=GroupBindData(everyone=True)
         ),
     )
 
-    # Mock the sync method to prevent actual API calls
-    mocked_sync = module_mocker.AsyncMock(return_value=None)
-    module_mocker.patch.object(RobloxGroup, "sync", new=mocked_sync)
-
-    return new_bind
+    return mocked_bind
