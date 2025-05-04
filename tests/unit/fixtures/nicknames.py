@@ -16,6 +16,7 @@ NicknameTestCaseData = namedtuple(
 
 
 @pytest.fixture(
+    scope="module",
     params=[
         NicknameTestData(
             nickname_template="{roblox-name}",
@@ -93,6 +94,7 @@ def nickname_test_data(
 
 
 @pytest.fixture(
+    scope="module",
     params=[
         # Tests not dependent on a Roblox user being linked to a Discord user
         NicknameTestData(

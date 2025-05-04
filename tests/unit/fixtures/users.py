@@ -24,7 +24,11 @@ class MockUser(BaseModel):
 
 
 def _mock_roblox_user(
-    mocker, *, user_id: int, username: str, groups: dict[int, RobloxUserGroup] | None
+    module_mocker,
+    *,
+    user_id: int,
+    username: str,
+    groups: dict[int, RobloxUserGroup] | None,
 ) -> RobloxUser:
     roblox_user = RobloxUser(
         id=user_id,
@@ -37,8 +41,8 @@ def _mock_roblox_user(
     )
 
     # Do not sync the model with the Roblox API
-    mocked_sync = mocker.AsyncMock(return_value=None)
-    mocker.patch.object(RobloxUser, "sync", new=mocked_sync)
+    mocked_sync = module_mocker.AsyncMock(return_value=None)
+    module_mocker.patch.object(RobloxUser, "sync", new=mocked_sync)
 
     return roblox_user
 
@@ -63,22 +67,22 @@ def _mock_discord_user(
 
 
 def _mock_user(
-    mocker, username: str, guild: GuildSerializable, groups: RobloxUserGroup
+    module_mocker, username: str, guild: GuildSerializable, groups: RobloxUserGroup
 ) -> MockUser:
     user_id = generate_snowflake()
 
     member = _mock_discord_user(user_id=user_id, username=username, guild=guild)
 
     roblox_user = _mock_roblox_user(
-        mocker, user_id=user_id, username=username, groups=groups
+        module_mocker, user_id=user_id, username=username, groups=groups
     )
 
     return MockUser(discord_user=member, roblox_user=roblox_user)
 
 
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def test_military_member(
-    mocker,
+    module_mocker,
     military_guild: GuildSerializable,
     test_military_group: RobloxGroup,
     member_roleset: GroupRoleset,
@@ -86,7 +90,7 @@ def test_military_member(
     """Test Discord Member model."""
 
     user = _mock_user(
-        mocker,
+        module_mocker,
         username="john",
         guild=military_guild,
         groups={

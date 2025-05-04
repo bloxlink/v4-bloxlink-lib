@@ -7,7 +7,7 @@ from tests.unit.utils import generate_snowflake
 from .groups import group_rolesets, GroupRolesets
 
 
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def guild_roles(group_rolesets: GroupRolesets) -> dict[int, RoleSerializable]:
     """Test Discord roles for the Military guild."""
 
@@ -22,7 +22,7 @@ def guild_roles(group_rolesets: GroupRolesets) -> dict[int, RoleSerializable]:
     return new_roles
 
 
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def military_guild(guild_roles) -> GuildSerializable:
     """Military Roleplay server."""
 

@@ -8,9 +8,9 @@ from .groups import test_military_group
 
 
 # Bind scenarios (user does/does not meet bind condition)
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def entire_group_bind(
-    mocker,
+    module_mocker,
     guild_roles,
     test_military_group: RobloxGroup,
 ) -> binds.GuildBind:
@@ -26,7 +26,7 @@ def entire_group_bind(
     )
 
     # Mock the sync method to prevent actual API calls
-    mocked_sync = mocker.AsyncMock(return_value=None)
-    mocker.patch.object(RobloxGroup, "sync", new=mocked_sync)
+    mocked_sync = module_mocker.AsyncMock(return_value=None)
+    module_mocker.patch.object(RobloxGroup, "sync", new=mocked_sync)
 
     return new_bind
