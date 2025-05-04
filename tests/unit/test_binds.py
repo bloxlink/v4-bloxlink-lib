@@ -35,6 +35,7 @@ class TestBinds:
                 ),
                 expected_binds=ExpectedBinds(
                     expected_remove_roles=[GuildRoles.RANK_2],
+                    expected_bind_success=True,
                 ),
             ),
             MockBindScenario(
@@ -47,10 +48,20 @@ class TestBinds:
                     expected_bind_success=True,
                 ),
             ),
+            MockBindScenario(
+                test_against_bind_fixtures=["guest_group_bind"],
+                mock_user=MockUserData(
+                    current_discord_roles=[GuildRoles.VERIFIED],
+                    current_group_roleset=GroupRolesets.RANK_1,
+                ),
+                expected_binds=ExpectedBinds(
+                    expected_bind_success=False,
+                ),
+            ),
         ],
         indirect=True,
     )
-    @pytest.mark.asyncio_concurrent(group="bind_tests_group_binds")
+    @pytest.mark.asyncio_concurrent(group="bind_tests")
     async def test_group_binds(
         self,
         test_guild: GuildSerializable,
@@ -92,7 +103,7 @@ class TestBinds:
         ],
         indirect=True,
     )
-    @pytest.mark.asyncio_concurrent(group="bind_tests_verified_binds")
+    @pytest.mark.asyncio_concurrent(group="bind_tests")
     async def test_verified_bind(
         self,
         test_guild: GuildSerializable,
@@ -122,7 +133,7 @@ class TestBinds:
         ],
         indirect=True,
     )
-    @pytest.mark.asyncio_concurrent(group="bind_tests_unverified_bind")
+    @pytest.mark.asyncio_concurrent(group="bind_tests")
     async def test_unverified_bind(
         self,
         test_guild: GuildSerializable,

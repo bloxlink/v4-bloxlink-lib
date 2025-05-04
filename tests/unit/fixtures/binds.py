@@ -45,9 +45,7 @@ class ExpectedBinds(BaseModel):
     expected_remove_roles: Annotated[
         list[GuildRoles | int], Field(default_factory=list)
     ]  # Passed to MockUser to use in the test case. Defaults to empty array.
-    expected_bind_success: bool = (
-        True  # Whether the user meets the bind criteria. Passed to MockUser to use in the test case.
-    )
+    expected_bind_success: bool  # Whether the user meets the bind criteria. Passed to MockUser to use in the test case.
 
 
 class MockBindScenario(BaseModel):
