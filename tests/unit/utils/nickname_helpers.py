@@ -8,8 +8,8 @@ class NicknameTestData(BaseModel):
 
     nickname_template: str
     expected_nickname: str | None
-    valid_roblox_user: bool = None
-    valid_discord_user: bool = None
+    include_roblox_user: bool = None
+    include_discord_user: bool = None
 
 
 def nickname_formatter(

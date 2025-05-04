@@ -29,17 +29,17 @@ class TestNicknames:
 
         expected_nickname = nickname_test_data.expected_nickname
         nickname_template = nickname_test_data.nickname_fixture.nickname_template
-        valid_roblox_user = nickname_test_data.nickname_fixture.valid_roblox_user
-        valid_discord_user = nickname_test_data.nickname_fixture.valid_discord_user
+        include_roblox_user = nickname_test_data.nickname_fixture.include_roblox_user
+        include_discord_user = nickname_test_data.nickname_fixture.include_discord_user
 
         nickname = await parse_template(
             guild_id=military_guild.id,
             guild_name=military_guild.name,
-            member=test_military_member.discord_user if valid_discord_user else None,
+            member=test_military_member.discord_user if include_discord_user else None,
             template=nickname_template,
             potential_binds=[],
             roblox_user=(
-                test_military_member.roblox_user if valid_roblox_user else None
+                test_military_member.roblox_user if include_roblox_user else None
             ),
             trim_nickname=True,
         )
@@ -63,14 +63,14 @@ class TestNicknames:
         nickname_template = (
             generic_template_test_data.nickname_fixture.nickname_template
         )
-        valid_discord_user = (
-            generic_template_test_data.nickname_fixture.valid_discord_user
+        include_discord_user = (
+            generic_template_test_data.nickname_fixture.include_discord_user
         )
 
         nickname = await parse_template(
             guild_id=military_guild.id,
             guild_name=military_guild.name,
-            member=test_military_member.discord_user if valid_discord_user else None,
+            member=test_military_member.discord_user if include_discord_user else None,
             template=nickname_template,
             potential_binds=[],
             roblox_user=(
