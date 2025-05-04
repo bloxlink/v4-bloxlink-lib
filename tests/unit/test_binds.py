@@ -37,6 +37,4 @@ class TestBinds:
             guild_roles=test_guild.roles,
         )
 
-        successful_bind = result[0]
-
-        assert successful_bind, "The user must satisfy this bind condition"
+        assert result.successful, "The user must satisfy this bind condition"

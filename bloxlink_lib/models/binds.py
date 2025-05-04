@@ -38,6 +38,15 @@ VALID_BIND_TYPES = Literal[
 BIND_GROUP_SUBTYPES = Literal["role_bind", "full_group"]
 
 
+class BindCalculationResult(BaseModel):
+    """The result of bind calculation for the user"""
+
+    successful: bool
+    additional_roles: SnowflakeSet
+    ineligible_roles: SnowflakeSet
+    missing_roles: CoerciveSet[str]
+
+
 # TypedDict definitions used for function kwargs
 class GroupBindDataDict(TypedDict, total=False):
     everyone: bool
@@ -249,112 +258,96 @@ class GuildBind(BaseModel):
         guild_roles: dict[int, RoleSerializable],
         member: Member | MemberSerializable,
         roblox_user: RobloxUser | None = None,
-    ) -> tuple[bool, SnowflakeSet, CoerciveSet[str], SnowflakeSet]:
+    ) -> BindCalculationResult:
         """Check if a user satisfies the requirements for this bind."""
 
         ineligible_roles = SnowflakeSet()
         additional_roles = SnowflakeSet()
         missing_roles = CoerciveSet[str]()
+        successful: bool = False
 
         if not roblox_user:
             if self.criteria.type == "unverified":
-                return True, additional_roles, missing_roles, ineligible_roles
+                successful = True
+            else:
+                # user is unverified, so remove Verified role
+                if self.criteria.type == "verified":
+                    for role_id in filter(
+                        lambda r: int(r) in member.role_ids, self.roles
+                    ):
+                        ineligible_roles.add(role_id)
 
-            # user is unverified, so remove Verified role
-            if self.criteria.type == "verified":
-                for role_id in filter(lambda r: int(r) in member.role_ids, self.roles):
-                    ineligible_roles.add(role_id)
+                successful = False
+        else:
+            # user is verified
+            match self.criteria.type:
+                case "verified":
+                    successful = True
 
-            return False, additional_roles, missing_roles, ineligible_roles
+                case "group":
+                    group: RobloxGroup = self.entity
 
-        # user is verified
-        match self.criteria.type:
-            case "verified":
-                return True, additional_roles, missing_roles, ineligible_roles
+                    await group.sync_for(roblox_user, sync=True)
 
-            case "group":
-                group: RobloxGroup = self.entity
+                    user_roleset = group.user_roleset
 
-                await group.sync_for(roblox_user, sync=True)
-
-                user_roleset = group.user_roleset
-
-                # check if the user has any group roleset roles they shouldn't have
-                if self.criteria.group.dynamicRoles:
-                    for roleset in group.rolesets.values():
-                        for role_id in member.role_ids:
-                            if (
-                                role_id in guild_roles
-                                and guild_roles[role_id].name == roleset.name
-                                and str(roleset) != str(user_roleset)
-                            ):
-                                ineligible_roles.add(role_id)
-
-                if self.criteria.id in roblox_user.groups:
-                    # full group bind. check for a matching roleset
+                    # check if the user has any group roleset roles they shouldn't have
                     if self.criteria.group.dynamicRoles:
-                        roleset_role = find(
-                            lambda r: r.name == user_roleset.name, guild_roles.values()
-                        )
+                        for roleset in group.rolesets.values():
+                            for role_id in member.role_ids:
+                                if (
+                                    role_id in guild_roles
+                                    and guild_roles[role_id].name == roleset.name
+                                    and str(roleset) != str(user_roleset)
+                                ):
+                                    ineligible_roles.add(role_id)
 
-                        if roleset_role:
-                            additional_roles.add(roleset_role.id)
-                            return (
-                                True,
-                                additional_roles,
-                                missing_roles,
-                                ineligible_roles,
+                    if self.criteria.id in roblox_user.groups:
+                        # full group bind. check for a matching roleset
+                        if self.criteria.group.dynamicRoles:
+                            roleset_role = find(
+                                lambda r: r.name == user_roleset.name,
+                                guild_roles.values(),
                             )
 
-                        missing_roles.add(user_roleset.name)
+                            if roleset_role:
+                                additional_roles.add(roleset_role.id)
+                                successful = True
+                            else:
+                                missing_roles.add(user_roleset.name)
 
-                    if self.criteria.group.everyone:
-                        return True, additional_roles, missing_roles, ineligible_roles
-
-                    if self.criteria.group.guest:
-                        return False, additional_roles, missing_roles, ineligible_roles
-
-                    if (self.criteria.group.min and self.criteria.group.max) and (
-                        self.criteria.group.min
-                        <= group.user_roleset.rank
-                        <= self.criteria.group.max
-                    ):
-                        return True, additional_roles, missing_roles, ineligible_roles
-
-                    if self.criteria.group.roleset:
-                        roleset = self.criteria.group.roleset
-                        return (
-                            group.user_roleset.rank == roleset
-                            or (
+                        elif self.criteria.group.everyone:
+                            successful = True
+                        elif self.criteria.group.guest:
+                            successful = False
+                        elif (self.criteria.group.min and self.criteria.group.max) and (
+                            self.criteria.group.min
+                            <= group.user_roleset.rank
+                            <= self.criteria.group.max
+                        ):
+                            successful = True
+                        elif self.criteria.group.roleset:
+                            roleset = self.criteria.group.roleset
+                            successful = group.user_roleset.rank == roleset or (
                                 roleset < 0 and group.user_roleset.rank >= abs(roleset)
-                            ),
-                            additional_roles,
-                            missing_roles,
-                            ineligible_roles,
-                        )
+                            )
+                        else:
+                            successful = False
+                    else:
+                        # Not in the group.
+                        # Result is whether the bind is for guests only
+                        successful = self.criteria.group.guest
 
-                    return False, additional_roles, missing_roles, ineligible_roles
+                case "badge" | "gamepass" | "asset":
+                    asset: RobloxBaseAsset = self.entity
+                    successful = await roblox_user.owns_asset(asset)
 
-                # Not in the group.
-                # Return whether the bind is for guests only
-                return (
-                    self.criteria.group.guest,
-                    additional_roles,
-                    missing_roles,
-                    ineligible_roles,
-                )
-
-            case "badge" | "gamepass" | "asset":
-                asset: RobloxBaseAsset = self.entity
-
-                return (
-                    await roblox_user.owns_asset(asset),
-                    additional_roles,
-                    missing_roles,
-                    ineligible_roles,
-                )
-
-        return False, additional_roles, missing_roles, ineligible_roles
+        return BindCalculationResult(
+            successful=successful,
+            additional_roles=additional_roles,
+            missing_roles=missing_roles,
+            ineligible_roles=ineligible_roles,
+        )
 
     @property
     def description_prefix(self) -> str:
