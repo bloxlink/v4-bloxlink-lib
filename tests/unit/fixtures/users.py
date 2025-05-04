@@ -12,8 +12,8 @@ from bloxlink_lib import (
 from tests.unit.utils import generate_snowflake
 
 # fixtures
-from .guilds import military_guild
-from .groups import GroupRolesets, test_military_group, member_roleset
+from .guilds import test_guild
+from .groups import GroupRolesets, test_test_group, member_roleset
 
 
 class MockUser(BaseModel):
@@ -81,10 +81,10 @@ def _mock_user(
 
 
 @pytest.fixture(scope="module")
-def test_military_member(
+def test_group_member(
     module_mocker,
-    military_guild: GuildSerializable,
-    test_military_group: RobloxGroup,
+    test_guild: GuildSerializable,
+    test_test_group: RobloxGroup,
     member_roleset: GroupRoleset,
 ) -> MockUser:
     """Test Discord Member model."""
@@ -92,10 +92,10 @@ def test_military_member(
     user = _mock_user(
         module_mocker,
         username="john",
-        guild=military_guild,
+        guild=test_guild,
         groups={
-            test_military_group.id: RobloxUserGroup(
-                group=test_military_group, role=member_roleset
+            test_test_group.id: RobloxUserGroup(
+                group=test_test_group, role=member_roleset
             )
         },
     )

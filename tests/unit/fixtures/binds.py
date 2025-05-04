@@ -4,7 +4,7 @@ from bloxlink_lib import RobloxGroup, GroupBindData
 
 # fixtures
 from .guilds import guild_roles
-from .groups import test_military_group
+from .groups import test_test_group
 
 
 # Bind scenarios (user does/does not meet bind condition)
@@ -12,7 +12,7 @@ from .groups import test_military_group
 def entire_group_bind(
     module_mocker,
     guild_roles,
-    test_military_group: RobloxGroup,
+    test_test_group: RobloxGroup,
 ) -> binds.GuildBind:
     """Whole group binds for V3 with 1 group linked."""
 
@@ -21,7 +21,7 @@ def entire_group_bind(
         nickname="{roblox-name}",
         roles=[str(role_id) for role_id in guild_roles.keys()],
         criteria=binds.BindCriteria(
-            type="group", id=test_military_group.id, group=GroupBindData(everyone=True)
+            type="group", id=test_test_group.id, group=GroupBindData(everyone=True)
         ),
     )
 

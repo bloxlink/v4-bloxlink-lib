@@ -4,8 +4,8 @@ import pytest
 from tests.unit.utils.nickname_helpers import NicknameTestData, nickname_formatter
 
 # fixtures
-from .users import test_military_member, MockUser
-from .guilds import military_guild
+from .users import test_group_member, MockUser
+from .guilds import test_guild
 
 if TYPE_CHECKING:
     from bloxlink_lib import GuildSerializable, RobloxUser, MemberSerializable
@@ -76,7 +76,7 @@ NicknameTestCaseData = namedtuple(
 )
 def nickname_test_data(
     request,
-    test_military_member: MockUser,
+    test_group_member: MockUser,
 ) -> NicknameTestCaseData:
     expected_nickname = request.param.expected_nickname
     include_roblox_user = request.param.include_roblox_user
@@ -84,10 +84,8 @@ def nickname_test_data(
 
     expected_nickname = nickname_formatter(
         expected_nickname_format=expected_nickname,
-        roblox_user=(test_military_member.roblox_user if include_roblox_user else None),
-        discord_user=(
-            test_military_member.discord_user if include_discord_user else None
-        ),
+        roblox_user=(test_group_member.roblox_user if include_roblox_user else None),
+        discord_user=(test_group_member.discord_user if include_discord_user else None),
     )
 
     return NicknameTestCaseData(
@@ -143,8 +141,8 @@ def nickname_test_data(
 )
 def generic_template_test_data(
     request,
-    test_military_member: MockUser,
-    military_guild: "GuildSerializable",
+    test_group_member: MockUser,
+    test_guild: "GuildSerializable",
 ) -> NicknameTestCaseData:
     expected_nickname = request.param.expected_nickname
     include_roblox_user = request.param.include_roblox_user
@@ -152,11 +150,9 @@ def generic_template_test_data(
 
     expected_nickname = nickname_formatter(
         expected_nickname_format=expected_nickname,
-        roblox_user=(test_military_member.roblox_user if include_roblox_user else None),
-        discord_user=(
-            test_military_member.discord_user if include_discord_user else None
-        ),
-        guild=military_guild,
+        roblox_user=(test_group_member.roblox_user if include_roblox_user else None),
+        discord_user=(test_group_member.discord_user if include_discord_user else None),
+        guild=test_guild,
     )
 
     return NicknameTestCaseData(

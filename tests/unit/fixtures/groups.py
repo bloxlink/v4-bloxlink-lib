@@ -60,7 +60,7 @@ def group_rolesets(member_roleset: GroupRoleset) -> GroupRolesets:
 
 
 @pytest.fixture(scope="module")
-def test_military_group(group_rolesets: GroupRolesets) -> RobloxGroup:
+def test_test_group(group_rolesets: GroupRolesets) -> RobloxGroup:
     """Military test group"""
 
     return RobloxGroup(

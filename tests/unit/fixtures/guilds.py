@@ -23,7 +23,7 @@ def guild_roles(group_rolesets: GroupRolesets) -> dict[int, RoleSerializable]:
 
 
 @pytest.fixture(scope="module")
-def military_guild(guild_roles) -> GuildSerializable:
+def test_guild(guild_roles) -> GuildSerializable:
     """Military Roleplay server."""
 
     return GuildSerializable(
