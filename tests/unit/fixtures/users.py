@@ -31,7 +31,7 @@ class MockUser(BaseModel):
 
 
 def _mock_roblox_user(
-    module_mocker,
+    mocker,
     *,
     user_id: int,
     username: str,
@@ -48,8 +48,8 @@ def _mock_roblox_user(
     )
 
     # Do not sync the model with the Roblox API
-    mocked_sync = module_mocker.AsyncMock(return_value=None)
-    module_mocker.patch.object(RobloxUser, "sync", new=mocked_sync)
+    mocked_sync = mocker.AsyncMock(return_value=None)
+    mocker.patch.object(RobloxUser, "sync", new=mocked_sync)
 
     return roblox_user
 
@@ -78,7 +78,7 @@ def _mock_discord_user(
 
 
 def mock_user(
-    module_mocker,
+    mocker,
     *,
     verified: bool,
     username: str,
@@ -99,7 +99,7 @@ def mock_user(
 
     if verified:
         roblox_user = _mock_roblox_user(
-            module_mocker, user_id=user_id, username=username, groups=groups
+            mocker, user_id=user_id, username=username, groups=groups
         )
     else:
         roblox_user = None
@@ -107,9 +107,9 @@ def mock_user(
     return MockUser(discord_user=member, roblox_user=roblox_user)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def test_group_member(
-    module_mocker,
+    mocker,
     test_guild: GuildSerializable,
     test_group: RobloxGroup,
     member_roleset: GroupRoleset,
@@ -117,7 +117,7 @@ def test_group_member(
     """Test Discord Member model."""
 
     user = mock_user(
-        module_mocker,
+        mocker,
         verified=True,
         username="john",
         guild=test_guild,

@@ -1,6 +1,5 @@
 import pytest
-from bloxlink_lib import GuildSerializable, SnowflakeSet
-from bloxlink_lib.models.base.serializable import RoleSerializable
+from bloxlink_lib import GuildSerializable, SnowflakeSet, find, RoleSerializable
 from .fixtures import (
     GuildRoles,
     GroupRolesets,
@@ -20,7 +19,7 @@ class TestBinds:
             MockBindScenario(
                 mock_user=MockUserData(
                     current_discord_roles=[GuildRoles.MEMBER],
-                    current_group_roleset=GroupRolesets.RANK_1,
+                    current_group_roleset=GroupRolesets.OFFICER,
                 ),
                 test_against_bind_fixtures=["everyone_group_bind"],
                 expected_binds=ExpectedBinds(
@@ -30,11 +29,11 @@ class TestBinds:
             MockBindScenario(
                 test_against_bind_fixtures=["dynamic_roles_group_bind"],
                 mock_user=MockUserData(
-                    current_discord_roles=[GuildRoles.RANK_2],
-                    current_group_roleset=GroupRolesets.RANK_1,
+                    current_discord_roles=[GuildRoles.COMMANDER],
+                    current_group_roleset=GroupRolesets.OFFICER,
                 ),
                 expected_binds=ExpectedBinds(
-                    expected_remove_roles=[GuildRoles.RANK_2],
+                    expected_remove_roles=[GuildRoles.COMMANDER],
                     expected_bind_success=True,
                 ),
             ),
@@ -52,7 +51,27 @@ class TestBinds:
                 test_against_bind_fixtures=["guest_group_bind"],
                 mock_user=MockUserData(
                     current_discord_roles=[GuildRoles.VERIFIED],
-                    current_group_roleset=GroupRolesets.RANK_1,
+                    current_group_roleset=GroupRolesets.OFFICER,
+                ),
+                expected_binds=ExpectedBinds(
+                    expected_bind_success=False,
+                ),
+            ),
+            MockBindScenario(
+                test_against_bind_fixtures=["roleset_group_bind"],
+                mock_user=MockUserData(
+                    current_discord_roles=[GuildRoles.VERIFIED],
+                    current_group_roleset=GroupRolesets.COMMANDER,
+                ),
+                expected_binds=ExpectedBinds(
+                    expected_bind_success=True,
+                ),
+            ),
+            MockBindScenario(
+                test_against_bind_fixtures=["roleset_group_bind"],
+                mock_user=MockUserData(
+                    current_discord_roles=[GuildRoles.VERIFIED],
+                    current_group_roleset=GroupRolesets.MEMBER,
                 ),
                 expected_binds=ExpectedBinds(
                     expected_bind_success=False,

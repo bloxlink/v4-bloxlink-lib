@@ -14,12 +14,7 @@ from bloxlink_lib import (
     GuildSerializable,
     RoleSerializable,
 )
-from . import (
-    GuildRoles,
-    MockUserData,
-    MockUser,
-    mock_user,
-)
+from . import GuildRoles, MockUserData, MockUser, mock_user, GroupRolesets
 from tests.unit.utils import enum_list_to_value_list
 
 if TYPE_CHECKING:
@@ -33,6 +28,7 @@ __all__ = [
     "everyone_group_bind",
     "mock_bind_scenario",
     "dynamic_roles_group_bind",
+    "roleset_group_bind",
     "guest_group_bind",
     "verified_bind",
     "unverified_bind",
@@ -67,10 +63,10 @@ class MockedBindScenarioResult(BaseModel):
 
 
 # Bind test case fixtures
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def mock_bind_scenario(
     request,
-    module_mocker,
+    mocker,
     test_guild: GuildSerializable,
     test_group: RobloxGroup,
     group_rolesets: "GroupRolesetsType",
@@ -104,7 +100,7 @@ def mock_bind_scenario(
     if mock_user_data.current_group_roleset:
         current_group_roleset = (
             find(
-                lambda r: r.name in mock_user_data.current_group_roleset.value,
+                lambda r: r.name == mock_user_data.current_group_roleset.name.title(),
                 group_rolesets.values(),
             )
             if mock_user_data.current_group_roleset
@@ -117,7 +113,7 @@ def mock_bind_scenario(
         current_group_roleset = None
 
     user = mock_user(
-        module_mocker,
+        mocker,
         verified=mock_user_data.verified,
         username="john",
         guild=test_guild,
@@ -143,7 +139,7 @@ def mock_bind_scenario(
 
 
 # Bind utility fixtures
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def find_discord_roles(guild_roles: "GuildRolesType") -> list[RoleSerializable]:
     """Retrieve the Discord roles from the GuildRoles enum"""
 
@@ -157,7 +153,7 @@ def find_discord_roles(guild_roles: "GuildRolesType") -> list[RoleSerializable]:
 
 
 def _mock_bind(
-    module_mocker,
+    mocker,
     *,
     discord_roles: list[RoleSerializable],
     criteria: binds.BindCriteria,
@@ -173,8 +169,8 @@ def _mock_bind(
     )
 
     # Mock the sync method to prevent actual API calls
-    mocked_sync = module_mocker.AsyncMock(return_value=None)
-    module_mocker.patch.object(RobloxGroup, "sync", new=mocked_sync)
+    mocked_sync = mocker.AsyncMock(return_value=None)
+    mocker.patch.object(RobloxGroup, "sync", new=mocked_sync)
 
     new_bind.entity = entity
 
@@ -182,17 +178,17 @@ def _mock_bind(
 
 
 # Group bind fixtures
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def everyone_group_bind(
-    module_mocker,
-    find_discord_roles: Callable[[GuildRoles, ...], list[RoleSerializable]],
+    mocker,
+    find_discord_roles: Callable[[GuildRoles], list[RoleSerializable]],
     test_group: RobloxGroup,
 ) -> binds.GuildBind:
     """Bind everyone to receive these specific roles"""
 
     mocked_bind = _mock_bind(
-        module_mocker,
-        discord_roles=find_discord_roles(GuildRoles.RANK_1),
+        mocker,
+        discord_roles=find_discord_roles(GuildRoles.OFFICER),
         criteria=binds.BindCriteria(
             type="group", id=test_group.id, group=GroupBindData(everyone=True)
         ),
@@ -202,15 +198,15 @@ def everyone_group_bind(
     return mocked_bind
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def dynamic_roles_group_bind(
-    module_mocker,
+    mocker,
     test_group: RobloxGroup,
 ) -> binds.GuildBind:
     """Bind every group roleset to the same name Discord role"""
 
     mocked_bind = _mock_bind(
-        module_mocker,
+        mocker,
         discord_roles=[],
         criteria=binds.BindCriteria(
             type="group", id=test_group.id, group=GroupBindData(dynamicRoles=True)
@@ -221,16 +217,16 @@ def dynamic_roles_group_bind(
     return mocked_bind
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def guest_group_bind(
-    module_mocker,
+    mocker,
     test_group: RobloxGroup,
     find_discord_roles: Callable[[GuildRoles], list[RoleSerializable]],
 ) -> binds.GuildBind:
     """Bind a non-group member to receive these specific roles"""
 
     mocked_bind = _mock_bind(
-        module_mocker,
+        mocker,
         discord_roles=find_discord_roles(GuildRoles.NOT_IN_GROUP),
         criteria=binds.BindCriteria(
             type="group", id=test_group.id, group=GroupBindData(guest=True)
@@ -241,16 +237,38 @@ def guest_group_bind(
     return mocked_bind
 
 
+@pytest.fixture()
+def roleset_group_bind(
+    mocker,
+    test_group: RobloxGroup,
+    find_discord_roles: Callable[[GuildRoles], list[RoleSerializable]],
+) -> binds.GuildBind:
+    """Bind a specific roleset to receive these specific roles"""
+
+    mocked_bind = _mock_bind(
+        mocker,
+        discord_roles=find_discord_roles(GuildRoles.COMMANDER),
+        criteria=binds.BindCriteria(
+            type="group",
+            id=test_group.id,
+            group=GroupBindData(roleset=GroupRolesets.COMMANDER.value),
+        ),
+        entity=test_group,
+    )
+
+    return mocked_bind
+
+
 # Verified bind fixtures
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def verified_bind(
-    module_mocker,
+    mocker,
     find_discord_roles: Callable[[GuildRoles], list[RoleSerializable]],
 ) -> binds.GuildBind:
     """Bind everyone to receive these specific roles"""
 
     mocked_bind = _mock_bind(
-        module_mocker,
+        mocker,
         discord_roles=find_discord_roles(GuildRoles.VERIFIED),
         criteria=binds.BindCriteria(type="verified"),
         entity=BloxlinkEntity(type="verified"),
@@ -260,15 +278,15 @@ def verified_bind(
 
 
 # Unverified bind fixtures
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def unverified_bind(
-    module_mocker,
-    find_discord_roles: Callable[[GuildRoles, ...], list[RoleSerializable]],
+    mocker,
+    find_discord_roles: Callable[[GuildRoles], list[RoleSerializable]],
 ) -> binds.GuildBind:
     """Bind everyone to receive these specific roles"""
 
     mocked_bind = _mock_bind(
-        module_mocker,
+        mocker,
         discord_roles=find_discord_roles(GuildRoles.UNVERIFIED),
         criteria=binds.BindCriteria(type="unverified"),
         entity=BloxlinkEntity(type="unverified"),

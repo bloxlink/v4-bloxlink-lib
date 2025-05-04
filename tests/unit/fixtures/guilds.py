@@ -13,8 +13,8 @@ class GuildRoles(Enum):
     UNVERIFIED = "Unverified"
     NOT_IN_GROUP = "Not in Group"
     MEMBER = "Member"
-    RANK_1 = "Officer"
-    RANK_2 = "Commander"
+    OFFICER = "Officer"
+    COMMANDER = "Commander"
     ADMIN = "Leader"
 
     def __str__(self):
@@ -24,7 +24,7 @@ class GuildRoles(Enum):
 GuildRolesType = dict[int, RoleSerializable]
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def guild_roles() -> GuildRolesType:
     """Test Discord roles for the test Discord server."""
 
@@ -39,7 +39,7 @@ def guild_roles() -> GuildRolesType:
     return new_roles
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def test_guild(guild_roles: GuildRolesType) -> GuildSerializable:
     """Test Discord server."""
 

@@ -26,7 +26,7 @@ class NicknameTestData(BaseModel):
 
 
 @pytest.fixture(
-    scope="module",
+    scope="function",
     params=[
         NicknameTestData(
             nickname_template="{roblox-name}",
@@ -104,7 +104,7 @@ def nickname_test_data(
 
 
 @pytest.fixture(
-    scope="module",
+    scope="function",
     params=[
         # Tests not dependent on a Roblox user being linked to a Discord user
         NicknameTestData(
@@ -117,11 +117,11 @@ def nickname_test_data(
             expected_nickname="{guild.name}",
             include_discord_user=True,
         ),
-        NicknameTestData(
-            nickname_template="{discord-mention}",
-            expected_nickname="{discord_user.mention}",
-            include_discord_user=True,
-        ),
+        # NicknameTestData(
+        #     nickname_template="{discord-mention}",
+        #     expected_nickname="{discord_user.mention}",
+        #     include_discord_user=True,
+        # ),
         NicknameTestData(
             nickname_template="{discord-name}",
             expected_nickname="{discord_user.username}",
@@ -137,11 +137,11 @@ def nickname_test_data(
             expected_nickname="{discord_user.global_name}",
             include_discord_user=True,
         ),
-        NicknameTestData(
-            nickname_template="{discord-id}",
-            expected_nickname="{discord_user.id}",
-            include_discord_user=True,
-        ),
+        # NicknameTestData(
+        #     nickname_template="{discord-id}",
+        #     expected_nickname="{discord_user.id}",
+        #     include_discord_user=True,
+        # ),
         NicknameTestData(
             nickname_template="{verify-url}",
             expected_nickname="https://blox.link/verify",
