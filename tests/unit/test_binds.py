@@ -15,6 +15,12 @@ class TestBinds:
                 current_group_roleset=GroupRolesets.RANK_1,
                 test_against_bind_fixtures=["everyone_group_bind"],
             ),
+            MockUserData(
+                current_discord_roles=[GuildRoles.RANK_2],
+                current_group_roleset=GroupRolesets.RANK_1,
+                expected_removed_roles=[GuildRoles.RANK_2],
+                test_against_bind_fixtures=["dynamic_roles_group_bind"],
+            ),
         ],
         indirect=True,
     )
@@ -53,7 +59,7 @@ class TestBinds:
         await _assert_successful_binds_results(
             mocked_user=mock_verified_user,
             guild_roles=test_guild.roles,
-            expected_removed_roles=mock_verified_user.expected_removed_roles,
+            expected_remove_roles=mock_verified_user.expected_removed_roles,
         )
 
     @pytest.mark.parametrize(
@@ -84,9 +90,13 @@ class TestBinds:
 async def _assert_successful_binds_results(
     mocked_user: MockUser,
     guild_roles: list[RoleSerializable],
-    expected_removed_roles: list[int] | None = None,
+    expected_additional_roles: list[int] | None = None,
+    expected_missing_roles: list[int] | None = None,
+    expected_remove_roles: list[int] | None = None,
 ):
-    expected_removed_roles = expected_removed_roles or []
+    expected_additional_roles = expected_additional_roles or []
+    expected_missing_roles = expected_missing_roles or []
+    expected_ineligible_roles = expected_remove_roles or []
 
     for bind in mocked_user.test_against_bind_fixtures:
         result = await bind.satisfies_for(
@@ -96,8 +106,6 @@ async def _assert_successful_binds_results(
         )
 
         assert result.successful, "The user must satisfy this bind condition"
-        assert (
-            not result.additional_roles
-        ), "The user should not receive any additional roles"
-        assert not result.missing_roles, "The guild should not be missing any roles"
-        assert result.ineligible_roles == SnowflakeSet(expected_removed_roles)
+        assert result.additional_roles == SnowflakeSet(expected_additional_roles)
+        assert result.missing_roles == SnowflakeSet(expected_missing_roles)
+        assert result.ineligible_roles == SnowflakeSet(expected_ineligible_roles)

@@ -18,6 +18,7 @@ from .binds import (
     everyone_group_bind,
     verified_bind,
     unverified_bind,
+    dynamic_roles_group_bind,
 )
 from .nicknames import (
     NicknameTestCaseData,

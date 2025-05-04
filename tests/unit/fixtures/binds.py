@@ -1,8 +1,9 @@
 from typing import TYPE_CHECKING, Callable
 import pytest
 from bloxlink_lib.models import binds
-from bloxlink_lib import RobloxGroup, GroupBindData, find
+from bloxlink_lib import RobloxGroup, GroupBindData, find, BloxlinkEntity
 from bloxlink_lib.models.base.serializable import RoleSerializable
+from bloxlink_lib.models.roblox.base import RobloxEntity
 from tests.unit.fixtures.guilds import GuildRoles
 
 if TYPE_CHECKING:
@@ -28,6 +29,7 @@ def _mock_bind(
     *,
     discord_roles: list[RoleSerializable],
     criteria: binds.BindCriteria,
+    entity: RobloxEntity,
     nickname: str = "{roblox-name}",
 ) -> binds.GuildBind:
     """Mock a bind"""
@@ -41,6 +43,8 @@ def _mock_bind(
     # Mock the sync method to prevent actual API calls
     mocked_sync = module_mocker.AsyncMock(return_value=None)
     module_mocker.patch.object(RobloxGroup, "sync", new=mocked_sync)
+
+    new_bind.entity = entity
 
     return new_bind
 
@@ -63,6 +67,26 @@ def everyone_group_bind(
         criteria=binds.BindCriteria(
             type="group", id=test_group.id, group=GroupBindData(everyone=True)
         ),
+        entity=test_group,
+    )
+
+    return mocked_bind
+
+
+@pytest.fixture(scope="module")
+def dynamic_roles_group_bind(
+    module_mocker,
+    test_group: RobloxGroup,
+) -> binds.GuildBind:
+    """Bind every group roleset to the same name Discord role"""
+
+    mocked_bind = _mock_bind(
+        module_mocker,
+        discord_roles=[],
+        criteria=binds.BindCriteria(
+            type="group", id=test_group.id, group=GroupBindData(dynamicRoles=True)
+        ),
+        entity=test_group,
     )
 
     return mocked_bind
@@ -80,6 +104,7 @@ def verified_bind(
         module_mocker,
         discord_roles=find_discord_roles(GuildRoles.VERIFIED),
         criteria=binds.BindCriteria(type="verified"),
+        entity=BloxlinkEntity(type="verified"),
     )
 
     return mocked_bind
@@ -97,6 +122,7 @@ def unverified_bind(
         module_mocker,
         discord_roles=find_discord_roles(GuildRoles.UNVERIFIED),
         criteria=binds.BindCriteria(type="unverified"),
+        entity=BloxlinkEntity(type="unverified"),
     )
 
     return mocked_bind
