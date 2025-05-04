@@ -18,7 +18,7 @@ class TestBinds:
             MockUserData(
                 current_discord_roles=[GuildRoles.RANK_2],
                 current_group_roleset=GroupRolesets.RANK_1,
-                expected_removed_roles=[GuildRoles.RANK_2],
+                expected_remove_roles=[GuildRoles.RANK_2],
                 test_against_bind_fixtures=["dynamic_roles_group_bind"],
             ),
             MockUserData(
@@ -64,7 +64,7 @@ class TestBinds:
         await _assert_successful_binds_results(
             mocked_user=mock_verified_user,
             guild_roles=test_guild.roles,
-            expected_remove_roles=mock_verified_user.expected_removed_roles,
+            expected_remove_roles=mock_verified_user.expected_remove_roles,
         )
 
     @pytest.mark.parametrize(
@@ -77,7 +77,7 @@ class TestBinds:
             ),
             MockUserData(
                 current_discord_roles=[GuildRoles.RANK_1],
-                expected_removed_roles=[GuildRoles.RANK_1],
+                expected_remove_roles=[GuildRoles.RANK_1],
                 current_group_roleset=None,
                 test_against_bind_fixtures=["unverified_bind"],
             ),

@@ -27,7 +27,7 @@ class MockUserData(BaseModel):
     current_discord_roles: list[GuildRoles]  # Set the user's current Discord roles
     test_against_bind_fixtures: list[str]  # Passed to MockUser to use in the test case
 
-    expected_removed_roles: Annotated[
+    expected_remove_roles: Annotated[
         list[GuildRoles], Field(default_factory=list)
     ]  # Passed to MockUser to use in the test case. Defaults to empty array.
 
@@ -37,7 +37,7 @@ class MockUser(BaseModel):
 
     discord_user: MemberSerializable  # The Discord user
     roblox_user: RobloxUser | None  # The Roblox account of the user. Optional.
-    expected_removed_roles: list[int] = (
+    expected_remove_roles: list[int] = (
         None  # Used by the test case. Injected by mock_verified_user fixture. Optional.
     )
     test_against_bind_fixtures: list[GuildBind] | None = (
@@ -160,10 +160,10 @@ def mock_verified_user(
         for r in guild_roles.values()
         if r.name in enum_list_to_value_list(mock_data.current_discord_roles)
     ]
-    expected_removed_roles: list[int] = [
+    expected_remove_roles: list[int] = [
         r.id
         for r in guild_roles.values()
-        if r.name in enum_list_to_value_list(mock_data.expected_removed_roles)
+        if r.name in enum_list_to_value_list(mock_data.expected_remove_roles)
     ]
 
     if mock_data.current_group_roleset:
@@ -203,7 +203,7 @@ def mock_verified_user(
         for fixture in mock_data.test_against_bind_fixtures
     ]
 
-    user.expected_removed_roles = expected_removed_roles  # For the test case to use
+    user.expected_remove_roles = expected_remove_roles  # For the test case to use
 
     return user
 
@@ -224,10 +224,10 @@ def mock_unverified_user(
         for r in guild_roles.values()
         if r.name in enum_list_to_value_list(mock_data.current_discord_roles)
     ]
-    expected_removed_roles: list[int] = [
+    expected_remove_roles: list[int] = [
         r.id
         for r in guild_roles.values()
-        if r.name in enum_list_to_value_list(mock_data.expected_removed_roles)
+        if r.name in enum_list_to_value_list(mock_data.expected_remove_roles)
     ]
 
     user = _mock_user(
@@ -244,6 +244,6 @@ def mock_unverified_user(
         for fixture in mock_data.test_against_bind_fixtures
     ]
 
-    user.expected_removed_roles = expected_removed_roles  # For the test case to use
+    user.expected_remove_roles = expected_remove_roles  # For the test case to use
 
     return user
