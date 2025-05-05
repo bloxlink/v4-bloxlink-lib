@@ -1,46 +1,48 @@
+from enum import Enum
 import pytest
-from bloxlink_lib.models.base import GuildSerializable, RoleSerializable
+from bloxlink_lib import GuildSerializable, RoleSerializable
+from tests.unit.utils import generate_snowflake
+
+__all__ = ["GuildRoles", "GuildRolesType", "guild_roles", "test_guild"]
 
 
-@pytest.fixture
-def test_guild_1() -> GuildSerializable:
-    """Test Guild model."""
+class GuildRoles(Enum):
+    """The Discord roles in the test server"""
+
+    VERIFIED = "Verified"
+    UNVERIFIED = "Unverified"
+    NOT_IN_GROUP = "Not in Group"
+    MEMBER = "Member"
+    OFFICER = "Officer"
+    COMMANDER = "Commander"
+    ADMIN = "Leader"
+
+    def __str__(self):
+        return self.value
+
+
+GuildRolesType = dict[int, RoleSerializable]
+
+
+@pytest.fixture(scope="function")
+def guild_roles() -> GuildRolesType:
+    """Test Discord roles for the test Discord server."""
+
+    new_roles: dict[int, RoleSerializable] = {}
+
+    for i, discord_role in enumerate(GuildRoles):
+        new_snowflake = generate_snowflake()
+        new_roles[new_snowflake] = RoleSerializable(
+            id=new_snowflake, name=discord_role.value, position=i
+        )
+
+    return new_roles
+
+
+@pytest.fixture(scope="function")
+def test_guild(guild_roles: GuildRolesType) -> GuildSerializable:
+    """Test Discord server."""
 
     return GuildSerializable(
-        id=7323844246044188672,
-        name="My awesome server",
-        roles={
-            1: RoleSerializable(
-                id=1,
-                name="Admin",
-                color=0xFF0000,
-                is_hoisted=True,
-                position=1,
-                permissions=0,
-                is_managed=False,
-                is_mentionable=True,
-            )
-        },
-    )
-
-
-@pytest.fixture
-def test_role_1() -> GuildSerializable:
-    """Test Guild model."""
-
-    return RoleSerializable(
-        id=987654321,
-        name="My awesome server",
-        roles={
-            1: RoleSerializable(
-                id=1,
-                name="Admin",
-                color=0xFF0000,
-                is_hoisted=True,
-                position=1,
-                permissions=0,
-                is_managed=False,
-                is_mentionable=True,
-            )
-        },
+        id=generate_snowflake(), name="Military Roleplay Community", roles=guild_roles
     )

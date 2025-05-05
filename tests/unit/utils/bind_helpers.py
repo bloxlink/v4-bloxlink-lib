@@ -1,15 +1,5 @@
 from bloxlink_lib.models.base.serializable import MemberSerializable, GuildSerializable
 from bloxlink_lib.models.roblox.users import RobloxUser
-from pydantic import BaseModel
-
-
-class NicknameTestData(BaseModel):
-    """Represents a scenario for a user's nickname"""
-
-    nickname_template: str
-    expected_nickname: str | None
-    valid_roblox_user: bool = None
-    valid_discord_user: bool = None
 
 
 def nickname_formatter(

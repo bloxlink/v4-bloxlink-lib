@@ -3,14 +3,7 @@ import pytest
 from bloxlink_lib.models.roblox.binds import parse_template
 
 # fixtures
-from .fixtures.users import test_discord_user_1
-from .fixtures.roblox_users import test_roblox_user_1
-from .fixtures.guilds import test_guild_1
-from .fixtures.nicknames import (
-    nickname_test_data,
-    generic_template_test_data,
-    NicknameTestCaseData,
-)
+from .fixtures import NicknameTestCaseData, MockUser
 
 if TYPE_CHECKING:
     from bloxlink_lib import GuildSerializable, RobloxUser, MemberSerializable
@@ -22,25 +15,26 @@ class TestNicknames:
     @pytest.mark.asyncio_concurrent(group="nickname_tests")
     async def test_nicknames(
         self,
-        test_roblox_user_1,
-        test_discord_user_1,
-        test_guild_1,
+        test_guild: "GuildSerializable",
+        test_group_member: MockUser,
         nickname_test_data: NicknameTestCaseData,
     ):
         """Test that the nickname is correctly parsed with a valid Roblox user."""
 
         expected_nickname = nickname_test_data.expected_nickname
         nickname_template = nickname_test_data.nickname_fixture.nickname_template
-        valid_roblox_user = nickname_test_data.nickname_fixture.valid_roblox_user
-        valid_discord_user = nickname_test_data.nickname_fixture.valid_discord_user
+        include_roblox_user = nickname_test_data.nickname_fixture.include_roblox_user
+        include_discord_user = nickname_test_data.nickname_fixture.include_discord_user
 
         nickname = await parse_template(
-            guild_id=test_guild_1.id,
-            guild_name=test_guild_1.name,
-            member=test_discord_user_1 if valid_discord_user else None,
+            guild_id=test_guild.id,
+            guild_name=test_guild.name,
+            member=test_group_member.discord_user if include_discord_user else None,
             template=nickname_template,
             potential_binds=[],
-            roblox_user=test_roblox_user_1 if valid_roblox_user else None,
+            roblox_user=(
+                test_group_member.roblox_user if include_roblox_user else None
+            ),
             trim_nickname=True,
         )
 
@@ -52,10 +46,9 @@ class TestNicknames:
     @pytest.mark.parametrize("include_roblox_user", [False, True])
     async def test_generic_templates(
         self,
-        test_guild_1: "GuildSerializable",
-        test_discord_user_1: "MemberSerializable",
+        test_guild: "GuildSerializable",
+        test_group_member: MockUser,
         include_roblox_user: bool,
-        test_roblox_user_1: "RobloxUser",
         generic_template_test_data: NicknameTestCaseData,
     ):
         """Test that the template is correctly parsed regardless if a Roblox account is linked."""
@@ -64,17 +57,19 @@ class TestNicknames:
         nickname_template = (
             generic_template_test_data.nickname_fixture.nickname_template
         )
-        valid_discord_user = (
-            generic_template_test_data.nickname_fixture.valid_discord_user
+        include_discord_user = (
+            generic_template_test_data.nickname_fixture.include_discord_user
         )
 
         nickname = await parse_template(
-            guild_id=test_guild_1.id,
-            guild_name=test_guild_1.name,
-            member=test_discord_user_1 if valid_discord_user else None,
+            guild_id=test_guild.id,
+            guild_name=test_guild.name,
+            member=test_group_member.discord_user if include_discord_user else None,
             template=nickname_template,
             potential_binds=[],
-            roblox_user=test_roblox_user_1 if include_roblox_user else None,
+            roblox_user=(
+                test_group_member.roblox_user if include_roblox_user else None
+            ),
             trim_nickname=False,  # Parse the entire template
         )
 

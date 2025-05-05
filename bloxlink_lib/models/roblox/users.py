@@ -16,7 +16,7 @@ from bloxlink_lib.exceptions import RobloxNotFound, RobloxAPIError, UserNotVerif
 from bloxlink_lib.database.mongodb import mongo  # pylint: disable=no-name-in-module
 from bloxlink_lib.models.base import BaseModel, MemberSerializable
 from bloxlink_lib.utils import get_environment, Environment
-from .groups import GroupRoleset
+from .groups import GroupRoleset, RobloxGroup
 
 if TYPE_CHECKING:
     from .base_assets import RobloxBaseAsset
@@ -66,24 +66,32 @@ class RobloxUserAvatarResponse(BaseModel):
     data: list[RobloxUserAvatar]
 
 
-class RobloxGroupResponse(BaseModel):
-    id: int
-    name: str
-    member_count: int = Field(alias="memberCount")
-    has_verified_badge: bool = Field(alias="hasVerifiedBadge")
+# class RobloxGroupResponse(BaseModel):
+#     """Type definition for a Roblox group from the Roblox API."""
+
+#     id: int
+#     name: str
+#     member_count: int = Field(alias="memberCount")
+#     has_verified_badge: bool = Field(alias="hasVerifiedBadge")
+
+#     @classmethod
+#     def from_group(cls, group: RobloxGroup):
+#         """Create an instance of RobloxGroupResponse from a RobloxGroup for mock testing"""
+
+#         return cls(id=RobloxGroup.id, name=RobloxGroup.name)
 
 
-class RobloxUserGroups(BaseModel):
+class RobloxUserGroup(BaseModel):
     """Type definition for a Roblox group from a user from the Roblox API."""
 
-    group: RobloxGroupResponse
+    group: RobloxGroup
     role: GroupRoleset
 
 
-class RobloxUserGroupsResponse(BaseModel):
+class RobloxUserGroupResponse(BaseModel):
     """Type definition for a Roblox user's groups from the Roblox API."""
 
-    data: list[RobloxUserGroups]
+    data: list[RobloxUserGroup]
 
 
 class RobloxUserBadge(BaseModel):
@@ -109,7 +117,7 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
     # these fields are provided after sync() is called
     banned: bool = Field(alias="isBanned", default=False)
     age_days: int = None
-    groups: dict[int, RobloxUserGroups] | None = Field(default=None)
+    groups: dict[int, RobloxUserGroup] | None = Field(default=None)
 
     avatar: UserAvatar = None
     avatar_url: str | None = None
@@ -286,7 +294,7 @@ async def fetch_base_data(roblox_id: int) -> dict | None:
 
 async def fetch_user_groups(
     roblox_id: int,
-) -> dict[Literal["groups"] : dict[int, RobloxUserGroups]] | None:
+) -> dict[Literal["groups"] : dict[int, RobloxUserGroup]] | None:
     """
     Fetch the groups of a user.
 
@@ -295,7 +303,7 @@ async def fetch_user_groups(
     """
 
     user_groups, user_groups_response = await fetch_typed(
-        RobloxUserGroupsResponse,
+        RobloxUserGroupResponse,
         USER_GROUPS_API.format(roblox_id=roblox_id),
         raise_on_failure=False,
     )
