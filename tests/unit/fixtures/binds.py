@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import TYPE_CHECKING, Callable, Annotated
 import pytest
 from pydantic import Field
@@ -13,7 +14,9 @@ from bloxlink_lib import (
     RobloxEntity,
     GuildSerializable,
     RoleSerializable,
+    RobloxBadge,
 )
+from tests.unit.fixtures.badges import MockBadges
 from . import GuildRoles, MockUserData, MockUser, mock_user, GroupRolesets
 from tests.unit.utils import enum_list_to_value_list
 
@@ -33,7 +36,23 @@ __all__ = [
     "guest_group_bind",
     "verified_bind",
     "unverified_bind",
+    "badge_bind",
+    "BadgeBindTestCase",
+    "BindTestFixtures",
 ]
+
+
+class BindTestFixtures(Enum):
+    """The fixtures for all bind tests"""
+
+    EVERYONE_GROUP_BIND = "everyone_group_bind"
+    DYNAMIC_ROLES_GROUP_BIND = "dynamic_roles_group_bind"
+    ROLES_GROUP_BIND = "roles_group_bind"
+    MIN_MAX_GROUP_BIND = "min_max_group_bind"
+    GUEST_GROUP_BIND = "guest_group_bind"
+    VERIFIED_BIND = "verified_bind"
+    UNVERIFIED_BIND = "unverified_bind"
+    BADGE_BIND = "badge_bind"
 
 
 class ExpectedBinds(BaseModel):
@@ -45,20 +64,42 @@ class ExpectedBinds(BaseModel):
     expected_bind_success: bool  # Whether the user meets the bind criteria. Passed to MockUser to use in the test case.
 
 
+class BindTestCase(BaseModel):
+    """The base class for all bind test cases"""
+
+    test_fixture: str  # The fixture to use for the bind test case
+
+
+class BadgeBindTestCase(BindTestCase):
+    """The test case for badge binds"""
+
+    badge: MockBadges
+    discord_role: GuildRoles
+
+
+class ExtraBindResultData(BaseModel):
+    """Extra data to use for the mocked user"""
+
+    owns_assets: list[MockBadges] | None = None
+
+
 class MockBindScenario(BaseModel):
     """Data to use for the mocked user in a test case"""
 
-    test_against_bind_fixtures: list[
-        str
-    ]  # Passed to MockedBindScenarioResult to use in the test case
+    test_against_bind_fixtures: list[str] = (
+        None  # Passed to MockedBindScenarioResult to use in the test case
+    )
     mock_user: MockUserData
     expected_binds: ExpectedBinds = None
+    test_cases: list[BadgeBindTestCase] = None
 
 
 class MockedBindScenarioResult(BaseModel):
     """Data to use for the mocked user in a test case"""
 
-    test_against_bind_fixtures: list[GuildBind]
+    test_against_bind_fixtures: list[
+        GuildBind | Callable[..., GuildBind]
+    ]  # it's either a GuildBind or a function that returns a GuildBind if custom arguments are necessary
     mock_user: MockUser
     expected_binds: ExpectedBinds
 
@@ -86,10 +127,11 @@ def mock_bind_scenario(
 
     mock_user_data: MockUserData = mock_bind_scenario.mock_user
     expected_binds: ExpectedBinds = mock_bind_scenario.expected_binds
-    test_against_bind_fixtures: list[GuildBind] = [
+    test_against_bind_fixtures: list[GuildBind | Callable[..., GuildBind]] = [
         request.getfixturevalue(fixture)
-        for fixture in mock_bind_scenario.test_against_bind_fixtures
+        for fixture in mock_bind_scenario.test_against_bind_fixtures or []
     ]
+    test_cases = mock_bind_scenario.test_cases
 
     if expected_binds.expected_remove_roles:
         expected_binds.expected_remove_roles = [
@@ -113,6 +155,18 @@ def mock_bind_scenario(
     else:
         current_group_roleset = None
 
+    if test_cases:
+        for test_case in test_cases:
+            match test_case.test_fixture:
+                case BindTestFixtures.BADGE_BIND:
+                    badge_bind_callable: Callable[
+                        [MockBadges, GuildRoles], GuildBind
+                    ] = request.getfixturevalue(test_case.test_fixture)
+                    bind_fixture = badge_bind_callable(
+                        test_case.badge, test_case.discord_role
+                    )
+                    test_against_bind_fixtures.append(bind_fixture)
+
     user = mock_user(
         mocker,
         verified=mock_user_data.verified,
@@ -127,6 +181,7 @@ def mock_bind_scenario(
             if current_group_roleset
             else None
         ),
+        owns_assets=mock_user_data.owns_assets or [],
         current_discord_roles=current_discord_roles,
     )
 
@@ -316,3 +371,25 @@ def unverified_bind(
     )
 
     return mocked_bind
+
+
+# Badge bind fixtures
+@pytest.fixture()
+def badge_bind(
+    mocker,
+    find_discord_roles: Callable[[GuildRoles], list[RoleSerializable]],
+) -> Callable[[MockBadges, GuildRoles], binds.GuildBind]:
+    """Bind a badge to receive these specific roles"""
+
+    def _get_bind_for_badge(
+        badge: MockBadges,
+        discord_role: GuildRoles,
+    ) -> binds.GuildBind:
+        return _mock_bind(
+            mocker,
+            discord_roles=find_discord_roles(discord_role),
+            criteria=binds.BindCriteria(type="badge", id=badge.value),
+            entity=RobloxBadge(id=badge.value),
+        )
+
+    return _get_bind_for_badge

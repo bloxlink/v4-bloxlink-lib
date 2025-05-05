@@ -1,5 +1,5 @@
 import pytest
-from bloxlink_lib import GuildSerializable, SnowflakeSet, find, RoleSerializable
+from bloxlink_lib import GuildSerializable, SnowflakeSet, RoleSerializable, GuildBind
 from .fixtures import (
     GuildRoles,
     GroupRolesets,
@@ -7,6 +7,9 @@ from .fixtures import (
     MockBindScenario,
     ExpectedBinds,
     MockedBindScenarioResult,
+    MockBadges,
+    BadgeBindTestCase,
+    BindTestFixtures,
 )
 
 
@@ -116,7 +119,7 @@ class TestBinds:
         test_guild: GuildSerializable,
         mock_bind_scenario: MockedBindScenarioResult,
     ):
-        """Test that a user in a group with everyone=True binding satisfies the condition."""
+        """Test that a user in a group satisfies the group bind."""
 
         await _assert_successful_binds_results(
             mocked_bind_scenario=mock_bind_scenario,
@@ -188,7 +191,48 @@ class TestBinds:
         test_guild: GuildSerializable,
         mock_bind_scenario: MockedBindScenarioResult,
     ):
-        """Test that a user in a group with everyone=True binding satisfies the condition."""
+        """Test that a user in a group satisfies the unverified bind."""
+
+        await _assert_successful_binds_results(
+            mocked_bind_scenario=mock_bind_scenario,
+            guild_roles=test_guild.roles,
+        )
+
+    @pytest.mark.parametrize(
+        "mock_bind_scenario",
+        [
+            MockBindScenario(
+                test_cases=[
+                    BadgeBindTestCase(
+                        test_fixture=BindTestFixtures.BADGE_BIND,
+                        badge=MockBadges.VIP_BADGE,
+                        discord_role=GuildRoles.OWNS_BADGE,
+                    ),
+                    BadgeBindTestCase(
+                        test_fixture=BindTestFixtures.BADGE_BIND,
+                        badge=MockBadges.VIP_BADGE,
+                        discord_role=GuildRoles.OWNS_BADGE,
+                    ),
+                ],
+                mock_user=MockUserData(
+                    current_discord_roles=[],
+                    owns_assets=[MockBadges.VIP_BADGE],
+                    verified=True,
+                ),
+                expected_binds=ExpectedBinds(
+                    expected_bind_success=True,
+                ),
+            ),
+        ],
+        indirect=True,
+    )
+    @pytest.mark.asyncio_concurrent(group="bind_tests")
+    async def test_badge_bind(
+        self,
+        test_guild: GuildSerializable,
+        mock_bind_scenario: MockedBindScenarioResult,
+    ):
+        """Test that a user in a group satisfies the badge bind."""
 
         await _assert_successful_binds_results(
             mocked_bind_scenario=mock_bind_scenario,

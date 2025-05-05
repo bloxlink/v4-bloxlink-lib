@@ -1,4 +1,6 @@
 from datetime import datetime
+from typing import Annotated
+from pydantic import Field
 import pytest
 from bloxlink_lib import (
     MemberSerializable,
@@ -10,7 +12,9 @@ from bloxlink_lib import (
     GroupRoleset,
 )
 from tests.unit.utils import generate_snowflake
-from . import GroupRolesets, GuildRoles
+from .groups import GroupRolesets
+from .guilds import GuildRoles
+from .badges import MockBadges
 
 __all__ = ["MockUserData", "MockUser", "mock_user", "test_group_member"]
 
@@ -18,9 +22,10 @@ __all__ = ["MockUserData", "MockUser", "mock_user", "test_group_member"]
 class MockUserData(BaseModel):
     """Data to use for the mocked user"""
 
-    current_group_roleset: GroupRolesets | None
+    current_group_roleset: GroupRolesets | None = None
     current_discord_roles: list[GuildRoles]  # Set the user's current Discord roles
     verified: bool = True
+    owns_assets: list[MockBadges] | None = None
 
 
 class MockUser(BaseModel):
@@ -28,6 +33,9 @@ class MockUser(BaseModel):
 
     discord_user: MemberSerializable  # The Discord user
     roblox_user: RobloxUser | None  # The Roblox account of the user. Optional.
+    owns_assets: list[MockBadges] | None = (
+        None  # Passed from MockUserData (the test case)
+    )
 
 
 def _mock_roblox_user(
@@ -36,6 +44,7 @@ def _mock_roblox_user(
     user_id: int,
     username: str,
     groups: dict[int, RobloxUserGroup] | None,
+    owns_assets: list[MockBadges] | None,
 ) -> RobloxUser:
     roblox_user = RobloxUser(
         id=user_id,
@@ -50,6 +59,21 @@ def _mock_roblox_user(
     # Do not sync the model with the Roblox API
     mocked_sync = mocker.AsyncMock(return_value=None)
     mocker.patch.object(RobloxUser, "sync", new=mocked_sync)
+
+    if owns_assets:
+        for asset in owns_assets:
+            # Mock owns_asset to return True when called with this asset (badge, gamepass, catalog asset) ID
+            async def mock_owns_asset(asset_id: int) -> bool:
+                if asset_id == asset.value:
+                    return True
+
+                return False
+
+            mocker.patch.object(
+                RobloxUser,
+                "owns_asset",
+                new=mocker.AsyncMock(side_effect=mock_owns_asset),
+            )
 
     return roblox_user
 
@@ -85,6 +109,7 @@ def mock_user(
     guild: GuildSerializable,
     groups: dict[int, RobloxUserGroup] | None = None,
     current_discord_roles: list[int] | None = None,
+    owns_assets: list[MockBadges] | None = None,
 ) -> MockUser:
     user_id = generate_snowflake()
     current_discord_roles = current_discord_roles or []
@@ -97,14 +122,23 @@ def mock_user(
         current_discord_roles=current_discord_roles,
     )
 
-    if verified:
-        roblox_user = _mock_roblox_user(
-            mocker, user_id=user_id, username=username, groups=groups
+    roblox_user = (
+        _mock_roblox_user(
+            mocker,
+            user_id=user_id,
+            username=username,
+            groups=groups,
+            owns_assets=owns_assets,
         )
-    else:
-        roblox_user = None
+        if verified
+        else None
+    )
 
-    return MockUser(discord_user=member, roblox_user=roblox_user)
+    return MockUser(
+        discord_user=member,
+        roblox_user=roblox_user,
+        owns_assets=owns_assets,
+    )
 
 
 @pytest.fixture(scope="function")
