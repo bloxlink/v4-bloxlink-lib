@@ -5,11 +5,12 @@ from .fixtures import (
     GroupRolesets,
     MockUserData,
     MockBindScenario,
-    ExpectedBinds,
+    ExpectedBindsResult,
     MockedBindScenarioResult,
     MockBadges,
     BadgeBindTestCase,
     BindTestFixtures,
+    BindTestCase,
 )
 
 
@@ -20,94 +21,129 @@ class TestBinds:
         "mock_bind_scenario",
         [
             MockBindScenario(
+                test_cases=[
+                    BindTestCase(
+                        test_fixture=BindTestFixtures.GROUPS.EVERYONE_GROUP_BIND,
+                        expected_result=ExpectedBindsResult(
+                            expected_bind_success=True,
+                        ),
+                    ),
+                ],
                 mock_user=MockUserData(
                     current_discord_roles=[GuildRoles.MEMBER],
                     current_group_roleset=GroupRolesets.OFFICER,
                 ),
-                test_against_bind_fixtures=["everyone_group_bind"],
-                expected_binds=ExpectedBinds(
-                    expected_bind_success=True,
-                ),
             ),
             MockBindScenario(
-                test_against_bind_fixtures=["dynamic_roles_group_bind"],
+                test_cases=[
+                    BindTestCase(
+                        test_fixture=BindTestFixtures.GROUPS.DYNAMIC_ROLES_GROUP_BIND,
+                        expected_result=ExpectedBindsResult(
+                            expected_bind_success=True,
+                        ),
+                    ),
+                ],
                 mock_user=MockUserData(
                     current_discord_roles=[GuildRoles.COMMANDER],
                     current_group_roleset=GroupRolesets.OFFICER,
                 ),
-                expected_binds=ExpectedBinds(
-                    expected_remove_roles=[GuildRoles.COMMANDER],
-                    expected_bind_success=True,
-                ),
             ),
             MockBindScenario(
-                test_against_bind_fixtures=["guest_group_bind"],
+                test_cases=[
+                    BindTestCase(
+                        test_fixture=BindTestFixtures.GROUPS.GUEST_GROUP_BIND,
+                        expected_result=ExpectedBindsResult(
+                            expected_bind_success=True,
+                        ),
+                    ),
+                ],
                 mock_user=MockUserData(
                     current_discord_roles=[GuildRoles.VERIFIED],
                     current_group_roleset=None,
                 ),
-                expected_binds=ExpectedBinds(
-                    expected_bind_success=True,
-                ),
             ),
             MockBindScenario(
-                test_against_bind_fixtures=["guest_group_bind"],
+                test_cases=[
+                    BindTestCase(
+                        test_fixture=BindTestFixtures.GROUPS.GUEST_GROUP_BIND,
+                        expected_result=ExpectedBindsResult(
+                            expected_bind_success=False,
+                        ),
+                    ),
+                ],
                 mock_user=MockUserData(
                     current_discord_roles=[GuildRoles.VERIFIED],
                     current_group_roleset=GroupRolesets.OFFICER,
                 ),
-                expected_binds=ExpectedBinds(
-                    expected_bind_success=False,
-                ),
             ),
             MockBindScenario(
-                test_against_bind_fixtures=["roleset_group_bind"],
+                test_cases=[
+                    BindTestCase(
+                        test_fixture=BindTestFixtures.GROUPS.ROLESET_GROUP_BIND,
+                        expected_result=ExpectedBindsResult(
+                            expected_bind_success=True,
+                        ),
+                    ),
+                ],
                 mock_user=MockUserData(
                     current_discord_roles=[GuildRoles.VERIFIED],
                     current_group_roleset=GroupRolesets.COMMANDER,
                 ),
-                expected_binds=ExpectedBinds(
-                    expected_bind_success=True,
-                ),
             ),
             MockBindScenario(
-                test_against_bind_fixtures=["roleset_group_bind"],
+                test_cases=[
+                    BindTestCase(
+                        test_fixture=BindTestFixtures.GROUPS.ROLESET_GROUP_BIND,
+                        expected_result=ExpectedBindsResult(
+                            expected_bind_success=False,
+                        ),
+                    ),
+                ],
                 mock_user=MockUserData(
                     current_discord_roles=[GuildRoles.VERIFIED],
                     current_group_roleset=GroupRolesets.MEMBER,
                 ),
-                expected_binds=ExpectedBinds(
-                    expected_bind_success=False,
-                ),
             ),
             MockBindScenario(
-                test_against_bind_fixtures=["min_max_group_bind"],
+                test_cases=[
+                    BindTestCase(
+                        test_fixture=BindTestFixtures.GROUPS.MIN_MAX_GROUP_BIND,
+                        expected_result=ExpectedBindsResult(
+                            expected_bind_success=True,
+                        ),
+                    ),
+                ],
                 mock_user=MockUserData(
                     current_discord_roles=[GuildRoles.VERIFIED],
                     current_group_roleset=GroupRolesets.COMMANDER,
                 ),
-                expected_binds=ExpectedBinds(
-                    expected_bind_success=True,
-                ),
             ),
             MockBindScenario(
-                test_against_bind_fixtures=["min_max_group_bind"],
+                test_cases=[
+                    BindTestCase(
+                        test_fixture=BindTestFixtures.GROUPS.MIN_MAX_GROUP_BIND,
+                        expected_result=ExpectedBindsResult(
+                            expected_bind_success=True,
+                        ),
+                    ),
+                ],
                 mock_user=MockUserData(
                     current_discord_roles=[GuildRoles.VERIFIED],
                     current_group_roleset=GroupRolesets.ADMIN,
                 ),
-                expected_binds=ExpectedBinds(
-                    expected_bind_success=True,
-                ),
             ),
             MockBindScenario(
-                test_against_bind_fixtures=["min_max_group_bind"],
+                test_cases=[
+                    BindTestCase(
+                        test_fixture=BindTestFixtures.GROUPS.MIN_MAX_GROUP_BIND,
+                        expected_result=ExpectedBindsResult(
+                            expected_bind_success=False,
+                        ),
+                    ),
+                ],
                 mock_user=MockUserData(
                     current_discord_roles=[GuildRoles.VERIFIED],
                     current_group_roleset=GroupRolesets.MEMBER,
-                ),
-                expected_binds=ExpectedBinds(
-                    expected_bind_success=False,
                 ),
             ),
         ],
@@ -130,26 +166,33 @@ class TestBinds:
         "mock_bind_scenario",
         [
             MockBindScenario(
-                test_against_bind_fixtures=["verified_bind"],
+                test_cases=[
+                    BindTestCase(
+                        test_fixture=BindTestFixtures.VERIFIED.VERIFIED_BIND,
+                        expected_result=ExpectedBindsResult(
+                            expected_bind_success=True,
+                        ),
+                    ),
+                ],
                 mock_user=MockUserData(
                     current_discord_roles=[GuildRoles.UNVERIFIED],
                     current_group_roleset=None,
                     verified=True,
                 ),
-                expected_binds=ExpectedBinds(
-                    expected_bind_success=True,
-                ),
             ),
             MockBindScenario(
-                test_against_bind_fixtures=["verified_bind"],
+                test_cases=[
+                    BindTestCase(
+                        test_fixture=BindTestFixtures.VERIFIED.VERIFIED_BIND,
+                        expected_result=ExpectedBindsResult(
+                            expected_bind_success=True,
+                        ),
+                    ),
+                ],
                 mock_user=MockUserData(
                     current_discord_roles=[GuildRoles.VERIFIED],
                     current_group_roleset=None,
                     verified=False,
-                ),
-                expected_binds=ExpectedBinds(
-                    expected_remove_roles=[GuildRoles.VERIFIED],
-                    expected_bind_success=False,
                 ),
             ),
         ],
@@ -172,14 +215,18 @@ class TestBinds:
         "mock_bind_scenario",
         [
             MockBindScenario(
-                test_against_bind_fixtures=["unverified_bind"],
+                test_cases=[
+                    BindTestCase(
+                        test_fixture=BindTestFixtures.VERIFIED.UNVERIFIED_BIND,
+                        expected_result=ExpectedBindsResult(
+                            expected_bind_success=True,
+                        ),
+                    ),
+                ],
                 mock_user=MockUserData(
                     current_discord_roles=[],
                     current_group_roleset=None,
                     verified=False,
-                ),
-                expected_binds=ExpectedBinds(
-                    expected_bind_success=True,
                 ),
             ),
         ],
@@ -204,23 +251,18 @@ class TestBinds:
             MockBindScenario(
                 test_cases=[
                     BadgeBindTestCase(
-                        test_fixture=BindTestFixtures.BADGE_BIND,
+                        test_fixture=BindTestFixtures.BADGES.BADGE_BIND,
                         badge=MockBadges.VIP_BADGE,
                         discord_role=GuildRoles.OWNS_BADGE,
-                    ),
-                    BadgeBindTestCase(
-                        test_fixture=BindTestFixtures.BADGE_BIND,
-                        badge=MockBadges.VIP_BADGE,
-                        discord_role=GuildRoles.OWNS_BADGE,
+                        expected_result=ExpectedBindsResult(
+                            expected_bind_success=True,
+                        ),
                     ),
                 ],
                 mock_user=MockUserData(
                     current_discord_roles=[],
                     owns_assets=[MockBadges.VIP_BADGE],
                     verified=True,
-                ),
-                expected_binds=ExpectedBinds(
-                    expected_bind_success=True,
                 ),
             ),
         ],
@@ -244,21 +286,15 @@ async def _assert_successful_binds_results(
     mocked_bind_scenario: MockedBindScenarioResult,
     guild_roles: list[RoleSerializable],
 ):
-    expected_remove_roles = (
-        mocked_bind_scenario.expected_binds.expected_remove_roles or []
-    )
-    expected_bind_success = mocked_bind_scenario.expected_binds.expected_bind_success
-    expected_additional_roles = []
-    expected_missing_roles = []
-
-    for bind in mocked_bind_scenario.test_against_bind_fixtures:
+    for i, bind in enumerate(mocked_bind_scenario.test_against_binds):
+        expected_result = mocked_bind_scenario.expected_results[i]
         result = await bind.satisfies_for(
             roblox_user=mocked_bind_scenario.mock_user.roblox_user,
             member=mocked_bind_scenario.mock_user.discord_user,
             guild_roles=guild_roles,
         )
 
-        assert result.successful == expected_bind_success
-        assert result.additional_roles == SnowflakeSet(expected_additional_roles)
-        assert result.missing_roles == SnowflakeSet(expected_missing_roles)
-        assert result.ineligible_roles == SnowflakeSet(expected_remove_roles)
+        assert result.successful == expected_result.expected_bind_success
+        assert result.ineligible_roles == SnowflakeSet(
+            expected_result.expected_remove_roles
+        )

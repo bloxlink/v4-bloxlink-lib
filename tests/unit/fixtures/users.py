@@ -10,6 +10,7 @@ from bloxlink_lib import (
     RobloxUserGroup,
     RobloxGroup,
     GroupRoleset,
+    RobloxBaseAsset,
 )
 from tests.unit.utils import generate_snowflake
 from .groups import GroupRolesets
@@ -61,10 +62,10 @@ def _mock_roblox_user(
     mocker.patch.object(RobloxUser, "sync", new=mocked_sync)
 
     if owns_assets:
-        for asset in owns_assets:
+        for mocked_asset in owns_assets:
             # Mock owns_asset to return True when called with this asset (badge, gamepass, catalog asset) ID
-            async def mock_owns_asset(asset_id: int) -> bool:
-                if asset_id == asset.value:
+            async def mock_owns_asset(asset: RobloxBaseAsset) -> bool:
+                if mocked_asset.value == asset.id:
                     return True
 
                 return False
