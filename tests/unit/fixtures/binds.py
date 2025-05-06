@@ -68,7 +68,7 @@ class MockBindScenario(BaseModel):
     """Data to use for the mocked user in a test case"""
 
     mock_user: MockUserData
-    test_cases: list[BindTestCase | BadgeBindTestCase] = None
+    test_cases: Annotated[list[BindTestCase | BadgeBindTestCase], Field(min_length=1)]
 
 
 class MockedBindScenarioResult(BaseModel):
@@ -119,26 +119,31 @@ def mock_bind_scenario(
     else:
         current_group_roleset = None
 
-    if test_cases:
-        for test_case in test_cases:
-            if test_case.expected_result.expected_remove_roles:
-                test_case.expected_result.expected_remove_roles = [
-                    r.id
-                    for r in guild_roles.values()
-                    if r.name
-                    in enum_list_to_value_list(
-                        test_case.expected_result.expected_remove_roles
-                    )
-                ]
-            match test_case.test_fixture:
-                case BindTestFixtures.BADGES.BADGE_BIND:
-                    badge_bind_callable: Callable[
-                        [MockBadges, GuildRoles], GuildBind
-                    ] = request.getfixturevalue(test_case.test_fixture.value)
-                    bind_fixture = badge_bind_callable(
-                        test_case.badge, test_case.discord_role
-                    )
-                    test_against_binds.append(bind_fixture)
+    for test_case in test_cases:
+        if test_case.expected_result.expected_remove_roles:
+            test_case.expected_result.expected_remove_roles = [
+                r.id
+                for r in guild_roles.values()
+                if r.name
+                in enum_list_to_value_list(
+                    test_case.expected_result.expected_remove_roles
+                )
+            ]
+
+        match test_case.test_fixture:
+            case BindTestFixtures.BADGES.BADGE_BIND:
+                badge_bind_callable: Callable[[MockBadges, GuildRoles], GuildBind] = (
+                    request.getfixturevalue(test_case.test_fixture.value)
+                )
+                bind_fixture = badge_bind_callable(
+                    test_case.badge, test_case.discord_role
+                )
+                test_against_binds.append(bind_fixture)
+            case _:
+                print("test_case.test_fixture", test_case.test_fixture)
+                bind_fixture = request.getfixturevalue(test_case.test_fixture.value)
+                print("bind_fixture", bind_fixture)
+                test_against_binds.append(bind_fixture)
 
     user = mock_user(
         mocker,
@@ -226,4 +231,4 @@ __all__ = [
     "BindTestCase",
     "BindTestFixtures",
     "mock_bind_scenario",
-]
+] + [fixture.value for fixture in VerifiedTestFixtures]

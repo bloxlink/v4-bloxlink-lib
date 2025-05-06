@@ -79,10 +79,8 @@ def _mock_roblox_user(
 
     if owns_assets:
         for mocked_asset in owns_assets:
-            print("mocking asset", mocked_asset.value)
 
             def _mock_owns_asset(asset: RobloxBaseAsset) -> bool:
-                print("inside", mocked_asset.value, asset.id)
                 if mocked_asset.value == asset.id:
                     return True
 
@@ -167,7 +165,7 @@ def mock_user(
     )
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def test_group_member(
     mocker,
     test_guild: GuildSerializable,

@@ -1,5 +1,5 @@
 import pytest
-from bloxlink_lib import GuildSerializable, SnowflakeSet, RoleSerializable, GuildBind
+from bloxlink_lib import GuildSerializable, SnowflakeSet, RoleSerializable
 from .fixtures import (
     GuildRoles,
     GroupRolesets,
@@ -155,7 +155,7 @@ class TestBinds:
         test_guild: GuildSerializable,
         mock_bind_scenario: MockedBindScenarioResult,
     ):
-        """Test that a user in a group satisfies the group bind."""
+        """Test group bind logic"""
 
         await _assert_successful_binds_results(
             mocked_bind_scenario=mock_bind_scenario,
@@ -185,7 +185,22 @@ class TestBinds:
                     BindTestCase(
                         test_fixture=BindTestFixtures.VERIFIED.VERIFIED_BIND,
                         expected_result=ExpectedBindsResult(
-                            expected_bind_success=True,
+                            expected_bind_success=False,
+                        ),
+                    ),
+                ],
+                mock_user=MockUserData(
+                    current_discord_roles=[GuildRoles.VERIFIED],
+                    current_group_roleset=None,
+                    verified=False,
+                ),
+            ),
+            MockBindScenario(
+                test_cases=[
+                    BindTestCase(
+                        test_fixture=BindTestFixtures.VERIFIED.VERIFIED_BIND,
+                        expected_result=ExpectedBindsResult(
+                            expected_bind_success=False,
                         ),
                     ),
                 ],
@@ -204,7 +219,7 @@ class TestBinds:
         test_guild: GuildSerializable,
         mock_bind_scenario: MockedBindScenarioResult,
     ):
-        """Test that a verified user satisfies the verified bind."""
+        """Test verified bind logic"""
 
         await _assert_successful_binds_results(
             mocked_bind_scenario=mock_bind_scenario,
@@ -238,7 +253,7 @@ class TestBinds:
         test_guild: GuildSerializable,
         mock_bind_scenario: MockedBindScenarioResult,
     ):
-        """Test that a user in a group satisfies the unverified bind."""
+        """Test unverified bind logic"""
 
         await _assert_successful_binds_results(
             mocked_bind_scenario=mock_bind_scenario,

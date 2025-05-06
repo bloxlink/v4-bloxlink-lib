@@ -50,7 +50,7 @@ def _create_roleset(roleset: GroupRolesets) -> GroupRoleset:
     return new_roleset
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def guest_roleset() -> GroupRoleset:
     """Initial Guest Roleset for the Group."""
 
@@ -59,7 +59,7 @@ def guest_roleset() -> GroupRoleset:
     return new_roleset
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def member_roleset() -> GroupRoleset:
     """Initial Member Roleset for the Group."""
 
@@ -68,7 +68,7 @@ def member_roleset() -> GroupRoleset:
     return new_roleset
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def group_rolesets(
     guest_roleset: GroupRoleset, member_roleset: GroupRoleset
 ) -> GroupRolesetsType:
@@ -90,7 +90,7 @@ def group_rolesets(
     return rolesets
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def test_group(group_rolesets: GroupRolesetsType) -> RobloxGroup:
     """Military test group"""
 
