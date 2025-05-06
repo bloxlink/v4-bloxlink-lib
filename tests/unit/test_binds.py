@@ -265,16 +265,33 @@ class TestBinds:
                     verified=True,
                 ),
             ),
+            MockBindScenario(
+                test_cases=[
+                    BadgeBindTestCase(
+                        test_fixture=BindTestFixtures.BADGES.BADGE_BIND,
+                        badge=MockBadges.DONATOR_BADGE,
+                        discord_role=GuildRoles.OWNS_BADGE,
+                        expected_result=ExpectedBindsResult(
+                            expected_bind_success=False,
+                        ),
+                    ),
+                ],
+                mock_user=MockUserData(
+                    current_discord_roles=[],
+                    owns_assets=[],
+                    verified=True,
+                ),
+            ),
         ],
         indirect=True,
     )
-    @pytest.mark.asyncio_concurrent(group="bind_tests")
+    @pytest.mark.asyncio()
     async def test_badge_bind(
         self,
         test_guild: GuildSerializable,
         mock_bind_scenario: MockedBindScenarioResult,
     ):
-        """Test that a user in a group satisfies the badge bind."""
+        """Test the badge bind logic"""
 
         await _assert_successful_binds_results(
             mocked_bind_scenario=mock_bind_scenario,
