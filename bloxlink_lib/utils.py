@@ -55,6 +55,32 @@ def create_task_log_exception(awaitable: Awaitable) -> asyncio.Task:
     return asyncio.create_task(_log_exception(awaitable))
 
 
+async def _set_shard_config():
+    """Sets the shard config in Redis."""
+
+    if CONFIG.SHARD_COUNT and CONFIG.SHARDS_PER_NODE:
+        existing_shard_count = await redis.get(
+            f"bloxlink:{CONFIG.BOT_RELEASE}:shard_count"
+        )
+        existing_shards_per_node = await redis.get(
+            f"bloxlink:{CONFIG.BOT_RELEASE}:shards_per_node"
+        )
+
+        if not existing_shard_count or existing_shard_count != CONFIG.SHARD_COUNT:
+            await redis.set(
+                f"bloxlink:{CONFIG.BOT_RELEASE}:shard_count", CONFIG.SHARD_COUNT
+            )
+
+        if (
+            not existing_shards_per_node
+            or existing_shards_per_node != CONFIG.SHARDS_PER_NODE
+        ):
+            await redis.set(
+                f"bloxlink:{CONFIG.BOT_RELEASE}:shards_per_node",
+                CONFIG.SHARDS_PER_NODE,
+            )
+
+
 async def get_node_id() -> int:
     """Gets a unique node ID by atomically incrementing a Redis counter.
 
@@ -86,6 +112,8 @@ async def get_node_id() -> int:
                     f"Resetting node ID counter (reached max of {node_count})"
                 )
                 await redis.set(counter_key, "0")
+
+            await _set_shard_config()
 
             return int(node_id % node_count)
 
