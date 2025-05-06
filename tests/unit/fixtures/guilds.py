@@ -13,6 +13,8 @@ class GuildRoles(Enum):
     UNVERIFIED = "Unverified"  # Unverified role
     NOT_IN_GROUP = "Not in Group"  # Group role
     OWNS_BADGE = "Owns Badge"  # Badge role
+    OWNS_GAMEPASS = "Owns Gamepass"  # Gamepass role
+    OWNS_CATALOG_ITEM = "Owns Catalog Item"  # Catalog Item role
     MEMBER = "Member"  # Group role
     OFFICER = "Officer"  # Group role
     COMMANDER = "Commander"  # Group role

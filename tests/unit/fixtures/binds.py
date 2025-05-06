@@ -14,7 +14,7 @@ from bloxlink_lib import (
     GuildSerializable,
     RoleSerializable,
 )
-from tests.unit.fixtures.badges import MockBadges, BadgeTestFixtures
+from tests.unit.fixtures.assets import MockAssets, AssetTestFixtures, AssetTypes
 from tests.unit.fixtures.groups import GroupTestFixtures
 from tests.unit.utils import enum_list_to_value_list, mock_bind
 from . import GuildRoles, MockUserData, MockUser, mock_user
@@ -34,7 +34,7 @@ class VerifiedTestFixtures(Enum):
 class BindTestFixtures:
     """The fixtures for all bind tests"""
 
-    BADGES = BadgeTestFixtures
+    ASSETS = AssetTestFixtures
     GROUPS = GroupTestFixtures
     VERIFIED = VerifiedTestFixtures
 
@@ -52,15 +52,16 @@ class BindTestCase(BaseModel):
     """The base class for all bind test cases"""
 
     test_fixture: (
-        BindTestFixtures.BADGES | BindTestFixtures.GROUPS | BindTestFixtures.VERIFIED
+        BindTestFixtures.ASSETS | BindTestFixtures.GROUPS | BindTestFixtures.VERIFIED
     )  # The fixture to use for the bind test case
     expected_result: ExpectedBindsResult  # The expected result of the bind test case
 
 
-class BadgeBindTestCase(BindTestCase):
-    """The test case for badge binds"""
+class AssetBindTestCase(BindTestCase):
+    """The test case for asset binds"""
 
-    badge: MockBadges
+    asset: MockAssets
+    asset_type: AssetTypes
     discord_role: GuildRoles
 
 
@@ -68,7 +69,7 @@ class MockBindScenario(BaseModel):
     """Data to use for the mocked user in a test case"""
 
     mock_user: MockUserData
-    test_cases: Annotated[list[BindTestCase | BadgeBindTestCase], Field(min_length=1)]
+    test_cases: Annotated[list[BindTestCase | AssetBindTestCase], Field(min_length=1)]
 
 
 class MockedBindScenarioResult(BaseModel):
@@ -131,18 +132,18 @@ def mock_bind_scenario(
             ]
 
         match test_case.test_fixture:
-            case BindTestFixtures.BADGES.BADGE_BIND:
-                badge_bind_callable: Callable[[MockBadges, GuildRoles], GuildBind] = (
-                    request.getfixturevalue(test_case.test_fixture.value)
-                )
-                bind_fixture = badge_bind_callable(
-                    test_case.badge, test_case.discord_role
+            case BindTestFixtures.ASSETS.ASSET_BIND:
+                asset_bind_callable: Callable[
+                    [AssetTypes, int, GuildRoles], GuildBind
+                ] = request.getfixturevalue(test_case.test_fixture.value)
+                bind_fixture = asset_bind_callable(
+                    test_case.asset_type,
+                    test_case.asset.value,
+                    test_case.discord_role,
                 )
                 test_against_binds.append(bind_fixture)
             case _:
-                print("test_case.test_fixture", test_case.test_fixture)
                 bind_fixture = request.getfixturevalue(test_case.test_fixture.value)
-                print("bind_fixture", bind_fixture)
                 test_against_binds.append(bind_fixture)
 
     user = mock_user(
@@ -227,7 +228,7 @@ __all__ = [
     "MockBindScenario",
     "MockedBindScenarioResult",
     "find_discord_roles",
-    "BadgeBindTestCase",
+    "AssetBindTestCase",
     "BindTestCase",
     "BindTestFixtures",
     "mock_bind_scenario",

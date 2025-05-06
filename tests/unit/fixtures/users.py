@@ -14,7 +14,7 @@ from bloxlink_lib import (
 from tests.unit.utils import generate_snowflake
 from .groups import GroupRolesets
 from .guilds import GuildRoles
-from .badges import MockBadges
+from .assets import MockAssets
 
 __all__ = ["MockUserData", "MockUser", "mock_user", "test_group_member"]
 
@@ -25,7 +25,7 @@ class MockUserData(BaseModel):
     current_group_roleset: GroupRolesets | None = None
     current_discord_roles: list[GuildRoles]  # Set the user's current Discord roles
     verified: bool = True
-    owns_assets: list[MockBadges] | None = None
+    owns_assets: list[MockAssets] | None = None
 
 
 class MockUser(BaseModel):
@@ -33,7 +33,7 @@ class MockUser(BaseModel):
 
     discord_user: MemberSerializable  # The Discord user
     roblox_user: RobloxUser | None  # The Roblox account of the user. Optional.
-    owns_assets: list[MockBadges] | None = (
+    owns_assets: list[MockAssets] | None = (
         None  # Passed from MockUserData (the test case)
     )
 
@@ -61,7 +61,7 @@ def _mock_roblox_user(
     user_id: int,
     username: str,
     groups: dict[int, RobloxUserGroup] | None,
-    owns_assets: list[MockBadges] | None,
+    owns_assets: list[MockAssets] | None,
 ) -> RobloxUser:
     roblox_user = RobloxUser(
         id=user_id,
@@ -133,7 +133,7 @@ def mock_user(
     guild: GuildSerializable,
     groups: dict[int, RobloxUserGroup] | None = None,
     current_discord_roles: list[int] | None = None,
-    owns_assets: list[MockBadges] | None = None,
+    owns_assets: list[MockAssets] | None = None,
 ) -> MockUser:
     user_id = generate_snowflake()
     current_discord_roles = current_discord_roles or []

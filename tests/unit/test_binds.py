@@ -7,8 +7,9 @@ from .fixtures import (
     MockBindScenario,
     ExpectedBindsResult,
     MockedBindScenarioResult,
-    MockBadges,
-    BadgeBindTestCase,
+    MockAssets,
+    AssetBindTestCase,
+    AssetTypes,
     BindTestFixtures,
     BindTestCase,
 )
@@ -265,9 +266,10 @@ class TestBinds:
         [
             MockBindScenario(
                 test_cases=[
-                    BadgeBindTestCase(
-                        test_fixture=BindTestFixtures.BADGES.BADGE_BIND,
-                        badge=MockBadges.VIP_BADGE,
+                    AssetBindTestCase(
+                        test_fixture=BindTestFixtures.ASSETS.ASSET_BIND,
+                        asset=MockAssets.VIP,
+                        asset_type=AssetTypes.BADGE,
                         discord_role=GuildRoles.OWNS_BADGE,
                         expected_result=ExpectedBindsResult(
                             expected_bind_success=True,
@@ -276,15 +278,16 @@ class TestBinds:
                 ],
                 mock_user=MockUserData(
                     current_discord_roles=[],
-                    owns_assets=[MockBadges.VIP_BADGE],
+                    owns_assets=[MockAssets.VIP],
                     verified=True,
                 ),
             ),
             MockBindScenario(
                 test_cases=[
-                    BadgeBindTestCase(
-                        test_fixture=BindTestFixtures.BADGES.BADGE_BIND,
-                        badge=MockBadges.DONATOR_BADGE,
+                    AssetBindTestCase(
+                        test_fixture=BindTestFixtures.ASSETS.ASSET_BIND,
+                        asset=MockAssets.DONATOR,
+                        asset_type=AssetTypes.BADGE,
                         discord_role=GuildRoles.OWNS_BADGE,
                         expected_result=ExpectedBindsResult(
                             expected_bind_success=False,
@@ -295,6 +298,114 @@ class TestBinds:
                     current_discord_roles=[],
                     owns_assets=[],
                     verified=True,
+                ),
+            ),
+            MockBindScenario(
+                test_cases=[
+                    AssetBindTestCase(
+                        test_fixture=BindTestFixtures.ASSETS.ASSET_BIND,
+                        asset=MockAssets.VIP,
+                        asset_type=AssetTypes.GAMEPASS,
+                        discord_role=GuildRoles.OWNS_GAMEPASS,
+                        expected_result=ExpectedBindsResult(
+                            expected_bind_success=True,
+                        ),
+                    ),
+                ],
+                mock_user=MockUserData(
+                    current_discord_roles=[],
+                    owns_assets=[MockAssets.VIP],
+                    verified=True,
+                ),
+            ),
+            MockBindScenario(
+                test_cases=[
+                    AssetBindTestCase(
+                        test_fixture=BindTestFixtures.ASSETS.ASSET_BIND,
+                        asset=MockAssets.VIP,
+                        asset_type=AssetTypes.GAMEPASS,
+                        discord_role=GuildRoles.OWNS_GAMEPASS,
+                        expected_result=ExpectedBindsResult(
+                            expected_bind_success=False,
+                        ),
+                    ),
+                ],
+                mock_user=MockUserData(
+                    current_discord_roles=[],
+                    owns_assets=[],
+                    verified=True,
+                ),
+            ),
+            MockBindScenario(
+                test_cases=[
+                    AssetBindTestCase(
+                        test_fixture=BindTestFixtures.ASSETS.ASSET_BIND,
+                        asset=MockAssets.VIP,
+                        asset_type=AssetTypes.CATALOG_ITEM,
+                        discord_role=GuildRoles.OWNS_CATALOG_ITEM,
+                        expected_result=ExpectedBindsResult(
+                            expected_bind_success=True,
+                        ),
+                    ),
+                ],
+                mock_user=MockUserData(
+                    current_discord_roles=[],
+                    owns_assets=[MockAssets.VIP],
+                    verified=True,
+                ),
+            ),
+            MockBindScenario(
+                test_cases=[
+                    AssetBindTestCase(
+                        test_fixture=BindTestFixtures.ASSETS.ASSET_BIND,
+                        asset=MockAssets.VIP,
+                        asset_type=AssetTypes.CATALOG_ITEM,
+                        discord_role=GuildRoles.OWNS_CATALOG_ITEM,
+                        expected_result=ExpectedBindsResult(
+                            expected_bind_success=False,
+                        ),
+                    ),
+                ],
+                mock_user=MockUserData(
+                    current_discord_roles=[],
+                    owns_assets=[],
+                    verified=True,
+                ),
+            ),
+            MockBindScenario(
+                test_cases=[
+                    AssetBindTestCase(
+                        test_fixture=BindTestFixtures.ASSETS.ASSET_BIND,
+                        asset=MockAssets.VIP,
+                        asset_type=AssetTypes.BADGE,
+                        discord_role=GuildRoles.OWNS_BADGE,
+                        expected_result=ExpectedBindsResult(
+                            expected_bind_success=False,
+                        ),
+                    ),
+                    AssetBindTestCase(
+                        test_fixture=BindTestFixtures.ASSETS.ASSET_BIND,
+                        asset=MockAssets.VIP,
+                        asset_type=AssetTypes.CATALOG_ITEM,
+                        discord_role=GuildRoles.OWNS_CATALOG_ITEM,
+                        expected_result=ExpectedBindsResult(
+                            expected_bind_success=False,
+                        ),
+                    ),
+                    AssetBindTestCase(
+                        test_fixture=BindTestFixtures.ASSETS.ASSET_BIND,
+                        asset=MockAssets.VIP,
+                        asset_type=AssetTypes.GAMEPASS,
+                        discord_role=GuildRoles.OWNS_GAMEPASS,
+                        expected_result=ExpectedBindsResult(
+                            expected_bind_success=False,
+                        ),
+                    ),
+                ],
+                mock_user=MockUserData(
+                    current_discord_roles=[],
+                    owns_assets=[],
+                    verified=False,
                 ),
             ),
         ],
