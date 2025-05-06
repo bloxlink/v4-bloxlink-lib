@@ -26,7 +26,6 @@ class NicknameTestData(BaseModel):
 
 
 @pytest.fixture(
-    scope="function",
     params=[
         NicknameTestData(
             nickname_template="{roblox-name}",
@@ -104,7 +103,6 @@ def nickname_test_data(
 
 
 @pytest.fixture(
-    scope="function",
     params=[
         # Tests not dependent on a Roblox user being linked to a Discord user
         NicknameTestData(
