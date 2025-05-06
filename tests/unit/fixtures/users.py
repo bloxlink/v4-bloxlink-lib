@@ -38,21 +38,18 @@ class MockUser(BaseModel):
     )
 
 
-# def _mock_user_owns_asset(
-#     mocked_asset: MockBadges,
-# ) -> Callable[[RobloxBaseAsset], bool]:
-#     """Mock the user's owns_asset method to return True when called with this asset (badge, gamepass, catalog asset) ID"""
+def _mock_user_owns_asset(
+    mocked_asset: MockAssets,
+) -> Callable[[RobloxBaseAsset], bool]:
+    """Mock the user's owns_asset method to return True when called with this asset (badge, gamepass, catalog asset) ID"""
 
-#     print("mocking asset", mocked_asset.value)
+    def _mock_owns_asset(asset: RobloxBaseAsset) -> bool:
+        if mocked_asset.value == asset.id:
+            return True
 
-#     def _mock_owns_asset(asset: RobloxBaseAsset) -> bool:
-#         print("inside", mocked_asset.value, asset.id)
-#         if mocked_asset.value == asset.id:
-#             return True
+        return False
 
-#         return False
-
-#     return _mock_owns_asset
+    return _mock_owns_asset
 
 
 def _mock_roblox_user(
@@ -79,17 +76,10 @@ def _mock_roblox_user(
 
     if owns_assets:
         for mocked_asset in owns_assets:
-
-            def _mock_owns_asset(asset: RobloxBaseAsset) -> bool:
-                if mocked_asset.value == asset.id:
-                    return True
-
-                return False
-
             mocker.patch.object(
                 RobloxUser,
                 "owns_asset",
-                new=mocker.AsyncMock(side_effect=_mock_owns_asset),
+                new=mocker.AsyncMock(side_effect=_mock_user_owns_asset(mocked_asset)),
             )
     else:
         # Skip Roblox API calls
