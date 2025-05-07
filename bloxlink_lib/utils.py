@@ -6,7 +6,6 @@ import enum
 import json
 import sentry_sdk
 from sentry_sdk.integrations.aiohttp import AioHttpIntegration
-from sentry_sdk.integrations.fastapi import FastApiIntegration
 from .models.base import BaseModel
 from .database.redis import redis
 from .config import CONFIG
@@ -178,7 +177,7 @@ def init_sentry():
         sentry_sdk.init(
             environment=environment.name.lower(),
             dsn=CONFIG.SENTRY_DSN,
-            integrations=[AioHttpIntegration(), FastApiIntegration],
+            integrations=[AioHttpIntegration()],
             enable_tracing=True,
             debug=environment in (Environment.LOCAL, Environment.STAGING),
             traces_sample_rate=(
