@@ -1389,7 +1389,7 @@ version = "0.2.3"
 description = "A package to determine the values of generic classes through instances or subclasses"
 optional = false
 python-versions = ">=3.9"
-groups = ["test"]
+groups = ["main"]
 files = [
     {file = "python_generics-0.2.3-py3-none-any.whl", hash = "sha256:7dd0bdcd33eb874954eb580562bd6f2adb7f4c1d79d644a010efe59bb3fe186f"},
     {file = "python_generics-0.2.3.tar.gz", hash = "sha256:33c9c48c5d86df3bfc4a319e27cb7bcf3fdce1d28d89bdd3f7a15fe02d31a01e"},
@@ -1653,4 +1653,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.1"
 python-versions = "<3.13, >=3.12"
-content-hash = "c21272e408d31e5027f224e41a7b21c92c68775f4dd5b2859763ac60b3043e64"
+content-hash = "d93fe60a87dfac8c2fbb4047235c6bfd1db940eb66339e663740de1e2d7e6040"
