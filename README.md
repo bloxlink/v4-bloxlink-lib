@@ -48,6 +48,23 @@ print([await b.satisfies_for(roblox_user=roblox_user, ...) for b in guild_binds]
 
 ## Run tests locally
 
+Run all tests:
+
 ```bash
-$ poetry run pytest -v -s
+$ poetry run pytest -v -s .
 ```
+
+Run specific test(s):
+
+```bash
+$ poetry run pytest -m [test_group]
+```
+
+Test groups:
+
+* primitives
+* binds
+* nicknames
+* bind_conversions
+
+For example: `poetry run pytest -m binds`
