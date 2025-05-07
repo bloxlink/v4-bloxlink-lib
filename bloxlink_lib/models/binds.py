@@ -21,6 +21,7 @@ from bloxlink_lib.models.base import (
     MemberSerializable,
 )
 from bloxlink_lib.models.roblox import RobloxEntity, create_entity
+from bloxlink_lib.models.v3_binds import V3RoleBinds
 from bloxlink_lib.utils import find
 
 if TYPE_CHECKING:
@@ -149,13 +150,24 @@ class GuildBind(BaseModel):
             )
 
     @classmethod
-    def from_V3(cls: Type[Self], guild_data: GuildData | dict):
+    def from_V3(cls: Type[Self], guild_data: GuildData | dict | V3RoleBinds):
         """Convert V3 binds to V4 binds."""
 
-        whole_group_binds = getattr(
-            guild_data, "groupIDs", guild_data.get("groupIDs", {})
-        )
-        role_binds = getattr(guild_data, "roleBinds", guild_data.get("roleBinds", {}))
+        from .schemas import GuildData
+
+        if isinstance(guild_data, V3RoleBinds):
+            guild_data: dict = guild_data.model_dump()
+
+        whole_group_binds = (
+            getattr(guild_data, "groupIDs", {})
+            if isinstance(guild_data, GuildData)
+            else guild_data.get("groupIDs", {})
+        ) or {}
+        role_binds = (
+            getattr(guild_data, "roleBinds", {})
+            if isinstance(guild_data, GuildData)
+            else guild_data.get("roleBinds", {})
+        ) or {}
 
         converted_binds: list[Self] = []
 
@@ -205,16 +217,17 @@ class GuildBind(BaseModel):
 
                         for criteria_data in group_bind_data.get("ranges", []):
                             new_bind = cls(
-                                nickname=group_bind_data.get("nickname") or None,
+                                nickname=criteria_data.get("nickname") or None,
                                 criteria=BindCriteria(
                                     type="group",
                                     id=int(group_id),
-                                    group={
-                                        "min": criteria_data.get("low"),
-                                        "max": criteria_data.get("high"),
-                                    },
+                                    group=GroupBindData(
+                                        min=criteria_data.get("low"),
+                                        max=criteria_data.get("high"),
+                                    ),
                                 ),
-                                remove_roles=group_bind_data.get("removeRoles") or [],
+                                roles=criteria_data.get("roles") or [],
+                                remove_roles=criteria_data.get("removeRoles") or [],
                                 data=BindData(
                                     displayName=group_bind_data.get("groupName")
                                 ),

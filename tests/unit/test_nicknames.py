@@ -9,6 +9,9 @@ if TYPE_CHECKING:
     from bloxlink_lib import GuildSerializable, RobloxUser, MemberSerializable
 
 
+pytestmark = pytest.mark.nicknames
+
+
 class TestNicknames:
     """Tests related to bind nicknames."""
 

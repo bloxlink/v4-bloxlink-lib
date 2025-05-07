@@ -1,6 +1,8 @@
 from bloxlink_lib import CoerciveSet, SnowflakeSet
 import pytest
 
+pytestmark = pytest.mark.primitives
+
 
 class TestCoerciveSets:
     """Tests related to coercive sets."""

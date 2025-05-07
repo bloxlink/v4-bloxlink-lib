@@ -41,6 +41,12 @@ addopts = [
     "--import-mode=importlib",
 ]
 asyncio_mode = "strict"
+markers = [
+    "primitives",
+    "binds",
+    "nicknames",
+    "bind_conversions",
+]
 
 [tool.pytest_env]
 BOT_RELEASE = "CANARY"
