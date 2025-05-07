@@ -1,6 +1,8 @@
 from bloxlink_lib import PydanticList
 import pytest
 
+pytestmark = pytest.mark.primitives
+
 
 class TestPydanticList:
     """Tests related to PydanticList."""

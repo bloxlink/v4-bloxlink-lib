@@ -14,6 +14,8 @@ from .fixtures import (
     BindTestCase,
 )
 
+pytestmark = pytest.mark.binds
+
 
 class TestBinds:
     """Test the logic of binds"""
