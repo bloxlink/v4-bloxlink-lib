@@ -3,10 +3,10 @@ import logging
 import asyncio
 from inspect import isfunction
 import enum
-from os import getenv
 import json
 import sentry_sdk
 from sentry_sdk.integrations.aiohttp import AioHttpIntegration
+from sentry_sdk.integrations.fastapi import FastApiIntegration
 from .models.base import BaseModel
 from .database.redis import redis
 from .config import CONFIG
@@ -178,13 +178,14 @@ def init_sentry():
         sentry_sdk.init(
             environment=environment.name.lower(),
             dsn=CONFIG.SENTRY_DSN,
-            integrations=[AioHttpIntegration()],
+            integrations=[AioHttpIntegration(), FastApiIntegration],
             enable_tracing=True,
             debug=environment in (Environment.LOCAL, Environment.STAGING),
             traces_sample_rate=(
                 1.0 if environment in (Environment.LOCAL, Environment.STAGING) else 0.2
             ),
             attach_stacktrace=True,
+            send_default_pii=True,
         )
 
 
