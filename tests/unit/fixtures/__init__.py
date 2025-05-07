@@ -4,3 +4,4 @@ from .users import *
 from .binds import *
 from .nicknames import *
 from .assets import *
+from .bind_conversions import *

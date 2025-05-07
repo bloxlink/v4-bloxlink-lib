@@ -7,6 +7,7 @@ from .models.schemas.users import *  # pylint: disable=no-name-in-module
 from .models.roblox import *
 from .models.roblox.binds import *
 from .models.binds import *
+from .models.v3_binds import *
 from .exceptions import *
 from .utils import *
 from .fetch import *
