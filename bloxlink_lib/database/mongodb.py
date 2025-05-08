@@ -12,7 +12,7 @@ from bloxlink_lib.database.redis import redis  # pylint: disable=no-name-in-modu
 
 mongo: AsyncIOMotorClient = None
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from bloxlink_lib.models.schemas import BaseSchema
 
 

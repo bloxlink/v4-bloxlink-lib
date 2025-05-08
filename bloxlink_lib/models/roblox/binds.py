@@ -16,7 +16,7 @@ from bloxlink_lib.models.schemas.guilds import (  # pylint: disable=no-name-in-m
 )
 from bloxlink_lib.utils import find
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from bloxlink_lib.models.binds import (
         VALID_BIND_TYPES,
     )

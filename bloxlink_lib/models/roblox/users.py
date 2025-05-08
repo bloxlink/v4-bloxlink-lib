@@ -18,7 +18,7 @@ from bloxlink_lib.models.base import BaseModel, MemberSerializable
 from bloxlink_lib.utils import get_environment, Environment
 from .groups import GroupRoleset, RobloxGroup
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from .base_assets import RobloxBaseAsset
 
 VALID_INFO_SERVER_SCOPES: list[Literal["groups", "badges"]] = ["groups", "badges"]
