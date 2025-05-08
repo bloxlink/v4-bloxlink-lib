@@ -24,7 +24,7 @@ from bloxlink_lib.models.roblox import RobloxEntity, create_entity
 from bloxlink_lib.models.v3_binds import V3RoleBinds
 from bloxlink_lib.utils import find
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from hikari import Member
 
     from .roblox.base_assets import RobloxBaseAsset

@@ -10,7 +10,7 @@ from bloxlink_lib.fetch import fetch_typed
 from bloxlink_lib.models.base import BaseModel
 from .base import RobloxEntity
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from .users import RobloxUser
 
 GROUP_API = "https://groups.roblox.com/v1/groups"
