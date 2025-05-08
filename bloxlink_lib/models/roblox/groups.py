@@ -45,19 +45,6 @@ class RobloxGroupOwner(BaseModel):
     has_verified_badge: bool = Field(alias="hasVerifiedBadge")
 
 
-class RobloxGroupResponse(BaseModel):
-    """Representation of the response from the Roblox group API."""
-
-    id: int
-    name: str
-    description: str
-    member_count: int = Field(alias="memberCount")
-    owner: RobloxGroupOwner
-    shout: str | None
-    public_entry_allowed: bool = Field(alias="publicEntryAllowed")
-    has_verified_badge: bool = Field(alias="hasVerifiedBadge")
-
-
 class RobloxGroup(RobloxEntity):
     """Representation of a Group on Roblox.
 
@@ -71,12 +58,11 @@ class RobloxGroup(RobloxEntity):
     """
 
     member_count: int = Field(alias="memberCount", default=None)
-    rolesets: dict[int, GroupRoleset] = None
-    user_roleset: GroupRoleset = None
-    has_verified_badge: bool = Field(alias="hasVerifiedBadge", default=None)
+    rolesets: dict[int, GroupRoleset] | None = None
+    user_roleset: GroupRoleset | None = None
+    has_verified_badge: bool | None = Field(alias="hasVerifiedBadge", default=None)
     owner: RobloxGroupOwner | None = None
-    public_entry_allowed: bool = Field(alias="publicEntryAllowed", default=None)
-    has_verified_badge: bool = Field(alias="hasVerifiedBadge", default=None)
+    public_entry_allowed: bool | None = Field(alias="publicEntryAllowed", default=None)
 
     def model_post_init(self, __context):
         self.url = f"https://www.roblox.com/groups/{self.id}"

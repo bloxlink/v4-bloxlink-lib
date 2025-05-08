@@ -66,21 +66,6 @@ class RobloxUserAvatarResponse(BaseModel):
     data: list[RobloxUserAvatar]
 
 
-# class RobloxGroupResponse(BaseModel):
-#     """Type definition for a Roblox group from the Roblox API."""
-
-#     id: int
-#     name: str
-#     member_count: int = Field(alias="memberCount")
-#     has_verified_badge: bool = Field(alias="hasVerifiedBadge")
-
-#     @classmethod
-#     def from_group(cls, group: RobloxGroup):
-#         """Create an instance of RobloxGroupResponse from a RobloxGroup for mock testing"""
-
-#         return cls(id=RobloxGroup.id, name=RobloxGroup.name)
-
-
 class RobloxUserGroup(BaseModel):
     """Type definition for a Roblox group from a user from the Roblox API."""
 
