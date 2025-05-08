@@ -2,7 +2,7 @@ from __future__ import annotations
 import math
 from enum import Enum
 import re
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING
 from hikari import Member
 from bloxlink_lib.models.base.serializable import MemberSerializable, RoleSerializable
 from bloxlink_lib.models.binds import (

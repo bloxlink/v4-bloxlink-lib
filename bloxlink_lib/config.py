@@ -2,7 +2,7 @@ from typing import Literal
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class Config(BaseSettings):
+class BaseConfig(BaseSettings):
     """Type definition for config values."""
 
     #############################
@@ -100,4 +100,4 @@ class Config(BaseSettings):
             )
 
 
-CONFIG: Config = Config()
+CONFIG: BaseConfig = BaseConfig()
