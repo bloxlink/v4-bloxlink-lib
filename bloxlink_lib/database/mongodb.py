@@ -49,9 +49,9 @@ def connect_database():
     mongo.get_io_loop = asyncio.get_running_loop
 
 
-async def fetch_item[T: "BaseSchema"](
-    constructor: Type[T], item_id: str, *aspects
-) -> T:
+async def fetch_item[
+    T: "BaseSchema"
+](constructor: Type[T], item_id: str, *aspects) -> T:
     """
     Fetch an item from local cache, then redis, then database.
     Will populate caches for later access
@@ -105,9 +105,9 @@ async def fetch_item[T: "BaseSchema"](
     return constructor(**item)
 
 
-async def update_item[T: "BaseSchema"](
-    constructor: Type[T], item_id: str, **aspects
-) -> None:
+async def update_item[
+    T: "BaseSchema"
+](constructor: Type[T], item_id: str, **aspects) -> None:
     """
     Update an item's aspects in local cache, redis, and database.
     """

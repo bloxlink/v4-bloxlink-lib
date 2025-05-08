@@ -21,7 +21,9 @@ def _bytes_to_str_wrapper(data: Any) -> str:
     return to_json(data).decode("utf-8")
 
 
-async def fetch[T](
+async def fetch[
+    T
+](
     method: str,
     url: str,
     *,
@@ -133,9 +135,11 @@ async def fetch[T](
         raise RobloxDown() from None
 
 
-async def fetch_typed[T](
-    parse_as: Type[T], url: str, method="GET", **kwargs
-) -> Tuple[T, aiohttp.ClientResponse]:
+async def fetch_typed[
+    T
+](parse_as: Type[T], url: str, method="GET", **kwargs) -> Tuple[
+    T, aiohttp.ClientResponse
+]:
     """Fetch data from a URL and parse it as a dataclass.
 
     Args:
