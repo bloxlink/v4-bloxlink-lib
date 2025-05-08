@@ -100,4 +100,4 @@ class BaseConfig(BaseSettings):
             )
 
 
-Config = BaseConfig()
+CONFIG = BaseConfig()
