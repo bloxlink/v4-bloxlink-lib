@@ -3,7 +3,7 @@ import math
 from enum import Enum
 import re
 from typing import TYPE_CHECKING
-from hikari import Member
+from hikari import Member, Role
 from bloxlink_lib.models.base.serializable import MemberSerializable, RoleSerializable
 from bloxlink_lib.models.binds import (
     BindCriteria,
@@ -62,7 +62,7 @@ async def get_binds(
     guild_id: int | str,
     category: VALID_BIND_TYPES = None,
     bind_id: int = None,
-    guild_roles: dict[int, RoleSerializable] = None,
+    guild_roles: dict[int, RoleSerializable] | list[Role] = None,
 ) -> list[GuildBind]:
     """Get the current guild binds.
 
@@ -72,9 +72,12 @@ async def get_binds(
     """
 
     guild_id = str(guild_id)
-    guild_data = await fetch_guild_data(guild_id, "binds")
 
+    guild_data = await fetch_guild_data(guild_id, "binds")
     guild_data.binds = await migrate_old_binds_to_v4(guild_id, guild_data.binds)
+
+    if isinstance(guild_roles, list):
+        guild_roles = {r.id: RoleSerializable.from_hikari(r) for r in guild_roles}
 
     if guild_roles:
         await check_for_verified_roles(
