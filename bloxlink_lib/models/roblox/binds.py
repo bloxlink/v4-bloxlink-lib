@@ -350,19 +350,6 @@ async def check_for_verified_roles(
 
     new_verified_binds: list[GuildBind] = []
 
-    print(
-        verified_role_enabled,
-        find(
-            lambda b: b.criteria.type == "verified" and verified_role_id in b.roles,
-            merge_to,
-        ),
-        merge_to,
-    )
-    print(
-        verified_role_id,
-        type(verified_role_id),
-    )
-
     if verified_role_enabled and not find(
         lambda b: b.criteria.type == "verified" and verified_role_id in b.roles,
         merge_to,
@@ -395,15 +382,15 @@ async def check_for_verified_roles(
             new_verified_binds.append(new_bind)
 
     if new_verified_binds:
-        print("updating binds", new_verified_binds)
         merge_to.extend(new_verified_binds)
 
-        await update_guild_data(
-            guild_id,
-            binds=[b.model_dump(exclude_unset=True, by_alias=True) for b in merge_to],
-            verifiedRoleName=None,
-            unverifiedRoleName=None,
-        )
+        # if SAVE_NEW_BINDS: # TODO: this continuely appends the verifiedRoleName as a new bind
+        #     await update_guild_data(
+        #         guild_id,
+        #         binds=[b.model_dump(exclude_unset=True, by_alias=True) for b in merge_to],
+        #         verifiedRoleName=None,
+        #         unverifiedRoleName=None,
+        #     )
 
 
 async def count_binds(guild_id: int | str, bind_id: int = None) -> int:
