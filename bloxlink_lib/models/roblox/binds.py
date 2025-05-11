@@ -348,7 +348,8 @@ async def check_for_verified_roles(
     new_verified_binds: list[GuildBind] = []
 
     if verified_role_enabled and not find(
-        lambda b: b.criteria.type == "verified", merge_to
+        lambda b: b.criteria.type == "verified" and verified_role_id in b.roles,
+        merge_to,
     ):
         verified_role = find(
             lambda r: str(r.id) == verified_role_id or r.name == verified_role_name,
