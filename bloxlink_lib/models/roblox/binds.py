@@ -357,6 +357,8 @@ async def check_for_verified_roles(
             merge_to,
         ),
         merge_to,
+    )
+    print(
         verified_role_id,
         type(verified_role_id),
     )
