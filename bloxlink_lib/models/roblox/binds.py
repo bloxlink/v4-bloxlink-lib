@@ -356,6 +356,7 @@ async def check_for_verified_roles(
             lambda b: b.criteria.type == "verified" and verified_role_id in b.roles,
             merge_to,
         ),
+        merge_to,
     )
 
     if verified_role_enabled and not find(
@@ -390,6 +391,7 @@ async def check_for_verified_roles(
             new_verified_binds.append(new_bind)
 
     if new_verified_binds:
+        print("updating binds", new_verified_binds)
         merge_to.extend(new_verified_binds)
 
         await update_guild_data(
