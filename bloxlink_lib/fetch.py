@@ -82,7 +82,7 @@ async def fetch[T](
             del params[k]
 
     try:
-        async with session.request(
+        async with aiohttp.ClientSession(json_serialize=_bytes_to_str_wrapper).request(
             method,
             url,
             json=body,
