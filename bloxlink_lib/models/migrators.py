@@ -33,6 +33,15 @@ def migrate_restrictions(
 def migrate_delete_commands(delete_commands: int | None | bool) -> bool:
     """Migrate the deleteCommands field."""
 
+    if delete_commands and delete_commands.lower() in (
+        "none",
+        "off",
+        "disable",
+        "false",
+        "0",
+    ):
+        return False
+
     return bool(delete_commands)
 
 
