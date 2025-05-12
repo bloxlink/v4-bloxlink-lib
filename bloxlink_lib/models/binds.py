@@ -121,7 +121,7 @@ class BindCriteria(BaseModel):
 class BindData(BaseModel):
     """Represents the data required for a bind."""
 
-    displayName: str = None
+    displayName: str | None = None
 
 
 class GuildBind(BaseModel):
