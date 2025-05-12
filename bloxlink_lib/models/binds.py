@@ -272,12 +272,14 @@ class GuildBind(BaseModel):
         """Calculate the highest role in the guild for this bind."""
 
         if self.roles and not self.highest_role:
-            filtered_binds = filter(
-                lambda r: str(r.id) in self.roles and self.nickname,
-                guild_roles.values(),
+            filtered_binds = list(
+                filter(
+                    lambda r: str(r.id) in self.roles and self.nickname,
+                    guild_roles.values(),
+                )
             )
 
-            if list(filtered_binds):
+            if len(filtered_binds):
                 self.highest_role = max(filtered_binds, key=lambda r: r.position)
 
     async def satisfies_for(
