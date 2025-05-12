@@ -177,7 +177,7 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
             )
             self.avatar = roblox_user_data.avatar or self.avatar
             self.profile_link = roblox_user_data.profile_link or self.profile_link
-            self.groups = roblox_user_data.groups or self.groups
+            self.groups = roblox_user_data.groups or self.groups or {}
 
             self.parse_age()
 
