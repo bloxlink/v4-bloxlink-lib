@@ -3,7 +3,7 @@ import math
 from enum import Enum
 import re
 from typing import TYPE_CHECKING
-from hikari import Member
+from hikari import Member, Role
 from bloxlink_lib.models.base.serializable import MemberSerializable, RoleSerializable
 from bloxlink_lib.models.binds import (
     BindCriteria,
@@ -62,7 +62,7 @@ async def get_binds(
     guild_id: int | str,
     category: VALID_BIND_TYPES = None,
     bind_id: int = None,
-    guild_roles: dict[int, RoleSerializable] = None,
+    guild_roles: dict[int, RoleSerializable] | list[Role] = None,
 ) -> list[GuildBind]:
     """Get the current guild binds.
 
@@ -72,9 +72,12 @@ async def get_binds(
     """
 
     guild_id = str(guild_id)
-    guild_data = await fetch_guild_data(guild_id, "binds")
 
+    guild_data = await fetch_guild_data(guild_id, "binds")
     guild_data.binds = await migrate_old_binds_to_v4(guild_id, guild_data.binds)
+
+    if isinstance(guild_roles, list):
+        guild_roles = {r.id: RoleSerializable.from_hikari(r) for r in guild_roles}
 
     if guild_roles:
         await check_for_verified_roles(
@@ -348,7 +351,8 @@ async def check_for_verified_roles(
     new_verified_binds: list[GuildBind] = []
 
     if verified_role_enabled and not find(
-        lambda b: b.criteria.type == "verified", merge_to
+        lambda b: b.criteria.type == "verified" and verified_role_id in b.roles,
+        merge_to,
     ):
         verified_role = find(
             lambda r: str(r.id) == verified_role_id or r.name == verified_role_name,
@@ -380,12 +384,13 @@ async def check_for_verified_roles(
     if new_verified_binds:
         merge_to.extend(new_verified_binds)
 
-        await update_guild_data(
-            guild_id,
-            binds=[b.model_dump(exclude_unset=True, by_alias=True) for b in merge_to],
-            verifiedRoleName=None,
-            unverifiedRoleName=None,
-        )
+        # if SAVE_NEW_BINDS: # TODO: this continuely appends the verifiedRoleName as a new bind
+        #     await update_guild_data(
+        #         guild_id,
+        #         binds=[b.model_dump(exclude_unset=True, by_alias=True) for b in merge_to],
+        #         verifiedRoleName=None,
+        #         unverifiedRoleName=None,
+        #     )
 
 
 async def count_binds(guild_id: int | str, bind_id: int = None) -> int:
