@@ -103,6 +103,9 @@ class BindCriteria(BaseModel):
 
     group: GroupBindData | None = None
 
+    def __hash__(self) -> int:
+        return hash((self.type, self.id))
+
 
 class BindData(BaseModel):
     """Represents the data required for a bind."""
