@@ -151,7 +151,13 @@ def migrate_bind_criteria_type(bind_type: VALID_BIND_TYPES | str) -> VALID_BIND_
     if isinstance(bind_type, str):
         bind_type = bind_type.lower()
 
-    if bind_type == "gamepas":
+    if bind_type.startswith("gamep"):
         return "gamepass"
+
+    if bind_type.startswith("grou"):
+        return "group"
+
+    if bind_type.startswith("bad"):
+        return "badge"
 
     return bind_type
