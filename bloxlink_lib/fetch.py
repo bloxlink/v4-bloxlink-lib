@@ -103,9 +103,7 @@ async def fetch[T](
                     raise RobloxNotFound()
 
                 logging.warning(
-                    f"{url} failed with status {response.status} and body {await response.text()}",
-                    CONFIG.PROXY_URL,
-                    "roblox.com" in url,
+                    f"{url} failed with status {response.status} and body {await response.text()}; proxy: {CONFIG.PROXY_URL}, using proxy: {CONFIG.PROXY_URL and 'roblox.com' in url}",
                 )
                 raise RobloxAPIError(
                     "An unexpected error occurred while fetching data."
