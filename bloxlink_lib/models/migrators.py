@@ -1,4 +1,5 @@
 from __future__ import annotations
+from bloxlink_lib.models.binds import VALID_BIND_TYPES
 from bloxlink_lib.models.schemas.guilds import (  # pylint: disable=no-name-in-module
     GuildRestriction,
 )
@@ -142,3 +143,15 @@ def unset_empty_joinchannels(base_model: BaseModel, base_model_data: dict) -> di
             del base_model_data["leaveChannel"]
 
     return base_model_data
+
+
+def migrate_bind_criteria_type(bind_type: VALID_BIND_TYPES | str) -> VALID_BIND_TYPES:
+    """Migrate the bind criteria type."""
+
+    if isinstance(bind_type, str):
+        bind_type = bind_type.lower()
+
+    if bind_type == "gamepas":
+        return "gamepass"
+
+    return bind_type

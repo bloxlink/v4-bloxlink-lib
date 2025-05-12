@@ -11,7 +11,7 @@ from typing import (
     Type,
 )
 
-from pydantic import Field, ValidationError
+from pydantic import Field, ValidationError, field_validator
 
 from bloxlink_lib.models.base import (
     BaseModel,
@@ -102,6 +102,17 @@ class BindCriteria(BaseModel):
     id: int | None = Field(default=None)
 
     group: GroupBindData | None = None
+
+    @field_validator("type", mode="before")
+    @classmethod
+    def transform_type(
+        cls: Type[Self], bind_type: VALID_BIND_TYPES | str
+    ) -> VALID_BIND_TYPES:
+        """Transform the type to a valid bind type."""
+
+        from bloxlink_lib.models.migrators import migrate_bind_criteria_type
+
+        return migrate_bind_criteria_type(bind_type)
 
     def __hash__(self) -> int:
         return hash((self.type, self.id))
