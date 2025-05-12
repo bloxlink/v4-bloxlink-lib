@@ -21,9 +21,7 @@ def _bytes_to_str_wrapper(data: Any) -> str:
     return to_json(data).decode("utf-8")
 
 
-async def fetch[
-    T
-](
+async def fetch[T](
     method: str,
     url: str,
     *,
@@ -104,7 +102,7 @@ async def fetch[
                     logging.debug(f"{url} not found: {await response.text()}")
                     raise RobloxNotFound()
 
-                logging.debug(
+                logging.warning(
                     f"{url} failed with status {response.status} and body {await response.text()}"
                 )
                 raise RobloxAPIError()
@@ -135,11 +133,9 @@ async def fetch[
         raise RobloxDown() from None
 
 
-async def fetch_typed[
-    T
-](parse_as: Type[T], url: str, method="GET", **kwargs) -> Tuple[
-    T, aiohttp.ClientResponse
-]:
+async def fetch_typed[T](
+    parse_as: Type[T], url: str, method="GET", **kwargs
+) -> Tuple[T, aiohttp.ClientResponse]:
     """Fetch data from a URL and parse it as a dataclass.
 
     Args:
