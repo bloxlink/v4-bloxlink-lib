@@ -256,6 +256,9 @@ class GuildBind(BaseModel):
                         else:
                             bind_type = bind_type[:-1]
 
+                        if bind_type not in VALID_BIND_TYPES:
+                            continue
+
                         new_bind = cls(
                             nickname=bind_data.get("nickname") or None,
                             roles=bind_data.get("roles") or [],
