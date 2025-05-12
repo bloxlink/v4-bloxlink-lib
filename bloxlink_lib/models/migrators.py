@@ -114,24 +114,28 @@ def unset_empty_joinchannels(base_model: BaseModel, base_model_data: dict) -> di
     if isinstance(base_model_data, dict):
         if (
             base_model_data.get("joinChannel")
+            and "verified" in base_model_data.get("joinChannel")
             and base_model_data.get("joinChannel").get("verified") is None
         ):
             del base_model_data["joinChannel"]["verified"]
 
         if (
             base_model_data.get("joinChannel")
+            and "unverified" in base_model_data.get("joinChannel")
             and base_model_data.get("joinChannel").get("unverified") is None
         ):
             del base_model_data["joinChannel"]["unverified"]
 
         if (
             base_model_data.get("leaveChannel")
+            and "verified" in base_model_data.get("leaveChannel")
             and base_model_data.get("leaveChannel").get("verified") is None
         ):
             del base_model_data["leaveChannel"]["verified"]
 
         if (
             base_model_data.get("leaveChannel")
+            and "unverified" in base_model_data.get("leaveChannel")
             and base_model_data.get("leaveChannel").get("unverified") is None
         ):
             del base_model_data["leaveChannel"]["unverified"]
