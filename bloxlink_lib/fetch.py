@@ -105,7 +105,9 @@ async def fetch[T](
                 logging.warning(
                     f"{url} failed with status {response.status} and body {await response.text()}"
                 )
-                raise RobloxAPIError()
+                raise RobloxAPIError(
+                    "An unexpected error occurred while fetching data."
+                )
 
             if parse_as:
                 if parse_as == "TEXT":
@@ -117,7 +119,9 @@ async def fetch[T](
                     except aiohttp.client_exceptions.ContentTypeError as exc:
                         logging.debug(f"{url} {await response.text()}")
 
-                        raise RobloxAPIError() from exc
+                        raise RobloxAPIError(
+                            "An unexpected error occurred while fetching data."
+                        ) from exc
 
                     return json_response, response
 
