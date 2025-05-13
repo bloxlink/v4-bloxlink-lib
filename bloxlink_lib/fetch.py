@@ -100,6 +100,7 @@ async def fetch[T](
             ) as response:
                 if response.status != HTTPStatus.OK and raise_on_failure:
                     if response.status == HTTPStatus.SERVICE_UNAVAILABLE:
+                        logging.warning(f"{url} is down: {await response.text()}")
                         raise RobloxDown()
 
                     # Roblox APIs sometimes use 400 as not found
@@ -141,7 +142,7 @@ async def fetch[T](
                 return response
 
     except asyncio.TimeoutError:
-        logging.debug(f"URL {url} timed out")
+        logging.warning(f"URL {url} timed out")
         raise RobloxDown() from None
 
 
