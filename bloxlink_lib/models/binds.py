@@ -326,12 +326,12 @@ class GuildBind(BaseModel):
                 case "group":
                     group: RobloxGroup = self.entity
 
-                    await group.sync_for(roblox_user, sync=True)
-
-                    user_roleset = group.user_roleset
-
                     # check if the user has any group roleset roles they shouldn't have
                     if self.criteria.group.dynamicRoles:
+                        await group.sync_for(roblox_user, sync=True)
+
+                        user_roleset = group.user_roleset
+
                         for roleset in group.rolesets.values():
                             for role_id in member.role_ids:
                                 if (
@@ -342,6 +342,7 @@ class GuildBind(BaseModel):
                                     ineligible_roles.add(role_id)
 
                     if self.criteria.id in roblox_user.groups:
+                        user_roleset = roblox_user.groups[self.criteria.id].role
                         # full group bind. check for a matching roleset
                         if self.criteria.group.dynamicRoles:
                             roleset_role = find(
@@ -361,14 +362,14 @@ class GuildBind(BaseModel):
                             successful = False
                         elif (self.criteria.group.min and self.criteria.group.max) and (
                             self.criteria.group.min
-                            <= group.user_roleset.rank
+                            <= user_roleset.rank
                             <= self.criteria.group.max
                         ):
                             successful = True
                         elif self.criteria.group.roleset:
                             roleset = self.criteria.group.roleset
-                            successful = group.user_roleset.rank == roleset or (
-                                roleset < 0 and group.user_roleset.rank >= abs(roleset)
+                            successful = user_roleset.rank == roleset or (
+                                roleset < 0 and user_roleset.rank >= abs(roleset)
                             )
                         else:
                             successful = False
