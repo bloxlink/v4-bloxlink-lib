@@ -102,7 +102,7 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
     # these fields are provided after sync() is called
     banned: bool = Field(alias="isBanned", default=False)
     age_days: int = None
-    groups: dict[int, RobloxUserGroup] | None = Field(default=None)
+    groups: dict[int, RobloxUserGroup] = Field(default_factory=dict)
 
     avatar: UserAvatar = None
     avatar_url: str | None = None
