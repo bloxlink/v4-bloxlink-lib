@@ -280,7 +280,7 @@ async def parse_template(
                 template = template.replace("{{{0}}}".format(outer_nick), nick_value)
         except TypeError:
             logging.error(
-                f"Error parsing template: {template}, {nick_value}, {outer_nick}"
+                f"Error parsing template: {template}, {nick_value}, {outer_nick}, {roblox_user}"
             )
             raise
 
