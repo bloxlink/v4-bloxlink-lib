@@ -147,6 +147,9 @@ async def parse_template(
     group_bind: GuildBind | None = None
     group_roleset_name: str | None = None
 
+    if roblox_user:
+        await roblox_user.sync(includes=True)
+
     if not template:
         if not guild_id or potential_binds is None:
             raise ValueError(
@@ -223,7 +226,7 @@ async def parse_template(
                 case RobloxUserNicknames.ROBLOX_NAME.value:
                     nick_value = roblox_user.username
                 case RobloxUserNicknames.ROBLOX_DISPLAY_NAME.value:
-                    nick_value = roblox_user.display_name
+                    nick_value = roblox_user.display_name or roblox_user.username
                 case RobloxUserNicknames.SMART_NAME.value:
                     nick_value = smart_name
                 case RobloxUserNicknames.ROBLOX_ID.value:
