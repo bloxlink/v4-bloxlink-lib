@@ -135,18 +135,18 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
         if self._synced and self._complete:
             return
 
+        if includes is not None and any(
+            (x is False or x not in [*VALID_INFO_SERVER_SCOPES, True, None])
+            for x in includes
+        ):
+            raise ValueError("Invalid includes provided.")
+
         if includes is None:
             includes = []
 
         elif includes is True:
             includes = VALID_INFO_SERVER_SCOPES
             self._complete = True
-
-        if includes is not None and any(
-            (x is False or x not in [*VALID_INFO_SERVER_SCOPES, True, None])
-            for x in includes
-        ):
-            raise ValueError("Invalid includes provided.")
 
         if cache:
             # remove includes if we already have the value saved
