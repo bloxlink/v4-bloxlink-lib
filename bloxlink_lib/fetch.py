@@ -14,9 +14,6 @@ from .config import CONFIG
 __all__ = ("fetch", "fetch_typed")
 
 
-session = None
-
-
 def _bytes_to_str_wrapper(data: Any) -> str:
     return to_json(data).decode("utf-8")
 
@@ -30,7 +27,7 @@ async def fetch[T](
     body: dict = None,
     parse_as: Literal["JSON", "BYTES", "TEXT"] | BaseModel | Type[T] = "JSON",
     raise_on_failure: bool = True,
-    timeout: float = 10,
+    timeout: float = 30,
 ) -> Union[
     Tuple[dict, aiohttp.ClientResponse],
     Tuple[str, aiohttp.ClientResponse],
@@ -65,13 +62,9 @@ async def fetch[T](
         Tuple[dict, ClientResponse] | Tuple[str, ClientResponse] | Tuple[bytes, ClientResponse] | ClientResponse:
         The requested data from the request, if any.
     """
-    # global session  # pylint: disable=global-statement
 
     params = params or {}
     headers = headers or {}
-
-    # if not session:
-    #     session = aiohttp.ClientSession(json_serialize=_bytes_to_str_wrapper)
 
     url = requote_uri(url)
 
