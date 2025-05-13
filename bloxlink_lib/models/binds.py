@@ -205,6 +205,12 @@ class GuildBind(BaseModel):
                         for rank_id, criteria_data in group_bind_data.get(
                             "binds", {}
                         ).items():
+                            try:
+                                int(rank_id)
+                            except ValueError:
+                                if rank_id not in ("all", "0"):
+                                    rank_id = None
+
                             new_bind = cls(
                                 nickname=criteria_data.get("nickname") or None,
                                 criteria=BindCriteria(
@@ -215,7 +221,7 @@ class GuildBind(BaseModel):
                                         guest=rank_id == "0",
                                         roleset=(
                                             int(rank_id)
-                                            if rank_id not in ("all", "0")
+                                            if rank_id and rank_id not in ("all", "0")
                                             else None
                                         ),
                                     ),
