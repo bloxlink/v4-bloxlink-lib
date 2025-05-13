@@ -146,10 +146,10 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
 
         if cache:
             # remove includes if we already have the value saved
-            if self.groups is not None and "groups" in includes:
+            if self.groups and "groups" in includes:
                 includes.remove("groups")
 
-            if self.badges is not None and "badges" in includes:
+            if self.badges and "badges" in includes:
                 includes.remove("badges")
 
         roblox_user_data, user_data_response = await fetch_typed(
