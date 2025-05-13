@@ -254,7 +254,8 @@ class GuildBind(BaseModel):
                         if bind_type == "gamePasses":
                             bind_type = "gamepass"
                         else:
-                            bind_type = bind_type[:-1]
+                            if bind_type.endswith("s"):
+                                bind_type = bind_type[:-1]
 
                         if bind_type not in VALID_BIND_TYPES:
                             continue
