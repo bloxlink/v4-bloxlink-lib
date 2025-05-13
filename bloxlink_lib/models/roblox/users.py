@@ -102,7 +102,7 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
     # these fields are provided after sync() is called
     banned: bool = Field(alias="isBanned", default=False)
     age_days: int = None
-    groups: dict[int, RobloxUserGroup] = Field(default_factory=dict)
+    groups: dict[int, RobloxUserGroup] | None = Field(default=None)
 
     avatar: UserAvatar = None
     avatar_url: str | None = None
@@ -115,7 +115,6 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
     short_age_string: str = None
 
     _complete: bool = False
-    _synced: bool = False
 
     async def sync(
         self,
@@ -131,9 +130,6 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
                 "groups", "presences", and/or "badges" in it.
             cache (bool, optional): Should we check the object for values before retrieving. Defaults to True.
         """
-
-        if self._synced and self._complete:
-            return
 
         if includes is not None and any(
             (x is False or x not in [*VALID_INFO_SERVER_SCOPES, True, None])
@@ -194,8 +190,6 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
                     self.avatar_url = (
                         avatar_url.get("data", [{}])[0].get("imageUrl") or None
                     )
-
-            self._synced = True
 
     async def owns_asset(self, asset: RobloxBaseAsset) -> bool:
         """Check if the user owns a specific asset.
