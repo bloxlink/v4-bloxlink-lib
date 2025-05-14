@@ -1,5 +1,5 @@
 from typing import Self, Type, Literal, Annotated
-from pydantic import Field, field_validator, model_validator
+from pydantic import Field, field_validator, model_validator, computed_field
 from bloxlink_lib.models.base import (
     PydanticList,
     BaseModel,
@@ -197,15 +197,21 @@ class GuildData(BaseSchema):
 
         return unset_empty_dicts(cls, base_model_data)
 
-    @model_validator(mode="after")
-    def handle_verified_roles(self) -> Self:
-        """Remove verifiedRoleName and unverifiedRoleName if verifiedRole or unverifiedRole is set"""
+    @computed_field
+    @property
+    def verifiedRoleName(self) -> str | None:
+        if self.verifiedRole:
+            return None
 
-        from bloxlink_lib.models.migrators import (
-            set_verified_role_name_null,
-        )
+        return self.verifiedRoleName or "Verified"
 
-        return set_verified_role_name_null(self)
+    @computed_field
+    @property
+    def unverifiedRoleName(self) -> str | None:
+        if self.unverifiedRole:
+            return None
+
+        return self.unverifiedRoleName or "Unverified"
 
     @model_validator(mode="before")
     @classmethod
