@@ -108,26 +108,20 @@ def unset_empty_dicts(base_model: BaseModel, base_model_data: dict) -> dict:
     return base_model_data
 
 
-def unset_verified_role_name(base_model: BaseModel, base_model_data: dict) -> dict:
-    """Remove verifiedRoleName and unverifiedRoleName if verifiedRole or unverifiedRole is set"""
+def set_verified_role_name_null(base_model: BaseModel) -> dict:
+    """Set verifiedRoleName and/or unverifiedRoleName to None if verifiedRole and/or unverifiedRole is set"""
 
-    if isinstance(base_model_data, dict):
-        for field_name in base_model.model_fields:
-            if (
-                field_name == "verifiedRoleName"
-                and "verifiedRoleName" in base_model_data
-                and base_model_data.get("verifiedRole") is None
-            ):
-                del base_model_data[field_name]
+    if getattr(base_model, "verifiedRoleName", None) and getattr(
+        base_model, "verifiedRole", None
+    ):
+        base_model.verifiedRoleName = None
 
-            if (
-                field_name == "unverifiedRoleName"
-                and "unverifiedRoleName" in base_model_data
-                and base_model_data.get("unverifiedRole") is None
-            ):
-                del base_model_data[field_name]
+    if getattr(base_model, "unverifiedRoleName", None) and getattr(
+        base_model, "unverifiedRole", None
+    ):
+        base_model.unverifiedRoleName = None
 
-    return base_model_data
+    return base_model
 
 
 def unset_empty_joinchannels(base_model: BaseModel, base_model_data: dict) -> dict:
