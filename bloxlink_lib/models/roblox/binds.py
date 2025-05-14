@@ -1,4 +1,5 @@
 from __future__ import annotations
+import logging
 import math
 from enum import Enum
 import re
@@ -260,20 +261,28 @@ async def parse_template(
                 case GenericTemplates.VERIFY_URL.value:
                     nick_value = "https://blox.link/verify"
 
-        if nick_fn:
-            if nick_fn in ("allC", "allL"):
-                if nick_fn == "allC":
-                    nick_value = nick_value.upper()
-                elif nick_fn == "allL":
-                    nick_value = nick_value.lower()
+        try:
+            if nick_fn:
+                if nick_fn in ("allC", "allL"):
+                    if nick_fn == "allC":
+                        nick_value = nick_value.upper()
+                    elif nick_fn == "allL":
+                        nick_value = nick_value.lower()
 
-                template = template.replace("{{{0}}}".format(outer_nick), nick_value)
+                    template = template.replace(
+                        "{{{0}}}".format(outer_nick), nick_value
+                    )
+                else:
+                    template = template.replace(
+                        "{{{0}}}".format(outer_nick), outer_nick
+                    )  # remove {} only
             else:
-                template = template.replace(
-                    "{{{0}}}".format(outer_nick), outer_nick
-                )  # remove {} only
-        else:
-            template = template.replace("{{{0}}}".format(outer_nick), nick_value)
+                template = template.replace("{{{0}}}".format(outer_nick), nick_value)
+        except TypeError:
+            logging.error(
+                f"Error parsing template: {template}, {nick_value}, {outer_nick}, {roblox_user}"
+            )
+            raise
 
     if trim_nickname:
         return template[:32]

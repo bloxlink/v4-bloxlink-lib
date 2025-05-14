@@ -65,7 +65,7 @@ class MemberSerializable(BaseModel):
         return cls(
             id=member.id,
             username=member.username,
-            avatar_url=str(member.avatar_url),
+            avatar_url=str(member.make_avatar_url() or member.default_avatar_url),
             global_name=member.global_name,
             display_name=member.display_name,
             is_bot=member.is_bot,

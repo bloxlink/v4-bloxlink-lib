@@ -102,7 +102,7 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
     # these fields are provided after sync() is called
     banned: bool = Field(alias="isBanned", default=False)
     age_days: int = None
-    groups: dict[int, RobloxUserGroup] | None = Field(default=None)
+    groups: dict[int, RobloxUserGroup] = Field(default_factory=dict)
 
     avatar: UserAvatar = None
     avatar_url: str | None = None
@@ -131,12 +131,6 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
             cache (bool, optional): Should we check the object for values before retrieving. Defaults to True.
         """
 
-        if includes is not None and any(
-            (x is False or x not in [*VALID_INFO_SERVER_SCOPES, True, None])
-            for x in includes
-        ):
-            raise ValueError("Invalid includes provided.")
-
         if includes is None:
             includes = []
 
@@ -144,12 +138,18 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
             includes = VALID_INFO_SERVER_SCOPES
             self._complete = True
 
+        if includes is not None and any(
+            (x is False or x not in [*VALID_INFO_SERVER_SCOPES, True, None])
+            for x in includes
+        ):
+            raise ValueError("Invalid includes provided.")
+
         if cache:
             # remove includes if we already have the value saved
-            if self.groups is not None and "groups" in includes:
+            if self.groups and "groups" in includes:
                 includes.remove("groups")
 
-            if self.badges is not None and "badges" in includes:
+            if self.badges and "badges" in includes:
                 includes.remove("badges")
 
         roblox_user_data, user_data_response = await fetch_typed(
@@ -177,7 +177,7 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
             )
             self.avatar = roblox_user_data.avatar or self.avatar
             self.profile_link = roblox_user_data.profile_link or self.profile_link
-            self.groups = roblox_user_data.groups or self.groups
+            self.groups = roblox_user_data.groups or self.groups or {}
 
             self.parse_age()
 

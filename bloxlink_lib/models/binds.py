@@ -11,7 +11,7 @@ from typing import (
     Type,
 )
 
-from pydantic import Field, ValidationError
+from pydantic import Field, ValidationError, field_validator
 
 from bloxlink_lib.models.base import (
     BaseModel,
@@ -36,6 +36,7 @@ if TYPE_CHECKING:
 VALID_BIND_TYPES = Literal[
     "group", "asset", "badge", "gamepass", "verified", "unverified"
 ]
+VALID_BIND_TYPES_SET = {"group", "asset", "badge", "gamepass", "verified", "unverified"}
 BIND_GROUP_SUBTYPES = Literal["role_bind", "full_group"]
 
 
@@ -103,11 +104,25 @@ class BindCriteria(BaseModel):
 
     group: GroupBindData | None = None
 
+    @field_validator("type", mode="before")
+    @classmethod
+    def transform_type(
+        cls: Type[Self], bind_type: VALID_BIND_TYPES | str
+    ) -> VALID_BIND_TYPES:
+        """Transform the type to a valid bind type."""
+
+        from bloxlink_lib.models.migrators import migrate_bind_criteria_type
+
+        return migrate_bind_criteria_type(bind_type)
+
+    def __hash__(self) -> int:
+        return hash((self.type, self.id))
+
 
 class BindData(BaseModel):
     """Represents the data required for a bind."""
 
-    displayName: str = None
+    displayName: str | None = None
 
 
 class GuildBind(BaseModel):
@@ -191,6 +206,12 @@ class GuildBind(BaseModel):
                         for rank_id, criteria_data in group_bind_data.get(
                             "binds", {}
                         ).items():
+                            try:
+                                int(rank_id)
+                            except ValueError:
+                                if rank_id not in ("all", "0"):
+                                    rank_id = None
+
                             new_bind = cls(
                                 nickname=criteria_data.get("nickname") or None,
                                 criteria=BindCriteria(
@@ -201,7 +222,7 @@ class GuildBind(BaseModel):
                                         guest=rank_id == "0",
                                         roleset=(
                                             int(rank_id)
-                                            if rank_id not in ("all", "0")
+                                            if rank_id and rank_id not in ("all", "0")
                                             else None
                                         ),
                                     ),
@@ -240,7 +261,12 @@ class GuildBind(BaseModel):
                         if bind_type == "gamePasses":
                             bind_type = "gamepass"
                         else:
-                            bind_type = bind_type[:-1]
+                            if bind_type.endswith("s"):
+                                bind_type = bind_type[:-1]
+
+                        print(bind_type)
+                        if bind_type not in VALID_BIND_TYPES_SET:
+                            continue
 
                         new_bind = cls(
                             nickname=bind_data.get("nickname") or None,
@@ -258,12 +284,14 @@ class GuildBind(BaseModel):
         """Calculate the highest role in the guild for this bind."""
 
         if self.roles and not self.highest_role:
-            filtered_binds = filter(
-                lambda r: str(r.id) in self.roles and self.nickname,
-                guild_roles.values(),
+            filtered_binds = list(
+                filter(
+                    lambda r: str(r.id) in self.roles and self.nickname,
+                    guild_roles.values(),
+                )
             )
 
-            if list(filtered_binds):
+            if len(filtered_binds):
                 self.highest_role = max(filtered_binds, key=lambda r: r.position)
 
     async def satisfies_for(
@@ -300,12 +328,12 @@ class GuildBind(BaseModel):
                 case "group":
                     group: RobloxGroup = self.entity
 
-                    await group.sync_for(roblox_user, sync=True)
-
-                    user_roleset = group.user_roleset
-
                     # check if the user has any group roleset roles they shouldn't have
                     if self.criteria.group.dynamicRoles:
+                        await group.sync_for(roblox_user, sync=True)
+
+                        user_roleset = group.user_roleset
+
                         for roleset in group.rolesets.values():
                             for role_id in member.role_ids:
                                 if (
@@ -316,6 +344,7 @@ class GuildBind(BaseModel):
                                     ineligible_roles.add(role_id)
 
                     if self.criteria.id in roblox_user.groups:
+                        user_roleset = roblox_user.groups[self.criteria.id].role
                         # full group bind. check for a matching roleset
                         if self.criteria.group.dynamicRoles:
                             roleset_role = find(
@@ -335,14 +364,14 @@ class GuildBind(BaseModel):
                             successful = False
                         elif (self.criteria.group.min and self.criteria.group.max) and (
                             self.criteria.group.min
-                            <= group.user_roleset.rank
+                            <= user_roleset.rank
                             <= self.criteria.group.max
                         ):
                             successful = True
                         elif self.criteria.group.roleset:
                             roleset = self.criteria.group.roleset
-                            successful = group.user_roleset.rank == roleset or (
-                                roleset < 0 and group.user_roleset.rank >= abs(roleset)
+                            successful = user_roleset.rank == roleset or (
+                                roleset < 0 and user_roleset.rank >= abs(roleset)
                             )
                         else:
                             successful = False

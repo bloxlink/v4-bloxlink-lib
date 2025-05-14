@@ -1,4 +1,5 @@
 from __future__ import annotations
+from bloxlink_lib.models.binds import VALID_BIND_TYPES
 from bloxlink_lib.models.schemas.guilds import (  # pylint: disable=no-name-in-module
     GuildRestriction,
 )
@@ -32,6 +33,15 @@ def migrate_restrictions(
 
 def migrate_delete_commands(delete_commands: int | None | bool) -> bool:
     """Migrate the deleteCommands field."""
+
+    if delete_commands and str(delete_commands).lower() in (
+        "none",
+        "off",
+        "disable",
+        "false",
+        "0",
+    ):
+        return False
 
     return bool(delete_commands)
 
@@ -98,30 +108,50 @@ def unset_empty_dicts(base_model: BaseModel, base_model_data: dict) -> dict:
     return base_model_data
 
 
+def set_verified_role_name_null(base_model: BaseModel) -> dict:
+    """Set verifiedRoleName and/or unverifiedRoleName to None if verifiedRole and/or unverifiedRole is set"""
+
+    if getattr(base_model, "verifiedRoleName", None) and getattr(
+        base_model, "verifiedRole", None
+    ):
+        base_model.verifiedRoleName = None
+
+    if getattr(base_model, "unverifiedRoleName", None) and getattr(
+        base_model, "unverifiedRole", None
+    ):
+        base_model.unverifiedRoleName = None
+
+    return base_model
+
+
 def unset_empty_joinchannels(base_model: BaseModel, base_model_data: dict) -> dict:
     """Remove empty joinChannels from the data before Pydantic validates the model"""
 
     if isinstance(base_model_data, dict):
         if (
             base_model_data.get("joinChannel")
+            and "verified" in base_model_data.get("joinChannel")
             and base_model_data.get("joinChannel").get("verified") is None
         ):
             del base_model_data["joinChannel"]["verified"]
 
         if (
             base_model_data.get("joinChannel")
+            and "unverified" in base_model_data.get("joinChannel")
             and base_model_data.get("joinChannel").get("unverified") is None
         ):
             del base_model_data["joinChannel"]["unverified"]
 
         if (
             base_model_data.get("leaveChannel")
+            and "verified" in base_model_data.get("leaveChannel")
             and base_model_data.get("leaveChannel").get("verified") is None
         ):
             del base_model_data["leaveChannel"]["verified"]
 
         if (
             base_model_data.get("leaveChannel")
+            and "unverified" in base_model_data.get("leaveChannel")
             and base_model_data.get("leaveChannel").get("unverified") is None
         ):
             del base_model_data["leaveChannel"]["unverified"]
@@ -133,3 +163,21 @@ def unset_empty_joinchannels(base_model: BaseModel, base_model_data: dict) -> di
             del base_model_data["leaveChannel"]
 
     return base_model_data
+
+
+def migrate_bind_criteria_type(bind_type: VALID_BIND_TYPES | str) -> VALID_BIND_TYPES:
+    """Migrate the bind criteria type."""
+
+    if isinstance(bind_type, str):
+        bind_type = bind_type.lower()
+
+    if bind_type.startswith("gamep"):
+        return "gamepass"
+
+    if bind_type.startswith("grou"):
+        return "group"
+
+    if bind_type.startswith("bad"):
+        return "badge"
+
+    return bind_type

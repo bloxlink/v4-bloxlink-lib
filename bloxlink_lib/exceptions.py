@@ -11,7 +11,7 @@ class BloxlinkException(Exception):
         send_ephemeral: bool = False,
         status_code: int = HTTPStatus.BAD_REQUEST,
     ):
-        self.message = message
+        self.message = message or "An unexpected error occurred."
         self.send_ephemeral = send_ephemeral  # Used exclusively by the bot to send the message as an ephemeral message. Not shown in web responses.
         self.status_code = status_code  # If this is used by a web component, this will be the status code used.
 
