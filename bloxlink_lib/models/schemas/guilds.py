@@ -125,11 +125,9 @@ class GuildData(BaseSchema):
     binds: Annotated[list[GuildBind], Field(default_factory=list)]
 
     verifiedRoleEnabled: bool = True
-    verifiedRoleName: str | None = "Verified"  # deprecated
     verifiedRole: str = None
 
     unverifiedRoleEnabled: bool = True
-    unverifiedRoleName: str | None = "Unverified"  # deprecated
     unverifiedRole: str = None
 
     verifiedDM: str = (
