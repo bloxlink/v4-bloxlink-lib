@@ -288,6 +288,9 @@ class GuildData(BaseSchema):
             if verified_role_bind not in self.binds:
                 self.binds.append(verified_role_bind)
 
+            if self.verifiedRoleName:
+                self.verifiedRoleName = None
+
         if self.unverifiedRole:
             unverified_role_bind = GuildBind(
                 criteria={"type": "unverified"}, roles=[self.unverifiedRole]
@@ -296,12 +299,8 @@ class GuildData(BaseSchema):
             if unverified_role_bind not in self.binds:
                 self.binds.append(unverified_role_bind)
 
-        # remove verifiedRoleName and unverifiedRoleName if verifiedRole and unverifiedRole are set
-        if self.verifiedRole and self.verifiedRoleName:
-            self.verifiedRoleName = None
-
-        if self.unverifiedRole and self.unverifiedRoleName:
-            self.unverifiedRoleName = None
+            if self.unverifiedRoleName:
+                self.unverifiedRoleName = None
 
     @staticmethod
     def database_domain() -> DatabaseDomains:
