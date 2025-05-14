@@ -188,14 +188,10 @@ async def parse_template(
         # parse {group-rank}
         if "group-rank" in template:
             if group_bind and group_bind.criteria.id in roblox_user.groups:
-                if highest_priority_bind:
-                    group_roleset_name = roblox_user.groups[
-                        highest_priority_bind.criteria.id
-                    ].role.name
-                else:
-                    group_roleset_name = roblox_user.groups[
-                        potential_binds[0].criteria.id
-                    ].role.name
+                group_roleset_name = roblox_user.groups[
+                    group_bind.criteria.id
+                ].role.name
+
             else:
                 group_roleset_name = "Guest"
         else:
