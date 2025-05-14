@@ -45,7 +45,6 @@ markers = [
     "primitives",
     "binds",
     "nicknames",
-    "bind_conversions",
 ]
 
 [tool.pytest_env]
