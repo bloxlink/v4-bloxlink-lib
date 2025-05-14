@@ -32,13 +32,17 @@ async def wait_for_redis():
     await wait_for_redis_()
 
 
-@pytest_asyncio.fixture(scope="function")
+@pytest_asyncio.fixture(scope="function", autouse=True)
 async def setup_clean_guild_data(
     docker_services, wait_for_redis
 ):  # pylint: disable=unused-argument
     """Starts the database fresh for each test."""
 
-    await mongo.db.guilds.delete_one({"_id": TEST_GUILD_ID})
+    # Setup (nothing to do)
+    yield
+
+    # Teardown (runs after each test)
+    await mongo.bloxlink.guilds.delete_one({"_id": TEST_GUILD_ID})
 
 
 @pytest_asyncio.fixture(scope="session")

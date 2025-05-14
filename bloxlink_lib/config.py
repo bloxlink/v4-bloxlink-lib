@@ -45,8 +45,8 @@ class BaseConfig(BaseSettings):
     TEST_MODE: bool = (
         False  # if true, some library features can be manipulated via the settings below
     )
-    SKIP_MONGO_LOAD: bool = False
-    SKIP_REDIS_LOAD: bool = False
+    # SKIP_MONGO_LOAD: bool = False
+    # SKIP_REDIS_LOAD: bool = False
     #############################
     # OPTIONAL BLOXLINK VERIFICATION SETTINGS
     #############################
@@ -61,8 +61,8 @@ class BaseConfig(BaseSettings):
     )
 
     def model_post_init(self, __context):
-        if any([self.SKIP_MONGO_LOAD, self.SKIP_REDIS_LOAD]) and not self.TEST_MODE:
-            raise ValueError("TEST_MODE must be enabled to use test env vars")
+        # if any([self.SKIP_MONGO_LOAD, self.SKIP_REDIS_LOAD]) and not self.TEST_MODE:
+        #     raise ValueError("TEST_MODE must be enabled to use test env vars")
 
         if self.TEST_MODE:
             return

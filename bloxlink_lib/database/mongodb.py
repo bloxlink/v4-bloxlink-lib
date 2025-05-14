@@ -21,9 +21,9 @@ def connect_database():
 
     global mongo  # pylint: disable=global-statement
 
-    if CONFIG.SKIP_MONGO_LOAD and CONFIG.TEST_MODE:
-        logging.info("Skipping MongoDB initialization in test mode")
-        return
+    # if CONFIG.SKIP_MONGO_LOAD and CONFIG.TEST_MODE:
+    #     logging.info("Skipping MongoDB initialization in test mode")
+    #     return
 
     mongo_options: dict[str, str | int] = {}
 
@@ -49,9 +49,23 @@ def connect_database():
     mongo.get_io_loop = asyncio.get_running_loop
 
 
-async def fetch_item[
-    T: "BaseSchema"
-](constructor: Type[T], item_id: str, *aspects) -> T:
+async def _db_fetch[T: "BaseSchema"](
+    constructor: Type[T], item_id: str, *aspects
+) -> dict:
+    """Raw fetch an item from the database"""
+
+    database_domain = constructor.database_domain().value
+
+    item = await mongo.bloxlink[database_domain].find_one(
+        {"_id": item_id}, {x: True for x in aspects}
+    ) or {"_id": item_id}
+
+    return item
+
+
+async def fetch_item[T: "BaseSchema"](
+    constructor: Type[T], item_id: str, *aspects
+) -> T:
     """
     Fetch an item from local cache, then redis, then database.
     Will populate caches for later access
@@ -68,9 +82,7 @@ async def fetch_item[
         item = await redis.hgetall(f"{database_domain}:{item_id}")
 
     if not item:
-        item = await mongo.bloxlink[database_domain].find_one(
-            {"_id": item_id}, {x: True for x in aspects}
-        ) or {"_id": item_id}
+        item = await _db_fetch(constructor, item_id, *aspects)
 
         if item and not isinstance(item, (list, dict)):
             if aspects:
@@ -105,9 +117,9 @@ async def fetch_item[
     return constructor(**item)
 
 
-async def update_item[
-    T: "BaseSchema"
-](constructor: Type[T], item_id: str, **aspects) -> None:
+async def update_item[T: "BaseSchema"](
+    constructor: Type[T], item_id: str, **aspects
+) -> None:
     """
     Update an item's aspects in local cache, redis, and database.
     """

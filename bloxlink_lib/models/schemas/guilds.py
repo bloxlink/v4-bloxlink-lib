@@ -124,12 +124,12 @@ class GuildData(BaseSchema):
 
     binds: Annotated[list[GuildBind], Field(default_factory=list)]
 
-    verifiedRoleEnabled: bool = True
-    verifiedRole: str = None
+    verifiedRoleEnabled: bool | None = True
+    verifiedRole: str | None = None
     verifiedRoleName: str | None = "Verified"
 
-    unverifiedRoleEnabled: bool = True
-    unverifiedRole: str = None
+    unverifiedRoleEnabled: bool | None = True
+    unverifiedRole: str | None = None
     unverifiedRoleName: str | None = "Unverified"
 
     verifiedDM: str = (
@@ -175,17 +175,6 @@ class GuildData(BaseSchema):
     migratedBindsToV4: bool = False
 
     # model converters
-    @model_validator(mode="before")
-    @classmethod
-    def handle_nulls(cls: BaseModel, base_model_data: dict) -> dict:
-        """Remove null fields from the data before Pydantic validates the model"""
-
-        from bloxlink_lib.models.migrators import (
-            unset_nulls,
-        )
-
-        return unset_nulls(cls, base_model_data)
-
     @model_validator(mode="before")
     @classmethod
     def handle_empty_dicts(cls: BaseModel, base_model_data: dict) -> dict:
@@ -280,7 +269,7 @@ class GuildData(BaseSchema):
 
     def model_post_init(self, __context):
         # merge verified roles into binds
-        if getattr(self, "verifiedRole", None):
+        if self.verifiedRole is not None:
             verified_role_bind = GuildBind(
                 criteria={"type": "verified"}, roles=[self.verifiedRole]
             )
@@ -288,10 +277,10 @@ class GuildData(BaseSchema):
             if verified_role_bind not in self.binds:
                 self.binds.append(verified_role_bind)
 
-            if hasattr(self, "verifiedRoleName"):
+            if self.verifiedRoleName is not None:
                 self.verifiedRoleName = None
 
-        if getattr(self, "unverifiedRole", None):
+        if self.unverifiedRole is not None:
             unverified_role_bind = GuildBind(
                 criteria={"type": "unverified"}, roles=[self.unverifiedRole]
             )
@@ -299,7 +288,7 @@ class GuildData(BaseSchema):
             if unverified_role_bind not in self.binds:
                 self.binds.append(unverified_role_bind)
 
-            if hasattr(self, "unverifiedRoleName"):
+            if self.unverifiedRoleName is not None:
                 self.unverifiedRoleName = None
 
     @staticmethod

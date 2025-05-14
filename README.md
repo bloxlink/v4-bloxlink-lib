@@ -66,5 +66,7 @@ Test groups:
 * binds
 * nicknames
 * bind_conversions
+* migrators
+* database_utilities
 
 For example: `poetry run pytest -m binds`

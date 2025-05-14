@@ -54,11 +54,11 @@ class TestVerifiedRoleMigrators:
             verifiedRole="123",
         )
 
-        assert getattr(test_guild_data, "unverifiedRoleName", None) is None
-        assert getattr(test_guild_data, "unverifiedRole", None) == "456"
+        assert test_guild_data.unverifiedRoleName is None
+        assert test_guild_data.unverifiedRole == "456"
 
-        assert getattr(test_guild_data, "verifiedRoleName", None) is None
-        assert getattr(test_guild_data, "verifiedRole", None) == "123"
+        assert test_guild_data.verifiedRoleName is None
+        assert test_guild_data.verifiedRole == "123"
 
     @pytest.mark.asyncio_concurrent(group="migrators")
     async def test_default_verified_role_name(
@@ -69,8 +69,8 @@ class TestVerifiedRoleMigrators:
 
         test_guild_data = GuildData(id=test_guild.id)
 
-        assert getattr(test_guild_data, "unverifiedRoleName", None) is "Unverified"
-        assert getattr(test_guild_data, "unverifiedRole", None) is None
+        assert test_guild_data.unverifiedRoleName is "Unverified"
+        assert test_guild_data.unverifiedRole is None
 
-        assert getattr(test_guild_data, "verifiedRoleName", None) is "Verified"
-        assert getattr(test_guild_data, "verifiedRole", None) is None
+        assert test_guild_data.verifiedRoleName is "Verified"
+        assert test_guild_data.verifiedRole is None
