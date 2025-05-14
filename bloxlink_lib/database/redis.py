@@ -20,10 +20,6 @@ def connect_redis():
 
     global redis  # pylint: disable=global-statement
 
-    # if CONFIG.SKIP_REDIS_LOAD and CONFIG.TEST_MODE:
-    #     logging.info("Skipping Redis initialization in test mode")
-    #     return
-
     if CONFIG.REDIS_URL:
         redis = Redis.from_url(
             CONFIG.REDIS_URL,

@@ -40,14 +40,6 @@ class BaseConfig(BaseSettings):
     REDIS_PORT: str | None = "6379"
     REDIS_PASSWORD: str | None = None
     #############################
-    # TEST UTILITIES
-    #############################
-    TEST_MODE: bool = (
-        False  # if true, some library features can be manipulated via the settings below
-    )
-    # SKIP_MONGO_LOAD: bool = False
-    # SKIP_REDIS_LOAD: bool = False
-    #############################
     # OPTIONAL BLOXLINK VERIFICATION SETTINGS
     #############################
     STAGING_USE_FALLBACK_VERIFICATION_API: bool | None = (
@@ -61,12 +53,6 @@ class BaseConfig(BaseSettings):
     )
 
     def model_post_init(self, __context):
-        # if any([self.SKIP_MONGO_LOAD, self.SKIP_REDIS_LOAD]) and not self.TEST_MODE:
-        #     raise ValueError("TEST_MODE must be enabled to use test env vars")
-
-        if self.TEST_MODE:
-            return
-
         if self.REDIS_URL is None and (
             self.REDIS_HOST is None or self.REDIS_PORT is None
         ):

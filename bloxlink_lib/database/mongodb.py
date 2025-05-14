@@ -21,10 +21,6 @@ def connect_database():
 
     global mongo  # pylint: disable=global-statement
 
-    # if CONFIG.SKIP_MONGO_LOAD and CONFIG.TEST_MODE:
-    #     logging.info("Skipping MongoDB initialization in test mode")
-    #     return
-
     mongo_options: dict[str, str | int] = {}
 
     if CONFIG.MONGO_CA_FILE:
