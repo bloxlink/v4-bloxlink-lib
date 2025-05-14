@@ -125,11 +125,11 @@ class GuildData(BaseSchema):
     binds: Annotated[list[GuildBind], Field(default_factory=list)]
 
     verifiedRoleEnabled: bool = True
-    verifiedRoleName: str = "Verified"  # deprecated
+    verifiedRoleName: str | None = "Verified"  # deprecated
     verifiedRole: str = None
 
     unverifiedRoleEnabled: bool = True
-    unverifiedRoleName: str = "Unverified"  # deprecated
+    unverifiedRoleName: str | None = "Unverified"  # deprecated
     unverifiedRole: str = None
 
     verifiedDM: str = (
@@ -196,6 +196,16 @@ class GuildData(BaseSchema):
         )
 
         return unset_empty_dicts(cls, base_model_data)
+
+    @model_validator(mode="after")
+    def handle_verified_roles(self) -> Self:
+        """Remove verifiedRoleName and unverifiedRoleName if verifiedRole or unverifiedRole is set"""
+
+        from bloxlink_lib.models.migrators import (
+            set_verified_role_name_null,
+        )
+
+        return set_verified_role_name_null(self)
 
     @model_validator(mode="before")
     @classmethod
