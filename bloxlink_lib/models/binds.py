@@ -354,9 +354,10 @@ class GuildBind(BaseModel):
 
                             if roleset_role:
                                 additional_roles.add(roleset_role.id)
-                                successful = True
                             else:
                                 missing_roles.add(user_roleset.name)
+
+                            successful = True
 
                         elif self.criteria.group.everyone:
                             successful = True
