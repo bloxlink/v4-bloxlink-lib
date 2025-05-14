@@ -197,15 +197,15 @@ class GuildData(BaseSchema):
 
         return unset_empty_dicts(cls, base_model_data)
 
-    @model_validator(mode="after")
-    def handle_verified_roles(self) -> Self:
-        """Remove verifiedRoleName and unverifiedRoleName if verifiedRole or unverifiedRole is set"""
+    # @model_validator(mode="after")
+    # def handle_verified_roles(self) -> Self:
+    #     """Remove verifiedRoleName and unverifiedRoleName if verifiedRole or unverifiedRole is set"""
 
-        from bloxlink_lib.models.migrators import (
-            set_verified_role_name_null,
-        )
+    #     from bloxlink_lib.models.migrators import (
+    #         set_verified_role_name_null,
+    #     )
 
-        return set_verified_role_name_null(self)
+    #     return set_verified_role_name_null(self)
 
     @model_validator(mode="before")
     @classmethod
