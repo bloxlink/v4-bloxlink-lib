@@ -199,6 +199,17 @@ class GuildData(BaseSchema):
 
     @model_validator(mode="before")
     @classmethod
+    def handle_verified_roles(cls: BaseModel, base_model_data: dict) -> dict:
+        """Remove verifiedRoleName and unverifiedRoleName if verifiedRole or unverifiedRole is set"""
+
+        from bloxlink_lib.models.migrators import (
+            unset_verified_role_name,
+        )
+
+        return unset_verified_role_name(cls, base_model_data)
+
+    @model_validator(mode="before")
+    @classmethod
     def handle_empty_joinchannels(cls: BaseModel, base_model_data: dict) -> dict:
         """Remove joinChannels and leaveChannels if the channel is not set"""
 

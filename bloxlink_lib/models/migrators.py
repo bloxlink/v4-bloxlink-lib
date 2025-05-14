@@ -108,6 +108,22 @@ def unset_empty_dicts(base_model: BaseModel, base_model_data: dict) -> dict:
     return base_model_data
 
 
+def unset_verified_role_name(base_model: BaseModel, base_model_data: dict) -> dict:
+    """Remove verifiedRoleName and unverifiedRoleName if verifiedRole or unverifiedRole is set"""
+
+    if isinstance(base_model_data, dict):
+        for field_name in base_model.model_fields:
+            if field_name == "verifiedRoleName" and base_model_data.get("verifiedRole"):
+                del base_model_data["verifiedRoleName"]
+
+            if field_name == "unverifiedRoleName" and base_model_data.get(
+                "unverifiedRole"
+            ):
+                del base_model_data["unverifiedRoleName"]
+
+    return base_model_data
+
+
 def unset_empty_joinchannels(base_model: BaseModel, base_model_data: dict) -> dict:
     """Remove empty joinChannels from the data before Pydantic validates the model"""
 
