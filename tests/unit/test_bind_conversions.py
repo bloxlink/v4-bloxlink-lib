@@ -3,7 +3,7 @@ from bloxlink_lib.models import binds
 from tests.unit.fixtures.bind_conversions import BindConversionTestCase
 
 
-pytestmark = pytest.mark.bind_conversions
+pytestmark = pytest.mark.binds
 
 
 class TestBindConversions:

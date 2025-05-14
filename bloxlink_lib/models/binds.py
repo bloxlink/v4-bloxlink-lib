@@ -36,6 +36,7 @@ if TYPE_CHECKING:
 VALID_BIND_TYPES = Literal[
     "group", "asset", "badge", "gamepass", "verified", "unverified"
 ]
+VALID_BIND_TYPES_SET = {"group", "asset", "badge", "gamepass", "verified", "unverified"}
 BIND_GROUP_SUBTYPES = Literal["role_bind", "full_group"]
 
 
@@ -263,7 +264,8 @@ class GuildBind(BaseModel):
                             if bind_type.endswith("s"):
                                 bind_type = bind_type[:-1]
 
-                        if bind_type not in VALID_BIND_TYPES:
+                        print(bind_type)
+                        if bind_type not in VALID_BIND_TYPES_SET:
                             continue
 
                         new_bind = cls(
