@@ -83,17 +83,6 @@ def migrate_disallow_ban_evaders(disallow_ban_evaders: bool | str | None) -> boo
     return disallow_ban_evaders in ("ban", "kick")
 
 
-def unset_nulls(base_model: BaseModel, base_model_data: dict) -> dict:
-    """Remove null fields from the data before Pydantic validates the model"""
-
-    if isinstance(base_model_data, dict):
-        for field_name in base_model.model_fields:
-            if field_name in base_model_data and base_model_data[field_name] is None:
-                del base_model_data[field_name]  # unset the field
-
-    return base_model_data
-
-
 def unset_empty_dicts(base_model: BaseModel, base_model_data: dict) -> dict:
     """Remove empty dictionaries from the data before Pydantic validates the model"""
 
@@ -108,51 +97,35 @@ def unset_empty_dicts(base_model: BaseModel, base_model_data: dict) -> dict:
     return base_model_data
 
 
-def set_verified_role_name_null(base_model: BaseModel) -> dict:
-    """Set verifiedRoleName and/or unverifiedRoleName to None if verifiedRole and/or unverifiedRole is set"""
-
-    if getattr(base_model, "verifiedRoleName", None) and getattr(
-        base_model, "verifiedRole", None
-    ):
-        base_model.verifiedRoleName = None
-
-    if getattr(base_model, "unverifiedRoleName", None) and getattr(
-        base_model, "unverifiedRole", None
-    ):
-        base_model.unverifiedRoleName = None
-
-    return base_model
-
-
 def unset_empty_joinchannels(base_model: BaseModel, base_model_data: dict) -> dict:
     """Remove empty joinChannels from the data before Pydantic validates the model"""
 
     if isinstance(base_model_data, dict):
         if (
             base_model_data.get("joinChannel")
-            and "verified" in base_model_data.get("joinChannel")
-            and base_model_data.get("joinChannel").get("verified") is None
+            and "verified" in base_model_data.get("joinChannel", {})
+            and base_model_data.get("joinChannel", {}).get("verified") is None
         ):
             del base_model_data["joinChannel"]["verified"]
 
         if (
             base_model_data.get("joinChannel")
-            and "unverified" in base_model_data.get("joinChannel")
-            and base_model_data.get("joinChannel").get("unverified") is None
+            and "unverified" in base_model_data.get("joinChannel", {})
+            and base_model_data.get("joinChannel", {}).get("unverified") is None
         ):
             del base_model_data["joinChannel"]["unverified"]
 
         if (
             base_model_data.get("leaveChannel")
-            and "verified" in base_model_data.get("leaveChannel")
-            and base_model_data.get("leaveChannel").get("verified") is None
+            and "verified" in base_model_data.get("leaveChannel", {})
+            and base_model_data.get("leaveChannel", {}).get("verified") is None
         ):
             del base_model_data["leaveChannel"]["verified"]
 
         if (
             base_model_data.get("leaveChannel")
-            and "unverified" in base_model_data.get("leaveChannel")
-            and base_model_data.get("leaveChannel").get("unverified") is None
+            and "unverified" in base_model_data.get("leaveChannel", {})
+            and base_model_data.get("leaveChannel", {}).get("unverified") is None
         ):
             del base_model_data["leaveChannel"]["unverified"]
 
@@ -171,13 +144,13 @@ def migrate_bind_criteria_type(bind_type: VALID_BIND_TYPES | str) -> VALID_BIND_
     if isinstance(bind_type, str):
         bind_type = bind_type.lower()
 
-    if bind_type.startswith("gamep"):
-        return "gamepass"
+        if bind_type.startswith("gamep"):
+            return "gamepass"
 
-    if bind_type.startswith("grou"):
-        return "group"
+        if bind_type.startswith("grou"):
+            return "group"
 
-    if bind_type.startswith("bad"):
-        return "badge"
+        if bind_type.startswith("bad"):
+            return "badge"
 
     return bind_type

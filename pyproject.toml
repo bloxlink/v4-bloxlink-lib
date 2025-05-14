@@ -45,11 +45,12 @@ markers = [
     "primitives",
     "binds",
     "nicknames",
+    "migrators",
+    "database_utilities",
 ]
 
 [tool.pytest_env]
 BOT_RELEASE = "CANARY"
-TEST_MODE = true
 MONGO_USER = "admin"
 MONGO_PASSWORD = "admin123"
 

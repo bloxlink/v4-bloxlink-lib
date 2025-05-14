@@ -350,12 +350,12 @@ async def check_for_verified_roles(
         "unverifiedRoleEnabled",
     )
 
-    verified_role_name = guild_data.verifiedRoleName
-    unverified_role_name = guild_data.unverifiedRoleName
-    verified_role_enabled = guild_data.verifiedRoleEnabled
-    unverified_role_enabled = guild_data.unverifiedRoleEnabled
-    verified_role_id = guild_data.verifiedRole
-    unverified_role_id = guild_data.unverifiedRole
+    verified_role_name = getattr(guild_data, "verifiedRoleName", None)
+    unverified_role_name = getattr(guild_data, "unverifiedRoleName", None)
+    verified_role_enabled = getattr(guild_data, "verifiedRoleEnabled", None)
+    unverified_role_enabled = getattr(guild_data, "unverifiedRoleEnabled", None)
+    verified_role_id = getattr(guild_data, "verifiedRole", None)
+    unverified_role_id = getattr(guild_data, "unverifiedRole", None)
 
     new_verified_binds: list[GuildBind] = []
 

@@ -1,5 +1,5 @@
 from typing import Self, Type, Literal, Annotated
-from pydantic import Field, field_validator, model_validator
+from pydantic import Field, field_validator, model_validator, computed_field
 from bloxlink_lib.models.base import (
     PydanticList,
     BaseModel,
@@ -124,13 +124,13 @@ class GuildData(BaseSchema):
 
     binds: Annotated[list[GuildBind], Field(default_factory=list)]
 
-    verifiedRoleEnabled: bool = True
-    verifiedRoleName: str | None = "Verified"  # deprecated
-    verifiedRole: str = None
+    verifiedRoleEnabled: bool | None = True
+    verifiedRole: str | None = None
+    verifiedRoleName: str | None = "Verified"
 
-    unverifiedRoleEnabled: bool = True
-    unverifiedRoleName: str | None = "Unverified"  # deprecated
-    unverifiedRole: str = None
+    unverifiedRoleEnabled: bool | None = True
+    unverifiedRole: str | None = None
+    unverifiedRoleName: str | None = "Unverified"
 
     verifiedDM: str = (
         ":wave: Welcome to **{server-name}**, {roblox-name}! Visit <{verify-url}> to change your account.\nFind more Roblox Communities at https://blox.link/communities !"
@@ -177,17 +177,6 @@ class GuildData(BaseSchema):
     # model converters
     @model_validator(mode="before")
     @classmethod
-    def handle_nulls(cls: BaseModel, base_model_data: dict) -> dict:
-        """Remove null fields from the data before Pydantic validates the model"""
-
-        from bloxlink_lib.models.migrators import (
-            unset_nulls,
-        )
-
-        return unset_nulls(cls, base_model_data)
-
-    @model_validator(mode="before")
-    @classmethod
     def handle_empty_dicts(cls: BaseModel, base_model_data: dict) -> dict:
         """Remove empty dictionaries from the data before Pydantic validates the model"""
 
@@ -196,16 +185,6 @@ class GuildData(BaseSchema):
         )
 
         return unset_empty_dicts(cls, base_model_data)
-
-    # @model_validator(mode="after")
-    # def handle_verified_roles(self) -> Self:
-    #     """Remove verifiedRoleName and unverifiedRoleName if verifiedRole or unverifiedRole is set"""
-
-    #     from bloxlink_lib.models.migrators import (
-    #         set_verified_role_name_null,
-    #     )
-
-    #     return set_verified_role_name_null(self)
 
     @model_validator(mode="before")
     @classmethod
@@ -290,7 +269,7 @@ class GuildData(BaseSchema):
 
     def model_post_init(self, __context):
         # merge verified roles into binds
-        if self.verifiedRole:
+        if self.verifiedRole is not None:
             verified_role_bind = GuildBind(
                 criteria={"type": "verified"}, roles=[self.verifiedRole]
             )
@@ -298,7 +277,10 @@ class GuildData(BaseSchema):
             if verified_role_bind not in self.binds:
                 self.binds.append(verified_role_bind)
 
-        if self.unverifiedRole:
+            if self.verifiedRoleName is not None:
+                self.verifiedRoleName = None
+
+        if self.unverifiedRole is not None:
             unverified_role_bind = GuildBind(
                 criteria={"type": "unverified"}, roles=[self.unverifiedRole]
             )
@@ -306,14 +288,8 @@ class GuildData(BaseSchema):
             if unverified_role_bind not in self.binds:
                 self.binds.append(unverified_role_bind)
 
-        # # convert old binds
-        # if self.roleBinds and not self.converted_binds:
-        #     self.converted_binds = True
-
-        #     for role_id, group_id in self.roleBinds.items():
-        #         self.binds.append(binds_module.GuildBind(criteria={"type": "group", "group_id": group_id}, roles=[role_id]))
-
-        #     self.roleBinds = None
+            if self.unverifiedRoleName is not None:
+                self.unverifiedRoleName = None
 
     @staticmethod
     def database_domain() -> DatabaseDomains:

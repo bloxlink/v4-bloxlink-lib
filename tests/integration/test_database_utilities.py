@@ -2,13 +2,17 @@ import pytest
 from bloxlink_lib.models.schemas.guilds import (  # pylint: disable=no-name-in-module
     update_guild_data,
     fetch_guild_data,
+    GuildData,
 )
+from bloxlink_lib.database.mongodb import _db_fetch
 from bloxlink_lib.models.migrators import *
 from pydantic import ValidationError
 
 
 class TestIntegrationDatabaseUtilities:
     """Tests the database fetch and update utilities."""
+
+    pytestmark = pytest.mark.database_utilities
 
     @pytest.mark.parametrize("test_input", ["sadasda", "Very awesome role"])
     @pytest.mark.asyncio
@@ -28,3 +32,40 @@ class TestIntegrationDatabaseUtilities:
             await update_guild_data(test_guild_id, verifiedRoleName=test_input)
 
         assert issubclass(e.type, ValidationError)
+
+    @pytest.mark.asyncio
+    async def test_unset_guild_data_field(self, test_guild_id: int):
+        await update_guild_data(test_guild_id, verifiedRoleName="Verified")
+        assert (
+            await fetch_guild_data(test_guild_id, "verifiedRoleName")
+        ).verifiedRoleName == "Verified"
+
+        await update_guild_data(test_guild_id, verifiedRoleName=None)
+
+        guild_data = await _db_fetch(GuildData, test_guild_id, "verifiedRoleName")
+
+        assert "verifiedRoleName" not in guild_data
+
+
+class TestIntegrationDatabaseMigrators:
+    """Tests the database migrators."""
+
+    pytestmark = pytest.mark.migrators
+
+    @pytest.mark.asyncio
+    async def test_migrate_verified_role_name(self, test_guild_id: int):
+        await update_guild_data(
+            test_guild_id,
+            verifiedRoleName="Verified",
+            unverifiedRoleName="Unverified",
+            verifiedRole="123",
+            unverifiedRole="456",
+        )
+
+        guild_data = await fetch_guild_data(test_guild_id)
+
+        assert guild_data.verifiedRoleName is None
+        assert guild_data.unverifiedRoleName is None
+
+        assert guild_data.verifiedRole == "123"
+        assert guild_data.unverifiedRole == "456"
