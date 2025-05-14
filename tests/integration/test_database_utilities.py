@@ -3,11 +3,12 @@ from bloxlink_lib.models.schemas.guilds import (  # pylint: disable=no-name-in-m
     update_guild_data,
     fetch_guild_data,
 )
+from bloxlink_lib.models.migrators import *
 from pydantic import ValidationError
 
 
 class TestIntegrationDatabaseUtilities:
-    """Tests for converting V3 whole group binds to V4."""
+    """Tests the database fetch and update utilities."""
 
     @pytest.mark.parametrize("test_input", ["sadasda", "Very awesome role"])
     @pytest.mark.asyncio
