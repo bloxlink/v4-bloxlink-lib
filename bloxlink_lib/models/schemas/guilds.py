@@ -201,7 +201,7 @@ class GuildData(BaseSchema):
         if self.verifiedRole:
             return None
 
-        return self.verifiedRoleName or "Verified"
+        return "Verified"
 
     @computed_field
     @property
@@ -209,7 +209,7 @@ class GuildData(BaseSchema):
         if self.unverifiedRole:
             return None
 
-        return self.unverifiedRoleName or "Unverified"
+        return "Unverified"
 
     @model_validator(mode="before")
     @classmethod
