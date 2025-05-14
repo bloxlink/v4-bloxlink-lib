@@ -113,13 +113,19 @@ def unset_verified_role_name(base_model: BaseModel, base_model_data: dict) -> di
 
     if isinstance(base_model_data, dict):
         for field_name in base_model.model_fields:
-            if field_name == "verifiedRoleName" and base_model_data.get("verifiedRole"):
-                del base_model_data["verifiedRoleName"]
-
-            if field_name == "unverifiedRoleName" and base_model_data.get(
-                "unverifiedRole"
+            if (
+                field_name == "verifiedRoleName"
+                and "verifiedRoleName" in base_model_data
+                and base_model_data.get("verifiedRole") is None
             ):
-                del base_model_data["unverifiedRoleName"]
+                del base_model_data[field_name]
+
+            if (
+                field_name == "unverifiedRoleName"
+                and "unverifiedRoleName" in base_model_data
+                and base_model_data.get("unverifiedRole") is None
+            ):
+                del base_model_data[field_name]
 
     return base_model_data
 
