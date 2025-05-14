@@ -126,11 +126,11 @@ class GuildData(BaseSchema):
 
     verifiedRoleEnabled: bool = True
     verifiedRole: str = None
-    verifiedRoleName: str = "Verified"
+    verifiedRoleName: str | None = "Verified"
 
     unverifiedRoleEnabled: bool = True
     unverifiedRole: str = None
-    unverifiedRoleName: str = "Unverified"
+    unverifiedRoleName: str | None = "Unverified"
 
     verifiedDM: str = (
         ":wave: Welcome to **{server-name}**, {roblox-name}! Visit <{verify-url}> to change your account.\nFind more Roblox Communities at https://blox.link/communities !"
