@@ -280,7 +280,7 @@ class GuildData(BaseSchema):
 
     def model_post_init(self, __context):
         # merge verified roles into binds
-        if self.verifiedRole:
+        if getattr(self, "verifiedRole", None):
             verified_role_bind = GuildBind(
                 criteria={"type": "verified"}, roles=[self.verifiedRole]
             )
@@ -288,10 +288,10 @@ class GuildData(BaseSchema):
             if verified_role_bind not in self.binds:
                 self.binds.append(verified_role_bind)
 
-            if self.verifiedRoleName:
+            if hasattr(self, "verifiedRoleName"):
                 self.verifiedRoleName = None
 
-        if self.unverifiedRole:
+        if getattr(self, "unverifiedRole", None):
             unverified_role_bind = GuildBind(
                 criteria={"type": "unverified"}, roles=[self.unverifiedRole]
             )
@@ -299,7 +299,7 @@ class GuildData(BaseSchema):
             if unverified_role_bind not in self.binds:
                 self.binds.append(unverified_role_bind)
 
-            if self.unverifiedRoleName:
+            if hasattr(self, "unverifiedRoleName"):
                 self.unverifiedRoleName = None
 
     @staticmethod
