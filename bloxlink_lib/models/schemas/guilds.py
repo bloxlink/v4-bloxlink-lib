@@ -126,9 +126,11 @@ class GuildData(BaseSchema):
 
     verifiedRoleEnabled: bool = True
     verifiedRole: str = None
+    verifiedRoleName: str = "Verified"
 
     unverifiedRoleEnabled: bool = True
     unverifiedRole: str = None
+    unverifiedRoleName: str = "Unverified"
 
     verifiedDM: str = (
         ":wave: Welcome to **{server-name}**, {roblox-name}! Visit <{verify-url}> to change your account.\nFind more Roblox Communities at https://blox.link/communities !"
@@ -194,22 +196,6 @@ class GuildData(BaseSchema):
         )
 
         return unset_empty_dicts(cls, base_model_data)
-
-    @computed_field
-    @property
-    def verifiedRoleName(self) -> str | None:
-        if self.verifiedRole:
-            return None
-
-        return "Verified"
-
-    @computed_field
-    @property
-    def unverifiedRoleName(self) -> str | None:
-        if self.unverifiedRole:
-            return None
-
-        return "Unverified"
 
     @model_validator(mode="before")
     @classmethod
@@ -310,14 +296,12 @@ class GuildData(BaseSchema):
             if unverified_role_bind not in self.binds:
                 self.binds.append(unverified_role_bind)
 
-        # # convert old binds
-        # if self.roleBinds and not self.converted_binds:
-        #     self.converted_binds = True
+        # remove verifiedRoleName and unverifiedRoleName if verifiedRole and unverifiedRole are set
+        if self.verifiedRole and self.verifiedRoleName:
+            self.verifiedRoleName = None
 
-        #     for role_id, group_id in self.roleBinds.items():
-        #         self.binds.append(binds_module.GuildBind(criteria={"type": "group", "group_id": group_id}, roles=[role_id]))
-
-        #     self.roleBinds = None
+        if self.unverifiedRole and self.unverifiedRoleName:
+            self.unverifiedRoleName = None
 
     @staticmethod
     def database_domain() -> DatabaseDomains:
