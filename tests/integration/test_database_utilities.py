@@ -10,6 +10,8 @@ from pydantic import ValidationError
 class TestIntegrationDatabaseUtilities:
     """Tests the database fetch and update utilities."""
 
+    pytestmark = pytest.mark.database_utilities
+
     @pytest.mark.parametrize("test_input", ["sadasda", "Very awesome role"])
     @pytest.mark.asyncio
     async def test_update_guild_data(self, test_input: str, test_guild_id: int):
@@ -28,3 +30,27 @@ class TestIntegrationDatabaseUtilities:
             await update_guild_data(test_guild_id, verifiedRoleName=test_input)
 
         assert issubclass(e.type, ValidationError)
+
+
+class TestIntegrationDatabaseMigrators:
+    """Tests the database migrators."""
+
+    pytestmark = pytest.mark.migrators
+
+    @pytest.mark.asyncio
+    async def test_migrate_verified_role_name(self, test_guild_id: int):
+        await update_guild_data(
+            test_guild_id,
+            verifiedRoleName="Verified",
+            unverifiedRoleName="Unverified",
+            verifiedRole="123",
+            unverifiedRole="456",
+        )
+
+        guild_data = await fetch_guild_data(test_guild_id)
+
+        assert getattr(guild_data, "verifiedRoleName", None) is None
+        assert getattr(guild_data, "unverifiedRoleName", None) is None
+
+        assert getattr(guild_data, "verifiedRole", None) == "123"
+        assert getattr(guild_data, "unverifiedRole", None) == "456"
