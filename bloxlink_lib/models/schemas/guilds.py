@@ -202,10 +202,10 @@ class GuildData(BaseSchema):
         """Remove verifiedRoleName and unverifiedRoleName if verifiedRole or unverifiedRole is set"""
 
         from bloxlink_lib.models.migrators import (
-            unset_verified_role_name,
+            set_verified_role_name_null,
         )
 
-        return unset_verified_role_name(self)
+        return set_verified_role_name_null(self)
 
     @model_validator(mode="before")
     @classmethod
