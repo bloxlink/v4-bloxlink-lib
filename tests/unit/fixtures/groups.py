@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, auto
 from typing import Callable
 import pytest
 from bloxlink_lib import (
@@ -28,10 +28,10 @@ class GroupRolesets(Enum):
     """The Rolesets for the test group"""
 
     GUEST = 0
-    MEMBER = 1
-    OFFICER = 2
-    COMMANDER = 3
-    ADMIN = 4
+    MEMBER = auto()
+    OFFICER = auto()
+    COMMANDER = auto()
+    ADMIN = auto()
 
 
 GroupRolesetsType = dict[int, GroupRoleset]

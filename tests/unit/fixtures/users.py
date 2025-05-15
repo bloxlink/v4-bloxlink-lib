@@ -16,7 +16,13 @@ from .groups import GroupRolesets
 from .guilds import GuildRoles
 from .assets import MockAssets
 
-__all__ = ["MockUserData", "MockUser", "mock_user", "test_group_member"]
+__all__ = [
+    "MockUserData",
+    "MockUser",
+    "mock_user",
+    "test_group_member",
+    "test_group_member_bracketed_roleset",
+]
 
 
 class MockUserData(BaseModel):
@@ -170,6 +176,35 @@ def test_group_member(
         username="john",
         guild=test_guild,
         groups={test_group.id: RobloxUserGroup(group=test_group, role=member_roleset)},
+    )
+
+    return user
+
+
+@pytest.fixture()
+def test_group_member_bracketed_roleset(
+    mocker,
+    test_guild: GuildSerializable,
+    test_group: RobloxGroup,
+) -> MockUser:
+    """Test Discord Member model with a bracketed roleset"""
+
+    user = mock_user(
+        mocker,
+        verified=True,
+        username="john",
+        guild=test_guild,
+        groups={
+            test_group.id: RobloxUserGroup(
+                group=test_group,
+                role=GroupRoleset(
+                    name="[L1] Recruit",
+                    rank=1,
+                    id=1,
+                    memberCount=1,
+                ),
+            )
+        },
     )
 
     return user

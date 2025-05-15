@@ -200,7 +200,7 @@ async def parse_template(
                     )
 
                     if roleset_brackets_match:
-                        group_roleset_name = f"[{roleset_brackets_match.group(1)}]"
+                        group_roleset_name = roleset_brackets_match.group(1)
 
             else:
                 group_roleset_name = "Guest"
