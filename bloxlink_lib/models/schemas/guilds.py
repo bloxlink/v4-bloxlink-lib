@@ -132,47 +132,50 @@ class GuildData(BaseSchema):
     unverifiedRole: str | None = None
     unverifiedRoleName: str | None = "Unverified"
 
-    verifiedDM: str = (
+    verifiedDM: str | None = (
         ":wave: Welcome to **{server-name}**, {roblox-name}! Visit <{verify-url}> to change your account.\nFind more Roblox Communities at https://blox.link/communities !"
     )
 
-    ageLimit: int = None
-    autoRoles: bool = True
-    autoVerification: bool = True
-    disallowAlts: bool = False
-    disallowBanEvaders: bool = False
-    banRelatedAccounts: bool = False
-    unbanRelatedAccounts: bool = False
-    dynamicRoles: bool = True
-    groupLock: PydanticDict[str, GroupLock] = None
-    highTrafficServer: bool = False
-    allowOldRoles: bool = False
-    deleteCommands: Annotated[
-        bool,
-        Field(alias="ephemeralCommands", default=False),
-    ]
+    ageLimit: int | None = None
+    autoRoles: bool | None = True
+    autoVerification: bool | None = True
+    disallowAlts: bool | None = False
+    disallowBanEvaders: bool | None = False
+    banRelatedAccounts: bool | None = False
+    unbanRelatedAccounts: bool | None = False
+    dynamicRoles: bool | None = True
+    groupLock: PydanticDict[str, GroupLock] | None = None
+    highTrafficServer: bool | None = False
+    allowOldRoles: bool | None = False
+    deleteCommands: (
+        Annotated[
+            bool,
+            Field(alias="ephemeralCommands", default=False),
+        ]
+        | None
+    ) = False
 
-    joinChannel: JoinChannel = None
-    leaveChannel: JoinChannel = None
+    joinChannel: JoinChannel | None = None
+    leaveChannel: JoinChannel | None = None
 
-    restrictions: PydanticList[GuildRestriction] = Field(default_factory=list)
+    restrictions: PydanticList[GuildRestriction] | None = Field(default_factory=list)
 
-    webhooks: Webhooks = None
+    webhooks: Webhooks | None = None
 
-    hasBot: bool = False
-    proBot: bool = False
+    hasBot: bool | None = False
+    proBot: bool | None = False
 
-    nicknameTemplate: str = "{smart-name}"
-    unverifiedNickname: str = ""
+    nicknameTemplate: str | None = "{smart-name}"
+    unverifiedNickname: str | None = ""
 
-    magicRoles: PydanticDict[str, list[MagicRoleTypes]] = None
+    magicRoles: PydanticDict[str, list[MagicRoleTypes]] | None = None
 
-    premium: PydanticDict = Field(default_factory=PydanticDict)  # deprecated
+    premium: PydanticDict | None = Field(default_factory=PydanticDict)  # deprecated
 
     # Old bind fields.
-    roleBinds: PydanticDict = None
-    groupIDs: PydanticDict = None
-    migratedBindsToV4: bool = False
+    roleBinds: PydanticDict | None = None
+    groupIDs: PydanticDict | None = None
+    migratedBindsToV4: bool | None = False
 
     # model converters
     @model_validator(mode="before")
