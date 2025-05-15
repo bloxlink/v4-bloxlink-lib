@@ -195,12 +195,10 @@ async def parse_template(
                 ].role.name
 
                 if shorter_nicknames:
-                    roleset_brackets_match = ROLESET_BRACKET_TEMPLATE.search(
+                    if roleset_brackets_match := ROLESET_BRACKET_TEMPLATE.search(
                         group_roleset_name
-                    )
-
-                    if roleset_brackets_match:
-                        group_roleset_name = roleset_brackets_match.group(1)
+                    ):
+                        group_roleset_name = f"[{roleset_brackets_match.group(1)}]"
 
             else:
                 group_roleset_name = "Guest"

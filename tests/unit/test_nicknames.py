@@ -89,7 +89,7 @@ class TestNicknames:
         "test_case",
         [
             NicknameTestData(
-                nickname_template="[{group-rank}] {roblox-name}",
+                nickname_template="{group-rank} {roblox-name}",
                 expected_nickname="[L1] {roblox_user.username}",
                 include_discord_user=True,
                 include_roblox_user=False,
