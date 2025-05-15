@@ -132,7 +132,7 @@ async def parse_template(
     roblox_user: RobloxUser | None = None,
     template: str = None,
     potential_binds: list[GuildBind] | None = None,
-    shorter_nicknames=False,
+    shorter_nicknames=True,
     trim_nickname=True,
 ) -> str | None:
     """

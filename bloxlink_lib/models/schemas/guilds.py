@@ -144,7 +144,7 @@ class GuildData(BaseSchema):
     banRelatedAccounts: bool | None = False
     unbanRelatedAccounts: bool | None = False
     dynamicRoles: bool | None = True
-    shorterNicknames: bool | None = False
+    shorterNicknames: bool | None = True
     groupLock: PydanticDict[str, GroupLock] | None = None
     highTrafficServer: bool | None = False
     allowOldRoles: bool | None = False
