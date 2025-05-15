@@ -29,6 +29,7 @@ ARBITRARY_GROUP_TEMPLATE = re.compile(r"\{group-rank-(.*?)\}")
 
 ARBITRARY_GROUP_TEMPLATE = re.compile(r"\{group-rank-(.*?)\}")
 NICKNAME_TEMPLATE_REGEX = re.compile(r"\{(.*?)\}")
+ROLESET_BRACKET_TEMPLATE = re.compile(r"\[(.*)\]")
 
 
 class RobloxUserNicknames(Enum):
@@ -131,6 +132,7 @@ async def parse_template(
     roblox_user: RobloxUser | None = None,
     template: str = None,
     potential_binds: list[GuildBind] | None = None,
+    shorter_nicknames=False,
     trim_nickname=True,
 ) -> str | None:
     """
@@ -191,6 +193,14 @@ async def parse_template(
                 group_roleset_name = roblox_user.groups[
                     group_bind.criteria.id
                 ].role.name
+
+                if shorter_nicknames:
+                    roleset_brackets_match = ROLESET_BRACKET_TEMPLATE.search(
+                        group_roleset_name
+                    )
+
+                    if roleset_brackets_match:
+                        group_roleset_name = roleset_brackets_match.group(1)
 
             else:
                 group_roleset_name = "Guest"
