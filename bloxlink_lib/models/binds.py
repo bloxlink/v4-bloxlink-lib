@@ -357,6 +357,7 @@ class GuildBind(BaseModel):
                                 successful = True
                             else:
                                 missing_roles.add(user_roleset.name)
+                                successful = True
 
                         elif self.criteria.group.everyone:
                             successful = True
@@ -383,6 +384,11 @@ class GuildBind(BaseModel):
                 case "badge" | "gamepass" | "asset":
                     asset: RobloxBaseAsset = self.entity
                     successful = await roblox_user.owns_asset(asset)
+
+        if successful and self.remove_roles:
+            for role_id in self.remove_roles:
+                if int(role_id) in member.role_ids:
+                    ineligible_roles.add(role_id)
 
         return BindCalculationResult(
             successful=successful,
