@@ -264,7 +264,6 @@ class GuildBind(BaseModel):
                             if bind_type.endswith("s"):
                                 bind_type = bind_type[:-1]
 
-                        print(bind_type)
                         if bind_type not in VALID_BIND_TYPES_SET:
                             continue
 

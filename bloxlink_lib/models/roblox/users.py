@@ -26,7 +26,6 @@ INVENTORY_API = "https://inventory.roblox.com"
 USERS_API = "https://users.roblox.com"
 USERS_BASE_DATA_API = USERS_API + "/v1/users/{roblox_id}"
 USER_GROUPS_API = "https://groups.roblox.com/v2/users/{roblox_id}/groups/roles"
-USER_BADGES_API = "https://www.roblox.com/badges/roblox?userId={roblox_id}"
 AVATAR_URLS = {
     "bustThumbnail": "https://thumbnails.roblox.com/v1/users/avatar-bust?userIds={roblox_id}&size=420x420&format=Png&isCircular=false",
     "headshotThumbnail": "https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds={roblox_id}&size=420x420&format=Png&isCircular=false",
@@ -79,19 +78,6 @@ class RobloxUserGroupResponse(BaseModel):
     data: list[RobloxUserGroup]
 
 
-class RobloxUserBadge(BaseModel):
-    """Type definition for a Roblox badge from the Roblox API."""
-
-    image_url: str = Field(alias="ImageUri")
-    name: str = Field(alias="Name")
-
-
-class RobloxUserBadgeResponse(BaseModel):
-    """Type definition for a Roblox user's badges from the Roblox API."""
-
-    RobloxBadges: list[RobloxUserBadge]
-
-
 class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
     """Representation of a user on Roblox."""
 
@@ -111,14 +97,13 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
     profile_link: str = Field(alias="profileLink", default=None)
     display_name: str | None = Field(alias="displayName", default=None)
     created: datetime = None
-    badges: list | None = None
     short_age_string: str = None
 
     _complete: bool = False
 
     async def sync(
         self,
-        includes: list[Literal["groups", "badges"]] | bool | None = None,
+        includes: list[Literal["groups"]] | bool | None = None,
         *,
         cache: bool = True,
     ):
@@ -127,7 +112,7 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
         Args:
             includes (list | bool | None, optional): Data that should be included. Defaults to None.
                 True retrieves all available data; otherwise, a list can be passed with either
-                "groups", "presences", and/or "badges" in it.
+                "groups" in it.
             cache (bool, optional): Should we check the object for values before retrieving. Defaults to True.
         """
 
@@ -149,9 +134,6 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
             if self.groups and "groups" in includes:
                 includes.remove("groups")
 
-            if self.badges and "badges" in includes:
-                includes.remove("badges")
-
         roblox_user_data, user_data_response = await fetch_typed(
             RobloxUser,
             f"{CONFIG.BOT_API}/users",
@@ -168,7 +150,6 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
             self.description = roblox_user_data.description or self.description
             self.username = roblox_user_data.username or self.username
             self.banned = roblox_user_data.banned or self.banned
-            self.badges = roblox_user_data.badges or self.badges
             self.display_name = (
                 roblox_user_data.display_name or self.display_name or self.username
             )
@@ -332,26 +313,6 @@ async def fetch_user_avatars(
     avatar_model = UserAvatar(**avatars)
 
     return {"avatar": avatar_model}
-
-
-async def fetch_user_badges(roblox_id: int) -> list[RobloxUserBadge] | None:
-    """
-    Fetch the user's badges.
-
-    This returns a dictionary with "badges" as the response
-    so that this can be used with setattr() in the RobloxUser model.
-    """
-
-    user_badges, user_badges_response = await fetch_typed(
-        RobloxUserBadgeResponse,
-        USER_BADGES_API.format(roblox_id=roblox_id),
-        raise_on_failure=False,
-    )
-
-    if user_badges_response.status != HTTPStatus.OK:
-        return None
-
-    return {"badges": user_badges.RobloxBadges}
 
 
 async def get_user_account(
