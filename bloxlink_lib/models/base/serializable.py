@@ -38,6 +38,9 @@ class RoleSerializable(BaseModel):
     def role_mention(role_id: int | Snowflake | str) -> str:
         return f"<@&{role_id}>"
 
+    def __str__(self) -> str:
+        return str(self.name or self.id)
+
 
 class MemberSerializable(BaseModel):
     id: Snowflake
@@ -103,6 +106,9 @@ class MemberSerializable(BaseModel):
     def user_mention(user_id: int | Snowflake | str) -> str:
         return f"<@{user_id}>"
 
+    def __str__(self) -> str:
+        return str(self.username or self.id)
+
 
 class GuildSerializable(BaseModel):
     id: Snowflake
@@ -149,3 +155,6 @@ class GuildSerializable(BaseModel):
         return cls(
             id=guild.id, name=guild.name, roles=guild.roles, owner_id=guild.owner_id
         )
+
+    def __str__(self) -> str:
+        return str(self.name or self.id)
