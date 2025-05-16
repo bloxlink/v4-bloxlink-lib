@@ -143,7 +143,6 @@ class GuildData(BaseSchema):
     disallowBanEvaders: bool | None = False
     banRelatedAccounts: bool | None = False
     unbanRelatedAccounts: bool | None = False
-    dynamicRoles: bool | None = True
     shorterNicknames: bool | None = True
     groupLock: PydanticDict[str, GroupLock] | None = None
     highTrafficServer: bool | None = False
@@ -177,6 +176,7 @@ class GuildData(BaseSchema):
     roleBinds: PydanticDict | None = None
     groupIDs: PydanticDict | None = None
     migratedBindsToV4: bool | None = False
+    dynamicRoles: bool | None = True
 
     # model converters
     @model_validator(mode="before")
