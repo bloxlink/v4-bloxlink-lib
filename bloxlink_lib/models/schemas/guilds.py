@@ -154,6 +154,7 @@ class GuildData(BaseSchema):
         ]
         | None
     ) = False
+    createMissingRoles: bool | None = Field(default=True, alias="dynamicRoles")
 
     joinChannel: JoinChannel | None = None
     leaveChannel: JoinChannel | None = None
@@ -176,7 +177,6 @@ class GuildData(BaseSchema):
     roleBinds: PydanticDict | None = None
     groupIDs: PydanticDict | None = None
     migratedBindsToV4: bool | None = False
-    dynamicRoles: bool | None = True
 
     # model converters
     @model_validator(mode="before")
@@ -225,16 +225,18 @@ class GuildData(BaseSchema):
 
         return migrate_delete_commands(delete_commands)
 
-    @field_validator("dynamicRoles", mode="before")
+    @field_validator("createMissingRoles", mode="before")
     @classmethod
-    def transform_dynamic_roles(cls: Type[Self], dynamic_roles: bool | str) -> bool:
-        """Migrate the deleteCommands field."""
+    def transform_create_missing_roles(
+        cls: Type[Self], create_missing_roles: bool | str
+    ) -> bool:
+        """Migrate the createMissingRoles field."""
 
         from bloxlink_lib.models.migrators import (
-            migrate_dynamic_roles,
+            migrate_create_missing_roles,
         )
 
-        return migrate_dynamic_roles(dynamic_roles)
+        return migrate_create_missing_roles(create_missing_roles)
 
     @field_validator("magicRoles", mode="before")
     @classmethod

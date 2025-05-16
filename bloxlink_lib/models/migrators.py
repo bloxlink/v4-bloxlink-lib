@@ -46,18 +46,18 @@ def migrate_delete_commands(delete_commands: int | None | bool) -> bool:
     return bool(delete_commands)
 
 
-def migrate_dynamic_roles(dynamic_roles: bool | str) -> bool:
-    """Migrate the dynamicRoles field."""
+def migrate_create_missing_roles(create_missing_roles: bool | str) -> bool:
+    """Migrate the createMissingRoles field."""
 
-    if isinstance(dynamic_roles, bool):
-        return dynamic_roles
+    if isinstance(create_missing_roles, bool):
+        return create_missing_roles
 
-    if dynamic_roles.lower() in ("disable",):  # keeping track of the "false" values
+    if create_missing_roles.lower() in (
+        "disable",
+    ):  # keeping track of the "false" values
         return False
 
-    # return dynamic_roles in ()
-
-    return dynamic_roles
+    return create_missing_roles
 
 
 def migrate_magic_roles(magic_roles: dict) -> dict:
