@@ -183,21 +183,17 @@ class GuildBind(BaseModel):
             if isinstance(guild_data, GuildData)
             else guild_data.get("roleBinds", {})
         ) or {}
-        dynamic_roles = (
-            getattr(guild_data, "dynamicRoles", True)
-            if isinstance(guild_data, GuildData)
-            else guild_data.get("dynamicRoles", True)
-        )
 
         converted_binds: list[Self] = []
 
         for group_id, group_data in whole_group_binds.items():
             new_bind = cls(
-                nickname=group_data.get("nickname") or None,
+                nickname=group_data.get("nickname")
+                or None,  # don't include empty string
                 criteria=BindCriteria(
                     type="group",
                     id=int(group_id),
-                    group={"dynamicRoles": dynamic_roles},
+                    group={"dynamicRoles": True},
                 ),
                 remove_roles=group_data.get("removeRoles") or [],
                 subtype="full_group",
