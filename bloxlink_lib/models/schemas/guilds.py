@@ -177,6 +177,7 @@ class GuildData(BaseSchema):
     roleBinds: PydanticDict | None = None
     groupIDs: PydanticDict | None = None
     migratedBindsToV4: bool | None = False
+    dynamicRoles: bool | None = True
 
     # model converters
     @model_validator(mode="before")
