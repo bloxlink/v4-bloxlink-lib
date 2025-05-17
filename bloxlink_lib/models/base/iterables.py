@@ -196,25 +196,36 @@ class CoerciveSet[T: Callable](BaseModel):
         return self
 
     def intersection(self, *s: Iterable[T]) -> "CoerciveSet[T]":
-        """Intersection the set with the iterable."""
+        """Return the intersection of two sets as a new set.
+        (i.e. all elements that are in both sets.)"""
 
         result = self._data.intersection(self._coerce(x) for i in s for x in i)
         return self.__class__(root=result)
 
     def difference(self, *s: Iterable[T]) -> "CoerciveSet[T]":
-        """Difference the set with the iterable."""
+        """Return the difference of two sets as a new set.
+        (i.e. all elements that are in the first set but not the second.)"""
 
         result = self._data.difference(self._coerce(x) for i in s for x in i)
         return self.__class__(root=result)
 
+    def difference_update(self, *s: Iterable[T]) -> Self:
+        """Update the set with the difference of two sets."""
+
+        self._data.difference_update(self._coerce(x) for i in s for x in i)
+
+        return self
+
     def symmetric_difference(self, *s: Iterable[T]) -> "CoerciveSet[T]":
-        """Symmetric difference the set with the iterable."""
+        """Return the symmetric difference of two sets as a new set.
+        (i.e. all elements that are in either set but not both.)"""
 
         result = self._data.symmetric_difference(self._coerce(x) for i in s for x in i)
         return self.__class__(root=result)
 
     def union(self, *s: Iterable[T]) -> "CoerciveSet[T]":
-        """Union the set with the iterable."""
+        """Return the union of two sets as a new set.
+        (i.e. all elements that are in either set.)"""
 
         result = self._data.union(self._coerce(x) for iterable in s for x in iterable)
         return self.__class__(root=result)
