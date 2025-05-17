@@ -29,14 +29,14 @@ class BaseConfig(BaseSettings):
     # DATABASE SETTINGS
     #############################
     MONGO_URL: str | None = None
-    MONGO_HOST: str | None = None
+    MONGO_HOST: str | None = "localhost"
     MONGO_PORT: int | None = 27017
     MONGO_USER: str | None = None
     MONGO_PASSWORD: str | None = None
     MONGO_CA_FILE: str | None = None
     # these are optional because we can choose to use REDIS_URL or REDIS_HOST/REDIS_PORT/REDIS_PASSWORD
     REDIS_URL: str | None = None
-    REDIS_HOST: str | None = None
+    REDIS_HOST: str | None = "localhost"
     REDIS_PORT: str | None = "6379"
     REDIS_PASSWORD: str | None = None
     #############################
@@ -60,7 +60,7 @@ class BaseConfig(BaseSettings):
                 "REDIS_URL or REDIS_HOST/REDIS_PORT/REDIS_PASSWORD must be set"
             )
 
-        if all([self.REDIS_HOST, self.REDIS_PORT, self.REDIS_PASSWORD, self.REDIS_URL]):
+        if self.REDIS_URL and self.REDIS_HOST:
             raise ValueError(
                 "REDIS_URL and REDIS_HOST/REDIS_PORT/REDIS_PASSWORD cannot both be set"
             )
@@ -72,15 +72,7 @@ class BaseConfig(BaseSettings):
                 "MONGO_URL or MONGO_HOST/MONGO_PORT/MONGO_USER/MONGO_PASSWORD must be set"
             )
 
-        if all(
-            [
-                self.MONGO_HOST,
-                self.MONGO_PORT,
-                self.MONGO_USER,
-                self.MONGO_PASSWORD,
-                self.MONGO_URL,
-            ]
-        ):
+        if self.MONGO_URL and self.MONGO_HOST:
             raise ValueError(
                 "MONGO_URL and MONGO_HOST/MONGO_PORT/MONGO_USER/MONGO_PASSWORD cannot both be set"
             )

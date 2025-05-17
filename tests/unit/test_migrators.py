@@ -1,7 +1,7 @@
 import pytest
 from bloxlink_lib import GuildData, GuildSerializable
 
-pytestmark = pytest.mark.migrators
+pytestmark = pytest.mark.database
 
 
 class TestVerifiedRoleMigrators:

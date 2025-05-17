@@ -45,8 +45,7 @@ markers = [
     "primitives",
     "binds",
     "nicknames",
-    "migrators",
-    "database_utilities",
+    "database",
 ]
 
 [tool.pytest_env]
