@@ -1,5 +1,5 @@
 from typing import Self, Type, Literal, Annotated
-from pydantic import Field, field_validator, model_validator, computed_field
+from pydantic import Field, field_validator, model_validator, ValidationInfo
 from bloxlink_lib.models.base import (
     PydanticList,
     BaseModel,
@@ -273,6 +273,14 @@ class GuildData(BaseSchema):
         from bloxlink_lib.models.migrators import migrate_restrictions
 
         return migrate_restrictions(restrictions)
+
+    @field_validator("welcomeMessage")
+    @classmethod
+    def migrate_null_values(cls, v: str | None, info: ValidationInfo) -> str:
+        if v is None:
+            return cls.model_fields[info.field_name].get_default()
+
+        return v
 
     def model_post_init(self, __context):
         # merge verified roles into binds

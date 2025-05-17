@@ -4,6 +4,7 @@ from bloxlink_lib.models.schemas.guilds import (  # pylint: disable=no-name-in-m
     GuildRestriction,
 )
 from bloxlink_lib.models import BaseModel
+from pydantic import ValidationInfo
 
 
 def migrate_restrictions(
@@ -154,3 +155,12 @@ def migrate_bind_criteria_type(bind_type: VALID_BIND_TYPES | str) -> VALID_BIND_
             return "badge"
 
     return bind_type
+
+
+def migrate_null_values(cls: BaseModel, v: str | None, info: ValidationInfo) -> str:
+    """Migrate the null values."""
+
+    if v is None:
+        return cls.model_fields[info.field_name].get_default()
+
+    return v
