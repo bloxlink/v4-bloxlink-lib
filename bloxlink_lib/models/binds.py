@@ -183,11 +183,6 @@ class GuildBind(BaseModel):
             if isinstance(guild_data, GuildData)
             else guild_data.get("roleBinds", {})
         ) or {}
-        dynamic_roles = (
-            getattr(guild_data, "dynamicRoles", True)
-            if isinstance(guild_data, GuildData)
-            else guild_data.get("dynamicRoles", True)
-        )
 
         converted_binds: list[Self] = []
 

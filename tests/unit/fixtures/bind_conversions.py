@@ -272,30 +272,6 @@ class BindConversionTestCase(BaseModel):
                 ),
             ],
         ),
-        BindConversionTestCase(
-            v3_binds=V3RoleBinds(
-                dynamicRoles=False,
-                groupIDs={
-                    "1337": V3GroupID(
-                        nickname="{smart-name}",
-                        groupName="Test Group 1",
-                        removeRoles=[],
-                    ),
-                },
-            ),
-            v4_binds=[
-                binds.GuildBind(
-                    criteria=binds.BindCriteria(
-                        type="group",
-                        id=1337,
-                        group=binds.GroupBindData(dynamicRoles=False),
-                    ),
-                    nickname="{smart-name}",
-                    remove_roles=[],
-                    data=binds.BindData(displayName="Test Group 1"),
-                )
-            ],
-        ),
     ],
 )
 def bind_conversion_test_data(

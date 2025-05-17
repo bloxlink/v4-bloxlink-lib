@@ -70,7 +70,6 @@ class V3GroupID(BaseModel):
 class V3RoleBinds(BaseModel):
     """Represents the role binds for a guild in the database."""
 
-    dynamicRoles: bool | None = True
     roleBinds: (
         dict[
             V3BindType,
