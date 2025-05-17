@@ -186,12 +186,14 @@ class CoerciveSet[T: Callable](BaseModel):
 
         self._data.discard(self._coerce(item))
 
-    def update(self, *s: Iterable[T]):
+    def update(self, *s: Iterable[T]) -> Self:
         """Update the set with the iterable."""
 
         for iterable in s:
             for item in iterable:
                 self._data.add(self._coerce(item))
+
+        return self
 
     def intersection(self, *s: Iterable[T]) -> "CoerciveSet[T]":
         """Intersection the set with the iterable."""

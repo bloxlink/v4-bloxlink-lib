@@ -102,11 +102,13 @@ class TestCoerciveSets:
     def test_coercive_set_update(self, input_set, items_to_update, expected_length):
         """Test that the coercive set updates correctly"""
         test_set = CoerciveSet[int](input_set)
-        test_set.update(items_to_update)
+        returned_set = test_set.update(items_to_update)
+
         assert (
-            len(test_set) == expected_length
+            len(returned_set) == expected_length
         ), f"CoerciveSet should have {
             expected_length} items."
+        assert test_set is returned_set, "Update should return the set."
 
     @pytest.mark.parametrize(
         "set1, set2, expected_length",
