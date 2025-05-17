@@ -15,7 +15,7 @@ class BaseConfig(BaseSettings):
     # BOT SETTINGS
     #############################
     BOT_TOKEN: str | None = None
-    BOT_RELEASE: Literal["LOCAL", "CANARY", "MAIN", "PRO"]
+    BOT_RELEASE: Literal["LOCAL", "CANARY", "MAIN", "PRO"] | None = None
 
     BOT_API: str | None = None
     BOT_API_AUTH: str | None = None
@@ -60,7 +60,7 @@ class BaseConfig(BaseSettings):
                 "REDIS_URL or REDIS_HOST/REDIS_PORT/REDIS_PASSWORD must be set"
             )
 
-        if all([self.REDIS_HOST, self.REDIS_PORT, self.REDIS_PASSWORD, self.REDIS_URL]):
+        if self.REDIS_URL and self.REDIS_HOST:
             raise ValueError(
                 "REDIS_URL and REDIS_HOST/REDIS_PORT/REDIS_PASSWORD cannot both be set"
             )
@@ -72,15 +72,7 @@ class BaseConfig(BaseSettings):
                 "MONGO_URL or MONGO_HOST/MONGO_PORT/MONGO_USER/MONGO_PASSWORD must be set"
             )
 
-        if all(
-            [
-                self.MONGO_HOST,
-                self.MONGO_PORT,
-                self.MONGO_USER,
-                self.MONGO_PASSWORD,
-                self.MONGO_URL,
-            ]
-        ):
+        if self.MONGO_URL and self.MONGO_HOST:
             raise ValueError(
                 "MONGO_URL and MONGO_HOST/MONGO_PORT/MONGO_USER/MONGO_PASSWORD cannot both be set"
             )

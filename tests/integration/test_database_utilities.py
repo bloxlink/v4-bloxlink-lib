@@ -4,15 +4,15 @@ from bloxlink_lib.models.schemas.guilds import (  # pylint: disable=no-name-in-m
     fetch_guild_data,
     GuildData,
 )
-from bloxlink_lib.database.mongodb import _db_fetch
+from bloxlink_lib.database.mongodb import _db_fetch, _db_update
 from bloxlink_lib.models.migrators import *
 from pydantic import ValidationError
+
+pytestmark = pytest.mark.database
 
 
 class TestIntegrationDatabaseUtilities:
     """Tests the database fetch and update utilities."""
-
-    pytestmark = pytest.mark.database_utilities
 
     @pytest.mark.parametrize("test_input", ["sadasda", "Very awesome role"])
     @pytest.mark.asyncio
@@ -50,8 +50,6 @@ class TestIntegrationDatabaseUtilities:
 class TestIntegrationDatabaseMigrators:
     """Tests the database migrators."""
 
-    pytestmark = pytest.mark.migrators
-
     @pytest.mark.asyncio
     async def test_migrate_verified_role_name(self, test_guild_id: int):
         await update_guild_data(
@@ -69,3 +67,16 @@ class TestIntegrationDatabaseMigrators:
 
         assert guild_data.verifiedRole == "123"
         assert guild_data.unverifiedRole == "456"
+
+    @pytest.mark.asyncio
+    async def test_migrate_null_values(self, test_guild_id: int):
+        await _db_update(
+            GuildData,
+            test_guild_id,
+            set_aspects={"welcomeMessage": None},
+            unset_aspects={},
+        )
+
+        guild_data = await fetch_guild_data(test_guild_id)
+
+        assert guild_data.welcomeMessage is not None

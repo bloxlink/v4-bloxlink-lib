@@ -45,14 +45,15 @@ markers = [
     "primitives",
     "binds",
     "nicknames",
-    "migrators",
-    "database_utilities",
+    "database",
 ]
 
 [tool.pytest_env]
 BOT_RELEASE = "CANARY"
 MONGO_USER = "admin"
 MONGO_PASSWORD = "admin123"
+MONGO_HOST = "localhost"
+REDIS_HOST = "localhost"
 
 [tool.coverage.report]
 exclude_also = [

@@ -59,6 +59,24 @@ async def _db_fetch[T: "BaseSchema"](
     return item
 
 
+async def _db_update[T: "BaseSchema"](
+    constructor: Type[T], item_id: str, set_aspects: dict, unset_aspects: dict
+) -> None:
+    """Raw update an item in the database"""
+
+    database_domain = constructor.database_domain().value
+
+    await mongo.bloxlink[database_domain].update_one(
+        {"_id": item_id},
+        {
+            "$set": set_aspects,
+            "$unset": unset_aspects,
+            "$currentDate": {"updatedAt": True},
+        },
+        upsert=True,
+    )
+
+
 async def fetch_item[T: "BaseSchema"](
     constructor: Type[T], item_id: str, *aspects
 ) -> T:
@@ -162,15 +180,7 @@ async def update_item[T: "BaseSchema"](
         await redis.hdel(f"{database_domain}:{item_id}", *redis_unset_aspects.keys())
 
     # update database
-    await mongo.bloxlink[database_domain].update_one(
-        {"_id": item_id},
-        {
-            "$set": set_aspects,
-            "$unset": unset_aspects,
-            "$currentDate": {"updatedAt": True},
-        },
-        upsert=True,
-    )
+    await _db_update(constructor, item_id, set_aspects, unset_aspects)
 
 
 connect_database()
