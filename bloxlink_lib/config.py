@@ -15,7 +15,7 @@ class BaseConfig(BaseSettings):
     # BOT SETTINGS
     #############################
     BOT_TOKEN: str | None = None
-    BOT_RELEASE: Literal["LOCAL", "CANARY", "MAIN", "PRO"]
+    BOT_RELEASE: Literal["LOCAL", "CANARY", "MAIN", "PRO"] | None = None
 
     BOT_API: str | None = None
     BOT_API_AUTH: str | None = None
