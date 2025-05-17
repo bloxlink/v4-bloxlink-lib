@@ -29,14 +29,14 @@ class BaseConfig(BaseSettings):
     # DATABASE SETTINGS
     #############################
     MONGO_URL: str | None = None
-    MONGO_HOST: str | None = "localhost"
+    MONGO_HOST: str | None = None
     MONGO_PORT: int | None = 27017
     MONGO_USER: str | None = None
     MONGO_PASSWORD: str | None = None
     MONGO_CA_FILE: str | None = None
     # these are optional because we can choose to use REDIS_URL or REDIS_HOST/REDIS_PORT/REDIS_PASSWORD
     REDIS_URL: str | None = None
-    REDIS_HOST: str | None = "localhost"
+    REDIS_HOST: str | None = None
     REDIS_PORT: str | None = "6379"
     REDIS_PASSWORD: str | None = None
     #############################
