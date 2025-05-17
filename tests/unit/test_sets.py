@@ -226,6 +226,13 @@ class TestCoerciveSets:
         test_set = CoerciveSet[str]()
         assert len(test_set) == 0, "CoerciveSet should be empty."
 
+    def test_coercive_set_clear(self):
+        """Test that the coercive set clears correctly"""
+
+        test_set = CoerciveSet[str](["a", "b", "c", "d", "e"])
+        test_set.clear()
+        assert len(test_set) == 0, "CoerciveSet should be empty."
+
 
 class TestSnowflakeSets:
     """Tests for SnowflakeSets"""

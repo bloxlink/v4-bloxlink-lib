@@ -201,6 +201,9 @@ class CoerciveSet[T: Callable](BaseModel):
     def contains(self, *items: Sequence[T]) -> bool:
         return all(self._coerce(x) in self._data for i in items for x in i)
 
+    def clear(self):
+        self._data.clear()
+
     def __iter__(self):
         return iter(self._data)
 
