@@ -163,45 +163,73 @@ class CoerciveSet[T: Callable](BaseModel):
             raise TypeError(f"Cannot coerce {item} to {target_type}")
 
     def __contains__(self, item):
+        """Check if the set contains the item."""
+
         return self._data.__contains__(self._coerce(item))
 
     def add(self, item):
+        """Add the item to the set."""
+
         self._data.add(self._coerce(item))
 
     def remove(self, item):
+        """Remove the item from the set, it must be a member.
+        If the item is not a member, a KeyError will be raised.
+        """
+
         self._data.remove(self._coerce(item))
 
     def discard(self, item):
+        """Discard the item from the set, it must be a member.
+        If the item is not a member, no error will be raised.
+        """
+
         self._data.discard(self._coerce(item))
 
     def update(self, *s: Iterable[T]):
+        """Update the set with the iterable."""
+
         for iterable in s:
             for item in iterable:
                 self._data.add(self._coerce(item))
 
     def intersection(self, *s: Iterable[T]) -> "CoerciveSet[T]":
+        """Intersection the set with the iterable."""
+
         result = self._data.intersection(self._coerce(x) for i in s for x in i)
         return self.__class__(root=result)
 
     def difference(self, *s: Iterable[T]) -> "CoerciveSet[T]":
+        """Difference the set with the iterable."""
+
         result = self._data.difference(self._coerce(x) for i in s for x in i)
         return self.__class__(root=result)
 
     def symmetric_difference(self, *s: Iterable[T]) -> "CoerciveSet[T]":
+        """Symmetric difference the set with the iterable."""
+
         result = self._data.symmetric_difference(self._coerce(x) for i in s for x in i)
         return self.__class__(root=result)
 
     def union(self, *s: Iterable[T]) -> "CoerciveSet[T]":
+        """Union the set with the iterable."""
+
         result = self._data.union(self._coerce(x) for iterable in s for x in iterable)
         return self.__class__(root=result)
 
     def contains_all(self, iterable: Iterable[T]) -> bool:
+        """Check if the set contains all items in the iterable."""
+
         return all(self._coerce(x) in self._data for x in iterable)
 
     def contains(self, *items: Sequence[T]) -> bool:
+        """Check if the set contains all items in the sequence."""
+
         return all(self._coerce(x) in self._data for i in items for x in i)
 
     def clear(self):
+        """Clear the set."""
+
         self._data.clear()
 
     def __iter__(self):
