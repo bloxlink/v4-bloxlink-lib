@@ -88,3 +88,17 @@ class TestVerifiedRoleMigrators:
         )
 
         assert test_guild_data.welcomeMessage is not None
+
+    @pytest.mark.asyncio_concurrent(group="migrators")
+    async def test_migrate_null_values_with_value(
+        self,
+        test_guild: GuildSerializable,
+    ):
+        """Test the null value migrator with a value"""
+
+        test_guild_data = GuildData(
+            id=test_guild.id,
+            welcomeMessage="Welcome to the server!",
+        )
+
+        assert test_guild_data.welcomeMessage == "Welcome to the server!"
