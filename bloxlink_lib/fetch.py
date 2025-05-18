@@ -137,6 +137,9 @@ async def fetch[T](
     except asyncio.TimeoutError:
         logging.warning(f"URL {url} timed out")
         raise RobloxDown() from None
+    except aiohttp.client_exceptions.ClientConnectorError:
+        logging.warning(f"URL {url} failed to connect")
+        raise RobloxDown() from None
 
 
 async def fetch_typed[T](
