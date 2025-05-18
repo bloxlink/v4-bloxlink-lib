@@ -62,7 +62,7 @@ $ poetry run pytest -m [test_group]
 
 Test groups:
 
-* primitives
+* iterable
 * binds
 * nicknames
 * bind_conversions

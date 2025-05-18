@@ -8,17 +8,11 @@ from bloxlink_lib.test_utils.fixtures import (
     AssetTypes,
     BindTestFixtures,
 )
-
 from .fixtures import (
-    # GuildRoles,
-    # MockUserData,
     MockBindScenario,
     ExpectedBindsResult,
     MockedBindScenarioResult,
-    # MockAssets,
     AssetBindTestCase,
-    # AssetTypes,
-    # BindTestFixtures,
     BindTestCase,
 )
 

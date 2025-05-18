@@ -42,7 +42,7 @@ addopts = [
 ]
 asyncio_mode = "strict"
 markers = [
-    "primitives",
+    "iterable",
     "binds",
     "nicknames",
     "database",
