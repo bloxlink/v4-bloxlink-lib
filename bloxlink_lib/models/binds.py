@@ -206,6 +206,9 @@ class GuildBind(BaseModel):
             match bind_type:
                 case "groups":
                     for group_id, group_bind_data in binds.items():
+                        if not group_id.isdigit():  # TODO write migrator
+                            continue
+
                         for rank_id, criteria_data in group_bind_data.get(
                             "binds", {}
                         ).items():
