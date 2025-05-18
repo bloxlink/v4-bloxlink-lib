@@ -11,10 +11,8 @@ from bloxlink_lib import (
     GroupRoleset,
     RobloxBaseAsset,
 )
-from tests.unit.utils import generate_snowflake
-from .groups import GroupRolesets
-from .guilds import GuildRoles
-from .assets import MockAssets
+from bloxlink_lib.test_utils.utils import generate_snowflake
+from bloxlink_lib.test_utils.fixtures import guilds, assets, groups
 
 __all__ = [
     "MockUserData",
@@ -28,10 +26,12 @@ __all__ = [
 class MockUserData(BaseModel):
     """Data to use for the mocked user"""
 
-    current_group_roleset: GroupRolesets | None = None
-    current_discord_roles: list[GuildRoles]  # Set the user's current Discord roles
+    current_group_roleset: groups.GroupRolesets | None = None
+    current_discord_roles: list[
+        guilds.GuildRoles
+    ]  # Set the user's current Discord roles
     verified: bool = True
-    owns_assets: list[MockAssets] | None = None
+    owns_assets: list[assets.MockAssets] | None = None
 
 
 class MockUser(BaseModel):
@@ -39,13 +39,13 @@ class MockUser(BaseModel):
 
     discord_user: MemberSerializable  # The Discord user
     roblox_user: RobloxUser | None  # The Roblox account of the user. Optional.
-    owns_assets: list[MockAssets] | None = (
+    owns_assets: list[assets.MockAssets] | None = (
         None  # Passed from MockUserData (the test case)
     )
 
 
 def _mock_user_owns_asset(
-    mocked_asset: MockAssets,
+    mocked_asset: assets.MockAssets,
 ) -> Callable[[RobloxBaseAsset], bool]:
     """Mock the user's owns_asset method to return True when called with this asset (badge, gamepass, catalog asset) ID"""
 
@@ -64,7 +64,7 @@ def _mock_roblox_user(
     user_id: int,
     username: str,
     groups: dict[int, RobloxUserGroup] | None,
-    owns_assets: list[MockAssets] | None,
+    owns_assets: list[assets.MockAssets] | None,
 ) -> RobloxUser:
     roblox_user = RobloxUser(
         id=user_id,
@@ -129,7 +129,7 @@ def mock_user(
     guild: GuildSerializable,
     groups: dict[int, RobloxUserGroup] | None = None,
     current_discord_roles: list[int] | None = None,
-    owns_assets: list[MockAssets] | None = None,
+    owns_assets: list[assets.MockAssets] | None = None,
 ) -> MockUser:
     user_id = generate_snowflake()
     current_discord_roles = current_discord_roles or []

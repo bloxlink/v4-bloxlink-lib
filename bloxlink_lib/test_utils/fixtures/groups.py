@@ -9,8 +9,8 @@ from bloxlink_lib import (
     GroupRoleset,
 )
 from bloxlink_lib.models import binds
-from tests.unit.utils import generate_snowflake, mock_bind
-from tests.unit.fixtures.guilds import GuildRoles
+from bloxlink_lib.test_utils.fixtures import guilds as guild_fixtures
+from bloxlink_lib.test_utils.utils import generate_snowflake, mock_bind
 
 
 class GroupTestFixtures(Enum):
@@ -115,14 +115,14 @@ def find_group_roleset(group_rolesets: GroupRolesetsType) -> GroupRoleset:
 @pytest.fixture()
 def everyone_group_bind(
     mocker,
-    find_discord_roles: Callable[[GuildRoles], list[RoleSerializable]],
+    find_discord_roles: Callable[[guild_fixtures.GuildRoles], list[RoleSerializable]],
     test_group: RobloxGroup,
 ) -> binds.GuildBind:
     """Bind everyone to receive these specific roles"""
 
     mocked_bind = mock_bind(
         mocker,
-        discord_roles=find_discord_roles(GuildRoles.OFFICER),
+        discord_roles=find_discord_roles(guild_fixtures.GuildRoles.OFFICER),
         criteria=binds.BindCriteria(
             type="group", id=test_group.id, group=GroupBindData(everyone=True)
         ),
@@ -155,13 +155,13 @@ def dynamic_roles_group_bind(
 def guest_group_bind(
     mocker,
     test_group: RobloxGroup,
-    find_discord_roles: Callable[[GuildRoles], list[RoleSerializable]],
+    find_discord_roles: Callable[[guild_fixtures.GuildRoles], list[RoleSerializable]],
 ) -> binds.GuildBind:
     """Bind a non-group member to receive these specific roles"""
 
     mocked_bind = mock_bind(
         mocker,
-        discord_roles=find_discord_roles(GuildRoles.NOT_IN_GROUP),
+        discord_roles=find_discord_roles(guild_fixtures.GuildRoles.NOT_IN_GROUP),
         criteria=binds.BindCriteria(
             type="group", id=test_group.id, group=GroupBindData(guest=True)
         ),
@@ -175,13 +175,13 @@ def guest_group_bind(
 def roleset_group_bind(
     mocker,
     test_group: RobloxGroup,
-    find_discord_roles: Callable[[GuildRoles], list[RoleSerializable]],
+    find_discord_roles: Callable[[guild_fixtures.GuildRoles], list[RoleSerializable]],
 ) -> binds.GuildBind:
     """Bind a specific roleset to receive these specific roles"""
 
     mocked_bind = mock_bind(
         mocker,
-        discord_roles=find_discord_roles(GuildRoles.COMMANDER),
+        discord_roles=find_discord_roles(guild_fixtures.GuildRoles.COMMANDER),
         criteria=binds.BindCriteria(
             type="group",
             id=test_group.id,
@@ -197,13 +197,15 @@ def roleset_group_bind(
 def min_max_group_bind(
     mocker,
     test_group: RobloxGroup,
-    find_discord_roles: Callable[[GuildRoles], list[RoleSerializable]],
+    find_discord_roles: Callable[[guild_fixtures.GuildRoles], list[RoleSerializable]],
 ) -> binds.GuildBind:
     """Bind a range of rolesets to receive these specific roles"""
 
     mocked_bind = mock_bind(
         mocker,
-        discord_roles=find_discord_roles(GuildRoles.COMMANDER, GuildRoles.ADMIN),
+        discord_roles=find_discord_roles(
+            guild_fixtures.GuildRoles.COMMANDER, guild_fixtures.GuildRoles.ADMIN
+        ),
         criteria=binds.BindCriteria(
             type="group",
             id=test_group.id,
@@ -220,14 +222,16 @@ def min_max_group_bind(
 @pytest.fixture()
 def group_bind(
     mocker,
-    find_discord_roles: Callable[[GuildRoles], list[RoleSerializable]],
-) -> Callable[[RobloxGroup, binds.GroupBindData, GuildRoles], binds.GuildBind]:
+    find_discord_roles: Callable[[guild_fixtures.GuildRoles], list[RoleSerializable]],
+) -> Callable[
+    [RobloxGroup, binds.GroupBindData, guild_fixtures.GuildRoles], binds.GuildBind
+]:
     """Bind a group to receive these specific roles"""
 
     def _get_bind_for_group(
         group: RobloxGroup,
         group_criteria: binds.GroupBindData,
-        discord_role: GuildRoles,
+        discord_role: guild_fixtures.GuildRoles,
     ) -> binds.GuildBind:
         return mock_bind(
             mocker,

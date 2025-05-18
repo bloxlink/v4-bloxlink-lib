@@ -1,8 +1,8 @@
 from collections import namedtuple
 import pytest
 from bloxlink_lib import BaseModel, GuildSerializable
+from bloxlink_lib.test_utils.fixtures import MockUser
 from tests.unit.utils import nickname_formatter
-from . import MockUser
 
 __all__ = [
     "NicknameTestCaseData",

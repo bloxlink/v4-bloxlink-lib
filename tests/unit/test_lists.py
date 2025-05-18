@@ -1,7 +1,7 @@
 from bloxlink_lib import PydanticList
 import pytest
 
-pytestmark = pytest.mark.primitives
+pytestmark = pytest.mark.iterable
 
 
 class TestPydanticList:
