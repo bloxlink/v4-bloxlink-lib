@@ -2,7 +2,6 @@ from enum import Enum
 from typing import TYPE_CHECKING, Callable, Annotated
 import pytest
 from pydantic import Field
-from pydantic.dataclasses import dataclass
 from bloxlink_lib.models import binds
 from bloxlink_lib import (
     RobloxGroup,
@@ -14,29 +13,21 @@ from bloxlink_lib import (
     GuildSerializable,
     RoleSerializable,
 )
-from tests.unit.fixtures.assets import MockAssets, AssetTestFixtures, AssetTypes
-from tests.unit.fixtures.groups import GroupTestFixtures
-from tests.unit.utils import enum_list_to_value_list, mock_bind
-from . import GuildRoles, MockUserData, MockUser, mock_user
+from bloxlink_lib.test_utils.fixtures import (
+    GuildRoles,
+    MockUserData,
+    MockUser,
+    mock_user,
+    MockAssets,
+    AssetTypes,
+    VerifiedTestFixtures,
+)
+from bloxlink_lib.test_utils.utils import mock_bind
+from bloxlink_lib.test_utils.fixtures.binds import BindTestFixtures
+from tests.unit.utils import enum_list_to_value_list
 
 if TYPE_CHECKING:
     from . import GuildRolesType, GroupRolesetsType
-
-
-class VerifiedTestFixtures(Enum):
-    """The fixtures for verified bind tests"""
-
-    VERIFIED_BIND = "verified_bind"
-    UNVERIFIED_BIND = "unverified_bind"
-
-
-@dataclass
-class BindTestFixtures:
-    """The fixtures for all bind tests"""
-
-    ASSETS = AssetTestFixtures
-    GROUPS = GroupTestFixtures
-    VERIFIED = VerifiedTestFixtures
 
 
 class ExpectedBindsResult(BaseModel):

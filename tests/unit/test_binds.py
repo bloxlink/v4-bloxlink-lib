@@ -1,16 +1,24 @@
 import pytest
 from bloxlink_lib import GuildSerializable, SnowflakeSet, RoleSerializable
-from .fixtures import (
+from bloxlink_lib.test_utils.fixtures import (
     GuildRoles,
     GroupRolesets,
     MockUserData,
+    MockAssets,
+    AssetTypes,
+    BindTestFixtures,
+)
+
+from .fixtures import (
+    # GuildRoles,
+    # MockUserData,
     MockBindScenario,
     ExpectedBindsResult,
     MockedBindScenarioResult,
-    MockAssets,
+    # MockAssets,
     AssetBindTestCase,
-    AssetTypes,
-    BindTestFixtures,
+    # AssetTypes,
+    # BindTestFixtures,
     BindTestCase,
 )
 
