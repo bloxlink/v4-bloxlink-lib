@@ -149,6 +149,7 @@ async def parse_template(
     smart_name: str = ""
     group_bind: GuildBind | None = None
     group_roleset_name: str | None = None
+    potential_binds = potential_binds or []
 
     if not template:
         if not guild_id or potential_binds is None:
