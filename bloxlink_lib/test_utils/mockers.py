@@ -7,6 +7,8 @@ __all__ = [
     "mock_entity_sync",
     "mock_bind",
     "mock_group",
+    "mock_guild_roles",
+    "mock_guild",
 ]
 
 
