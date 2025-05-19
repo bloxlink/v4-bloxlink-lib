@@ -1,5 +1,6 @@
 from bloxlink_lib.models import binds
 from bloxlink_lib import RoleSerializable, RobloxEntity, RobloxGroup, GroupRoleset
+from bloxlink_lib.models.base.serializable import GuildSerializable
 from bloxlink_lib.test_utils.utils import generate_snowflake
 
 __all__ = [
@@ -55,4 +56,30 @@ def mock_group(mocker, roleset_names: list[str]) -> RobloxGroup:
         id=generate_snowflake(),
         name="Military Roleplay Community",
         rolesets=group_rolesets,
+    )
+
+
+def mock_guild_roles(role_names: list[str]) -> dict[int, RoleSerializable]:
+    """Mock Discord roles for a Discord server"""
+
+    guild_roles: dict[int, RoleSerializable] = {}
+
+    for i, role_name in enumerate(role_names):
+        new_snowflake = generate_snowflake()
+        guild_roles[new_snowflake] = RoleSerializable(
+            id=new_snowflake, name=role_name, position=i
+        )
+
+    return guild_roles
+
+
+def mock_guild(role_names: list[str]):
+    """Mock a Discord server"""
+
+    guild_roles = mock_guild_roles(role_names)
+
+    return GuildSerializable(
+        id=generate_snowflake(),
+        name="Military Roleplay Community",
+        roles=guild_roles,
     )
