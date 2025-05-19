@@ -190,6 +190,7 @@ def init_sentry():
                 "ForbiddenError",
                 "NotFoundError",
                 "HTTPError",
+                "BadSignatureError",
             ],
         )
 
