@@ -4,6 +4,8 @@ import asyncio
 from inspect import isfunction
 import enum
 import json
+from aiohttp import ClientConnectorError
+import hikari
 import sentry_sdk
 from sentry_sdk.integrations.aiohttp import AioHttpIntegration
 from .models.base import BaseModel
@@ -183,8 +185,13 @@ def init_sentry():
             traces_sample_rate=(
                 1.0 if environment in (Environment.LOCAL, Environment.STAGING) else 0.2
             ),
-            attach_stacktrace=True,
-            send_default_pii=True,
+            ignore_errors=[
+                StopAsyncIteration,
+                ClientConnectorError,
+                hikari.ForbiddenError,
+                hikari.NotFoundError,
+                hikari.HTTPError,
+            ],
         )
 
 
