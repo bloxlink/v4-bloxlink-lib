@@ -136,13 +136,13 @@ class RobloxGroup(RobloxEntity):
         return f"({roleset_id})"
 
     @property
-    def roleset_enum[T: Enum](self) -> T:
+    def roleset_enum(self) -> Enum[str, GroupRoleset]:
         """Get the names of the rolesets in this group as an enum."""
 
         return Enum(
             "Rolesets",
             [
-                (roleset.name.upper(), roleset.name.title())
+                (roleset.name.upper(), self.rolesets.get(roleset.rank))
                 for roleset in self.rolesets.values()
             ],
         )
