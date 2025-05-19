@@ -3,7 +3,6 @@ from bloxlink_lib import GuildSerializable, SnowflakeSet, RoleSerializable
 from bloxlink_lib.test_utils.fixtures import (
     GuildRoles,
     GroupRolesets,
-    MockUserData,
     MockAssets,
     AssetTypes,
     BindTestFixtures,
@@ -15,6 +14,7 @@ from .fixtures import (
     AssetBindTestCase,
     BindTestCase,
 )
+from bloxlink_lib.test_utils.mockers import MockUserData
 
 pytestmark = pytest.mark.binds
 

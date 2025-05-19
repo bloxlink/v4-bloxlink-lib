@@ -65,6 +65,7 @@ async def get_binds(
     category: VALID_BIND_TYPES = None,
     bind_id: int = None,
     guild_roles: dict[int, RoleSerializable] | list[Role] = None,
+    guild_data: GuildData | None = None,
 ) -> list[GuildBind]:
     """Get the current guild binds.
 
@@ -75,8 +76,12 @@ async def get_binds(
 
     guild_id = str(guild_id)
 
-    guild_data = await fetch_guild_data(guild_id, "binds")
-    guild_data.binds = await migrate_old_binds_to_v4(guild_id, guild_data.binds)
+    guild_data = guild_data or await fetch_guild_data(guild_id, "binds")
+    guild_data.binds = await migrate_old_binds_to_v4(
+        guild_id,
+        guild_data.binds,
+        guild_data=guild_data,
+    )
 
     if isinstance(guild_roles, list):
         guild_roles = {r.id: RoleSerializable.from_hikari(r) for r in guild_roles}
@@ -296,14 +301,16 @@ async def parse_template(
 
 
 async def migrate_old_binds_to_v4(
-    guild_id: str, binds: list[GuildBind]
+    guild_id: str,
+    binds: list[GuildBind],
+    guild_data: GuildData | None = None,
 ) -> list[GuildBind]:
     """Migrates binds from the V3 structure to V4 and optionally saves them to the database.
 
     If POP_OLD_BINDS is true, the old binds will be removed from the database.
     """
 
-    guild_data = await fetch_guild_data(
+    guild_data = guild_data or await fetch_guild_data(
         guild_id,
         "roleBinds",
         "groupIDs",

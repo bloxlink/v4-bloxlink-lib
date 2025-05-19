@@ -1,7 +1,7 @@
 from enum import Enum
 import pytest
 from bloxlink_lib import GuildSerializable, RoleSerializable
-from bloxlink_lib.test_utils.utils import generate_snowflake
+from bloxlink_lib.test_utils.mockers import mock_guild, mock_guild_roles
 
 __all__ = ["GuildRoles", "GuildRolesType", "guild_roles", "test_guild"]
 
@@ -31,21 +31,11 @@ GuildRolesType = dict[int, RoleSerializable]
 def guild_roles() -> GuildRolesType:
     """Test Discord roles for the test Discord server."""
 
-    new_roles: dict[int, RoleSerializable] = {}
-
-    for i, discord_role in enumerate(GuildRoles):
-        new_snowflake = generate_snowflake()
-        new_roles[new_snowflake] = RoleSerializable(
-            id=new_snowflake, name=discord_role.value, position=i
-        )
-
-    return new_roles
+    return mock_guild_roles(role_names=[r.value for r in GuildRoles])
 
 
 @pytest.fixture()
 def test_guild(guild_roles: GuildRolesType) -> GuildSerializable:
     """Test Discord server."""
 
-    return GuildSerializable(
-        id=generate_snowflake(), name="Military Roleplay Community", roles=guild_roles
-    )
+    return mock_guild(role_names=[r.name for r in guild_roles.values()])

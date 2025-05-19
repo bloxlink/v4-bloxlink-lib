@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from enum import Enum
 import re
 from typing import TYPE_CHECKING, Annotated
 
@@ -133,6 +134,18 @@ class RobloxGroup(RobloxEntity):
             return f"{roleset_name} ({roleset_id})" if include_id else roleset_name
 
         return f"({roleset_id})"
+
+    @property
+    def roleset_enum(self) -> Enum[str, GroupRoleset]:
+        """Get the names of the rolesets in this group as an enum."""
+
+        return Enum(
+            "Rolesets",
+            [
+                (roleset.name.upper(), self.rolesets.get(roleset.rank))
+                for roleset in self.rolesets.values()
+            ],
+        )
 
     def __str__(self) -> str:
         name = f"**{self.name}**" if self.name else "*(Unknown Group)*"
