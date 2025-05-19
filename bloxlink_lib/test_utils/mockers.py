@@ -50,8 +50,7 @@ def mock_group(mocker, roleset_names: list[str]) -> RobloxGroup:
     mock_entity_sync(mocker, RobloxGroup)
 
     group_rolesets = {
-        i: GroupRoleset(id=generate_snowflake(), name=name, rank=i)
-        for i, name in enumerate(roleset_names)
+        i: GroupRoleset(id=i, name=name, rank=i) for i, name in enumerate(roleset_names)
     }
 
     return RobloxGroup(
@@ -67,10 +66,7 @@ def mock_guild_roles(role_names: list[str]) -> dict[int, RoleSerializable]:
     guild_roles: dict[int, RoleSerializable] = {}
 
     for i, role_name in enumerate(role_names):
-        new_snowflake = generate_snowflake()
-        guild_roles[new_snowflake] = RoleSerializable(
-            id=new_snowflake, name=role_name, position=i
-        )
+        guild_roles[i] = RoleSerializable(id=i, name=role_name, position=i)
 
     return guild_roles
 
