@@ -183,7 +183,7 @@ def init_sentry():
             enable_tracing=True,
             debug=environment in (Environment.LOCAL, Environment.STAGING),
             traces_sample_rate=(
-                1.0 if environment in (Environment.LOCAL, Environment.STAGING) else 0.2
+                1.0 if environment in (Environment.LOCAL, Environment.STAGING) else 0.01
             ),
             ignore_errors=[
                 StopAsyncIteration,
