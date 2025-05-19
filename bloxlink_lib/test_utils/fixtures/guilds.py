@@ -1,7 +1,6 @@
 from enum import Enum
 import pytest
 from bloxlink_lib import GuildSerializable, RoleSerializable
-from bloxlink_lib.test_utils.utils import generate_snowflake
 from bloxlink_lib.test_utils.mockers import mock_guild, mock_guild_roles
 
 __all__ = ["GuildRoles", "GuildRolesType", "guild_roles", "test_guild"]
