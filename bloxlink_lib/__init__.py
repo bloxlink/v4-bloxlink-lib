@@ -15,7 +15,6 @@ from .config import *
 from .module import *
 from .database.mongodb import fetch_item, update_item
 from .database.redis import redis
-from .test_utils import *
 
 logging.basicConfig(level=CONFIG.LOG_LEVEL)
 

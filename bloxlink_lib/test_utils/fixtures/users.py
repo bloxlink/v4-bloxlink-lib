@@ -12,6 +12,7 @@ from bloxlink_lib import (
     RobloxBaseAsset,
 )
 from bloxlink_lib.test_utils.utils import generate_snowflake
+from bloxlink_lib.test_utils.mockers import mock_entity_sync
 from bloxlink_lib.test_utils.fixtures import guilds, assets, groups
 
 __all__ = [
@@ -77,8 +78,7 @@ def _mock_roblox_user(
     )
 
     # Do not sync the model with the Roblox API
-    mocked_sync = mocker.AsyncMock(return_value=None)
-    mocker.patch.object(RobloxUser, "sync", new=mocked_sync)
+    mock_entity_sync(mocker, RobloxUser)
 
     if owns_assets:
         for mocked_asset in owns_assets:

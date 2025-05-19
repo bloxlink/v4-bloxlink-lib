@@ -10,7 +10,8 @@ from bloxlink_lib import (
 )
 from bloxlink_lib.models import binds
 from bloxlink_lib.test_utils.fixtures import guilds as guild_fixtures
-from bloxlink_lib.test_utils.utils import generate_snowflake, mock_bind
+from bloxlink_lib.test_utils.mockers import mock_bind, mock_group
+from bloxlink_lib.test_utils.utils import generate_snowflake
 
 
 class GroupTestFixtures(Enum):
@@ -91,14 +92,12 @@ def group_rolesets(
 
 
 @pytest.fixture()
-def test_group(group_rolesets: GroupRolesetsType) -> RobloxGroup:
+def test_group(mocker, group_rolesets: GroupRolesetsType) -> RobloxGroup:
     """Military test group"""
 
-    return RobloxGroup(
-        id=generate_snowflake(),
-        name="Military Roleplay Community",
-        rolesets=group_rolesets,
-    )
+    roleset_names = [r.name for r in group_rolesets.values()]
+
+    return mock_group(mocker, roleset_names=roleset_names)
 
 
 @pytest.fixture()

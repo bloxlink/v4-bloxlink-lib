@@ -6,7 +6,7 @@ from bloxlink_lib.models.binds import BindCriteria, GroupBindData
 from bloxlink_lib.models.roblox.groups import RobloxGroup
 from bloxlink_lib.test_utils.fixtures.users import MockUser
 from tests.unit.utils.bind_helpers import nickname_formatter
-from bloxlink_lib.test_utils.utils import mock_bind
+from bloxlink_lib.test_utils.mockers import mock_bind
 
 # fixtures
 from .fixtures import NicknameTestCaseData, NicknameTestData

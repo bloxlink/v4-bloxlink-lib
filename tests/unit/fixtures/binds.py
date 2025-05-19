@@ -22,7 +22,7 @@ from bloxlink_lib.test_utils.fixtures import (
     AssetTypes,
     VerifiedTestFixtures,
 )
-from bloxlink_lib.test_utils.utils import mock_bind
+from bloxlink_lib.test_utils.mockers import mock_bind
 from bloxlink_lib.test_utils.fixtures.binds import BindTestFixtures
 from tests.unit.utils import enum_list_to_value_list
 
