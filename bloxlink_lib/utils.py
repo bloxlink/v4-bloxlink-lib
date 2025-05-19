@@ -182,9 +182,8 @@ def init_sentry():
             integrations=[AioHttpIntegration()],
             enable_tracing=True,
             debug=environment in (Environment.LOCAL, Environment.STAGING),
-            traces_sample_rate=(
-                1.0 if environment in (Environment.LOCAL, Environment.STAGING) else 0.01
-            ),
+            traces_sample_rate=0.01,
+            sample_rate=0.01,
             ignore_errors=[
                 StopAsyncIteration,
                 ClientConnectorError,
