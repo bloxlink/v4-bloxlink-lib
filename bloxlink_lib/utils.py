@@ -187,9 +187,9 @@ def init_sentry():
             ignore_errors=[
                 StopAsyncIteration,
                 ClientConnectorError,
-                hikari.ForbiddenError,
-                hikari.NotFoundError,
-                hikari.HTTPError,
+                "ForbiddenError",
+                "NotFoundError",
+                "HTTPError",
             ],
         )
 
