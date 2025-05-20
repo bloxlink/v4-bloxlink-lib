@@ -402,7 +402,7 @@ async def check_for_verified_roles(
     if new_verified_binds:
         merge_to.extend(new_verified_binds)
 
-        # if SAVE_NEW_BINDS: # TODO: this continuely appends the verifiedRoleName as a new bind
+        # if SAVE_NEW_BINDS: # TODO: BUG: this continuely appends the verifiedRoleName as a new bind
         #     await update_guild_data(
         #         guild_id,
         #         binds=[b.model_dump(exclude_unset=True, by_alias=True) for b in merge_to],
