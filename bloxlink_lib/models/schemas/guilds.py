@@ -226,6 +226,19 @@ class GuildData(BaseSchema):
 
         return migrate_delete_commands(delete_commands)
 
+    @field_validator("nicknameTemplate", mode="before")
+    @classmethod
+    def transform_nickname_template(
+        cls: Type[Self], nickname_template: str | None
+    ) -> str:
+        """Migrate the nicknameTemplate field."""
+
+        from bloxlink_lib.models.migrators import (
+            migrate_nickname_template,
+        )
+
+        return migrate_nickname_template(nickname_template)
+
     @field_validator("createMissingRoles", mode="before")
     @classmethod
     def transform_create_missing_roles(
