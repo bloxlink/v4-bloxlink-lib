@@ -168,7 +168,7 @@ class BindConversionTestCase(BaseModel):
                         )
                     },
                     "badges": {
-                        "2667428956752400": V3BadgeBind(
+                        "2667428956752400": V3AssetBind(
                             nickname=None,
                             displayName="Spiral Horns of the Developer",
                             removeRoles=[],
@@ -176,7 +176,7 @@ class BindConversionTestCase(BaseModel):
                         )
                     },
                     "gamePasses": {
-                        "824168675": V3GamePassBind(
+                        "824168675": V3AssetBind(
                             nickname="sdaasdsd",
                             displayName="Carry 1 Extra Item ",
                             removeRoles=[],

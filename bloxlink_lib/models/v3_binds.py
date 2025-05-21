@@ -1,4 +1,4 @@
-from typing import Literal, Optional, Union, Annotated
+from typing import Literal, Optional, Annotated
 from pydantic import Field
 from bloxlink_lib.models.base import BaseModel
 
@@ -41,24 +41,6 @@ class V3AssetBind(BaseModel):
     roles: list[str]
 
 
-class V3BadgeBind(BaseModel):
-    """Represents a badge binding configuration."""
-
-    nickname: Optional[str] = None
-    displayName: str | None = None
-    removeRoles: Annotated[list[str], Field(default_factory=list)]
-    roles: list[str]
-
-
-class V3GamePassBind(BaseModel):
-    """Represents a game pass binding configuration."""
-
-    nickname: Optional[str] = None
-    displayName: str | None = None
-    removeRoles: Annotated[list[str], Field(default_factory=list)]
-    roles: list[str]
-
-
 class V3GroupID(BaseModel):
     """Represents a group ID configuration."""
 
@@ -70,11 +52,17 @@ class V3GroupID(BaseModel):
 class V3RoleBinds(BaseModel):
     """Represents the role binds for a guild in the database."""
 
-    roleBinds: (
+    roleBinds: Annotated[
         dict[
             V3BindType,
-            dict[str, Union[V3GroupBind, V3AssetBind, V3BadgeBind, V3GamePassBind]],
-        ]
-        | None
-    ) = None
-    groupIDs: dict[str, V3GroupID] | None = None
+            dict[str, V3GroupBind | V3AssetBind],
+        ],
+        Field(default_factory=dict),
+    ] = Field(default_factory=dict)
+    groupIDs: Annotated[dict[str, V3GroupID], Field(default_factory=dict)] = Field(
+        default_factory=dict
+    )
+
+
+V3RoleBindType = dict[V3BindType, dict[str, V3GroupBind | V3AssetBind]]
+V3GroupIDType = dict[str, V3GroupID]
