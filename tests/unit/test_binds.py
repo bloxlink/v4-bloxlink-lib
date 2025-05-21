@@ -1,5 +1,6 @@
 import pytest
 from bloxlink_lib import GuildSerializable, SnowflakeSet, RoleSerializable
+from bloxlink_lib.models.binds import GuildBind, BindCriteria, GroupBindData, BindData
 from bloxlink_lib.test_utils.fixtures import (
     GuildRoles,
     GroupRolesets,
@@ -427,6 +428,114 @@ class TestBinds:
             mocked_bind_scenario=mock_bind_scenario,
             guild_roles=test_guild.roles,
         )
+
+
+class TestBindHash:
+    """Test the bind hash logic"""
+
+    @pytest.mark.asyncio()
+    async def test_bind_hash_does_not_equal_different_bind(self):
+        """Test the bind hash logic with different bind criteria"""
+
+        bind_1 = GuildBind(
+            roles=["1", "2", "3"],
+            nickname="test",
+            remove_roles=["4", "5", "6"],
+            criteria=BindCriteria(
+                type="group",
+                id=1,
+                group=GroupBindData(
+                    everyone=True,
+                ),
+            ),
+        )
+
+        bind_2 = GuildBind(
+            roles=["1", "2", "3"],
+            nickname="test",
+            remove_roles=["4", "5", "6"],
+            criteria=BindCriteria(
+                type="group",
+                id=1,
+                group=GroupBindData(
+                    dynamicRoles=True,
+                ),
+            ),
+        )
+
+        assert hash(bind_1) != hash(bind_2)
+
+    @pytest.mark.asyncio()
+    async def test_bind_hash_equals(self):
+        """Test the bind hash logic with the same bind criteria and roles"""
+
+        bind_1 = GuildBind(
+            roles=["1", "2", "3"],
+            nickname="test",
+            remove_roles=["4", "5", "6"],
+            criteria=BindCriteria(
+                type="group",
+                id=1,
+                group=GroupBindData(
+                    everyone=True,
+                ),
+            ),
+        )
+
+        bind_2 = GuildBind(
+            roles=["1", "2", "3"],
+            nickname="test",
+            remove_roles=["4", "5", "6"],
+            criteria=BindCriteria(
+                type="group",
+                id=1,
+                group=GroupBindData(
+                    everyone=True,
+                ),
+            ),
+        )
+
+        assert hash(bind_1) == hash(bind_2)
+
+    @pytest.mark.asyncio()
+    async def test_bind_hash_equals_with_data(self):
+        """Test the bind hash logic with a different display name."""
+
+        bind_1 = GuildBind(
+            roles=["1", "2", "3"],
+            nickname="test",
+            remove_roles=["4", "5", "6"],
+            criteria=BindCriteria(
+                type="group",
+                id=1,
+                group=GroupBindData(
+                    everyone=True,
+                ),
+            ),
+            data=BindData(
+                displayName="test 1",
+            ),
+        )
+
+        bind_2 = GuildBind(
+            roles=["1", "2", "3"],
+            nickname="test",
+            remove_roles=["4", "5", "6"],
+            criteria=BindCriteria(
+                type="group",
+                id=1,
+                group=GroupBindData(
+                    everyone=True,
+                ),
+            ),
+            data=BindData(
+                displayName="test 2",
+            ),
+        )
+
+        assert hash(bind_1) == hash(
+            bind_2
+        ), "Binds should be equal since the display name is mutable but not a part of the criteria of the bind"
 
 
 async def _assert_successful_binds_results(
