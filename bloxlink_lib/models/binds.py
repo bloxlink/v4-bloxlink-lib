@@ -95,6 +95,9 @@ class GroupBindData(BaseModel):
                 "Everyone condition cannot have any other conditions."
             )
 
+    def __hash__(self) -> int:
+        return hash((self.everyone, self.guest, self.min, self.max, self.roleset))
+
 
 class BindCriteria(BaseModel):
     """Represents the criteria required for a bind. If anything is set, it must ALL be met."""
