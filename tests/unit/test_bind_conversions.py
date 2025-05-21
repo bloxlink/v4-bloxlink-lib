@@ -1,6 +1,6 @@
 import pytest
 from bloxlink_lib.models import binds
-from tests.unit.fixtures.bind_conversions import BindConversionTestCase
+from tests.shared.bind_conversions import BindConversionTestCase
 
 
 pytestmark = pytest.mark.binds

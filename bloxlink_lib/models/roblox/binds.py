@@ -433,14 +433,14 @@ async def count_binds(guild_id: int | str, bind_id: int = None) -> int:
 
 async def delete_bind(
     guild_id: int | str,
-    *remove_bind_hashes: int,
+    remove_bind_hashes: list[int],
 ):
     """
     Remove a bind from the database.
 
     Args:
         guild_id (int | str): ID of the guild.
-        *remove_bind_hashes (int): Hashes of the binds to remove. This can be found by calling hash() on the bind.
+        remove_bind_hashes (list[int]): Hashes of the binds to remove. This can be found by calling hash() on the bind.
     """
 
     guild_binds = await get_binds(str(guild_id))

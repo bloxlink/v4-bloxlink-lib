@@ -1,13 +1,14 @@
 import pytest
 from bloxlink_lib.models import binds
 from bloxlink_lib.models.v3_binds import *
+from bloxlink_lib import PydanticList
 
 
 class BindConversionTestCase(BaseModel):
     """A test case for bind conversions. V3 binds must be converted to V4 binds."""
 
     v3_binds: V3RoleBinds
-    v4_binds: list[binds.GuildBind]
+    v4_binds: PydanticList[binds.GuildBind]
 
 
 @pytest.fixture(

@@ -8,6 +8,7 @@ from bloxlink_lib.database.redis import (  # pylint: disable=no-name-in-module
     wait_for_redis as wait_for_redis_,
 )
 from bloxlink_lib.database.mongodb import mongo
+from tests.shared import *
 
 TEST_GUILD_ID: Final[int] = 123
 
