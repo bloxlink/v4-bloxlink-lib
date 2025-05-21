@@ -402,7 +402,7 @@ async def check_for_verified_roles(
     if new_verified_binds:
         merge_to.extend(new_verified_binds)
 
-        # if SAVE_NEW_BINDS: # TODO: this continuely appends the verifiedRoleName as a new bind
+        # if SAVE_NEW_BINDS: # TODO: BUG: this continuely appends the verifiedRoleName as a new bind
         #     await update_guild_data(
         #         guild_id,
         #         binds=[b.model_dump(exclude_unset=True, by_alias=True) for b in merge_to],
@@ -428,4 +428,33 @@ async def count_binds(guild_id: int | str, bind_id: int = None) -> int:
         len(guild_data)
         if not bind_id
         else sum(1 for b in guild_data if b.id == int(bind_id)) or 0
+    )
+
+
+async def delete_bind(
+    guild_id: int | str,
+    remove_bind_hashes: list[int],
+):
+    """
+    Remove a bind from the database.
+
+    Args:
+        guild_id (int | str): ID of the guild.
+        remove_bind_hashes (list[int]): Hashes of the binds to remove. This can be found by calling hash() on the bind.
+    """
+
+    guild_binds = await get_binds(str(guild_id))
+
+    for bind_hash in remove_bind_hashes:
+        bind = find(lambda b: hash(b) == bind_hash, guild_binds)
+
+        if not bind:
+            raise ValueError(f"Bind not found: {bind_hash}")
+
+        guild_binds.remove(bind)
+
+    await update_guild_data(
+        guild_id,
+        binds=[b.model_dump(exclude_unset=True, by_alias=True) for b in guild_binds],
+        migratedBindsToV4=True,
     )

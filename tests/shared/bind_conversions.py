@@ -1,13 +1,14 @@
 import pytest
 from bloxlink_lib.models import binds
 from bloxlink_lib.models.v3_binds import *
+from bloxlink_lib import PydanticList
 
 
 class BindConversionTestCase(BaseModel):
     """A test case for bind conversions. V3 binds must be converted to V4 binds."""
 
     v3_binds: V3RoleBinds
-    v4_binds: list[binds.GuildBind]
+    v4_binds: PydanticList[binds.GuildBind]
 
 
 @pytest.fixture(
@@ -93,7 +94,7 @@ class BindConversionTestCase(BaseModel):
             v3_binds=V3RoleBinds(
                 groupIDs={
                     "1": V3GroupID(
-                        nickname="{roblox-name}-{group-rank}",
+                        nickname="roblox-name-group-rank",
                         groupName="Test Group 1",
                         removeRoles=[],
                     ),
@@ -168,7 +169,7 @@ class BindConversionTestCase(BaseModel):
                         )
                     },
                     "badges": {
-                        "2667428956752400": V3BadgeBind(
+                        "2667428956752400": V3AssetBind(
                             nickname=None,
                             displayName="Spiral Horns of the Developer",
                             removeRoles=[],
@@ -176,7 +177,7 @@ class BindConversionTestCase(BaseModel):
                         )
                     },
                     "gamePasses": {
-                        "824168675": V3GamePassBind(
+                        "824168675": V3AssetBind(
                             nickname="sdaasdsd",
                             displayName="Carry 1 Extra Item ",
                             removeRoles=[],

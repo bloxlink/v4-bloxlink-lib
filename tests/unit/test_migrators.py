@@ -102,3 +102,29 @@ class TestVerifiedRoleMigrators:
         )
 
         assert test_guild_data.welcomeMessage == "Welcome to the server!"
+
+    @pytest.mark.parametrize(
+        "nickname_template",
+        [
+            ["roblox-name", "{roblox-name}"],
+            ["roblox-id", "{roblox-id}"],
+            ["{roblox-name}", "{roblox-name}"],
+            ["roblox-id {roblox-name}", "{roblox-id} {roblox-name}"],
+            ["[O1] group-rank", "[O1] {group-rank}"],
+            ["{test} {roblox-name}", "{test} {roblox-name}"],
+        ],
+    )
+    @pytest.mark.asyncio_concurrent(group="migrators")
+    async def test_migrate_nickname_template(
+        self,
+        test_guild: GuildSerializable,
+        nickname_template: list[str],
+    ):
+        """Test the nickname template migrator"""
+
+        test_guild_data = GuildData(
+            id=test_guild.id,
+            nicknameTemplate=nickname_template[0],
+        )
+
+        assert test_guild_data.nicknameTemplate == nickname_template[1]

@@ -164,6 +164,16 @@ class GuildBind(BaseModel):
                 "full_group" if self.criteria.group.dynamicRoles else "role_bind"
             )
 
+    # Field migrators
+    @field_validator("nickname", mode="before")
+    @classmethod
+    def migrate_nickname(cls: Type[Self], nickname: str | None) -> str | None:
+        """Migrate the nickname field."""
+
+        from bloxlink_lib.models.migrators import migrate_nickname_template
+
+        return migrate_nickname_template(nickname)
+
     @classmethod
     def from_V3(cls: Type[Self], guild_data: GuildData | dict | V3RoleBinds):
         """Convert V3 binds to V4 binds."""

@@ -4,6 +4,7 @@ from bloxlink_lib.models.schemas.guilds import (  # pylint: disable=no-name-in-m
     GuildRestriction,
 )
 from bloxlink_lib.models import BaseModel
+from bloxlink_lib.models.roblox.binds import RobloxUserNicknames
 from pydantic import ValidationInfo
 
 
@@ -164,3 +165,23 @@ def migrate_null_values(cls: BaseModel, v: str | None, info: ValidationInfo) -> 
         return cls.model_fields[info.field_name].get_default()
 
     return v
+
+
+def migrate_nickname_template(nickname_template: str | None) -> str | None:
+    """Migrate the nicknameTemplate field.
+
+    If the nicknameTemplate contains a Roblox user nickname template without the curly braces, add them.
+    """
+
+    if nickname_template is None:
+        return None
+
+    for template in RobloxUserNicknames:
+        if template.value in nickname_template and (
+            f"{{{template.value}}}" not in nickname_template
+        ):
+            nickname_template = nickname_template.replace(
+                template.value, f"{{{template.value}}}"
+            )
+
+    return nickname_template
