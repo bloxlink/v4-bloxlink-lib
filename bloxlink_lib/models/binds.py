@@ -154,7 +154,6 @@ class GuildBind(BaseModel):
     highest_role: RoleSerializable | None = Field(
         exclude=True, default=None
     )  # highest role in the guild
-    migrated_bind: bool = Field(exclude=True, default=False)  # for v3 to v4 migration
 
     def model_post_init(self, __context):
         self.entity = self.entity or create_entity(self.criteria.type, self.criteria.id)
@@ -199,7 +198,6 @@ class GuildBind(BaseModel):
                 remove_roles=group_data.get("removeRoles") or [],
                 subtype="full_group",
                 data=BindData(displayName=group_data.get("groupName")),
-                migrated_bind=True,
             )
 
             converted_binds.append(new_bind)
@@ -240,7 +238,6 @@ class GuildBind(BaseModel):
                                 data=BindData(
                                     displayName=group_bind_data.get("groupName")
                                 ),
-                                migrated_bind=True,
                             )
 
                             converted_binds.append(new_bind)
@@ -261,7 +258,6 @@ class GuildBind(BaseModel):
                                 data=BindData(
                                     displayName=group_bind_data.get("groupName")
                                 ),
-                                migrated_bind=True,
                             )
 
                             converted_binds.append(new_bind)
@@ -283,7 +279,6 @@ class GuildBind(BaseModel):
                             remove_roles=bind_data.get("removeRoles") or [],
                             criteria=BindCriteria(type=bind_type, id=int(entity_id)),
                             data=BindData(displayName=bind_data.get("displayName")),
-                            migrated_bind=True,
                         )
 
                         converted_binds.append(new_bind)
