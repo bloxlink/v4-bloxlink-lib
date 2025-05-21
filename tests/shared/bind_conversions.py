@@ -94,7 +94,7 @@ class BindConversionTestCase(BaseModel):
             v3_binds=V3RoleBinds(
                 groupIDs={
                     "1": V3GroupID(
-                        nickname="{roblox-name}-{group-rank}",
+                        nickname="roblox-name-group-rank",
                         groupName="Test Group 1",
                         removeRoles=[],
                     ),
