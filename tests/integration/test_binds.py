@@ -2,15 +2,10 @@ import pytest
 from bloxlink_lib.models.roblox.binds import delete_bind, get_binds, count_binds
 from bloxlink_lib.models.schemas.guilds import (  # pylint: disable=no-name-in-module
     update_guild_data,
-    fetch_guild_data,
-    GuildData,
 )
-from bloxlink_lib.database.mongodb import _db_fetch, _db_update
-from bloxlink_lib.models.migrators import *
-from pydantic import ValidationError
 from tests.shared import BindConversionTestCase
 
-pytestmark = pytest.mark.database
+pytestmark = pytest.mark.binds
 
 
 class TestIntegrationV3BindRemovals:
