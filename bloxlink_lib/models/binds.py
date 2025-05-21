@@ -116,7 +116,7 @@ class BindCriteria(BaseModel):
         return migrate_bind_criteria_type(bind_type)
 
     def __hash__(self) -> int:
-        return hash((self.type, self.id))
+        return hash((self.type, self.id, self.group))
 
 
 class BindData(BaseModel):
