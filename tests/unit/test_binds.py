@@ -499,7 +499,7 @@ class TestBindHash:
 
     @pytest.mark.asyncio()
     async def test_bind_hash_equals_with_data(self):
-        """Test the bind hash logic with a different display name"""
+        """Test the bind hash logic with a different display name."""
 
         bind_1 = GuildBind(
             roles=["1", "2", "3"],
@@ -533,7 +533,9 @@ class TestBindHash:
             ),
         )
 
-        assert hash(bind_1) == hash(bind_2)
+        assert hash(bind_1) == hash(
+            bind_2
+        ), "Binds should be equal since the display name is mutable but not a part of the criteria of the bind"
 
 
 async def _assert_successful_binds_results(
