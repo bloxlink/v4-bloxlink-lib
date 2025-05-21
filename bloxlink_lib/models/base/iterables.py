@@ -65,7 +65,11 @@ class PydanticDict[K, V](RootModel[dict[K, V]]):
         return len(self.root)
 
     def __eq__(self, other) -> bool:
-        return self.root == other.root if isinstance(other, PydanticDict) else False
+        return (
+            self.root == PydanticDict(other).root
+            if isinstance(other, (PydanticDict, dict))
+            else False
+        )
 
     def __str__(self) -> str:
         return str(self.root)
@@ -125,7 +129,11 @@ class PydanticList[T](RootModel[list[T]]):
         return len(self.root)
 
     def __eq__(self, other) -> bool:
-        return self.root == other.root if isinstance(other, PydanticList) else False
+        return (
+            self.root == PydanticList(other).root
+            if isinstance(other, (PydanticList, list))
+            else False
+        )
 
     def __str__(self) -> str:
         return str(self.root)
