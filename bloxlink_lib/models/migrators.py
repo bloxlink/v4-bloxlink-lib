@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Type
 from bloxlink_lib.models.binds import VALID_BIND_TYPES
 from bloxlink_lib.models.schemas.guilds import (  # pylint: disable=no-name-in-module
     GuildRestriction,
@@ -6,6 +7,7 @@ from bloxlink_lib.models.schemas.guilds import (  # pylint: disable=no-name-in-m
 from bloxlink_lib.models import BaseModel
 from bloxlink_lib.models.roblox.binds import RobloxUserNicknames
 from pydantic import ValidationInfo
+import re
 
 
 def migrate_restrictions(
@@ -158,7 +160,9 @@ def migrate_bind_criteria_type(bind_type: VALID_BIND_TYPES | str) -> VALID_BIND_
     return bind_type
 
 
-def migrate_null_values(cls: BaseModel, v: str | None, info: ValidationInfo) -> str:
+def migrate_null_values(
+    cls: Type[BaseModel], v: str | None, info: ValidationInfo
+) -> str:
     """Migrate the null values."""
 
     if v is None:
@@ -176,6 +180,19 @@ def migrate_nickname_template(nickname_template: str | None) -> str | None:
     if nickname_template is None:
         return None
 
+    # Special case for {group-rank-GROUPID} templates
+    group_rank_id_pattern = re.compile(r"\{group-rank-\d+\}")
+    matches = group_rank_id_pattern.findall(nickname_template)
+
+    # Temporarily replace these patterns to protect them
+    replacements: dict[str, str] = {}
+
+    for i, match in enumerate(matches):
+        placeholder = f"__GROUP_RANK_PLACEHOLDER_{i}__"
+        replacements[placeholder] = match
+        nickname_template = nickname_template.replace(match, placeholder)
+
+    # Process normal templates
     for template in RobloxUserNicknames:
         if template.value in nickname_template and (
             f"{{{template.value}}}" not in nickname_template
@@ -183,5 +200,9 @@ def migrate_nickname_template(nickname_template: str | None) -> str | None:
             nickname_template = nickname_template.replace(
                 template.value, f"{{{template.value}}}"
             )
+
+    # Restore the protected patterns
+    for placeholder, original in replacements.items():
+        nickname_template = nickname_template.replace(placeholder, original)
 
     return nickname_template
