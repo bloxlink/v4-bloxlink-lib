@@ -112,6 +112,14 @@ class TestVerifiedRoleMigrators:
             ["roblox-id {roblox-name}", "{roblox-id} {roblox-name}"],
             ["[O1] group-rank", "[O1] {group-rank}"],
             ["{test} {roblox-name}", "{test} {roblox-name}"],
+            [
+                "{group-rank-6762663} | {roblox-name}",
+                "{group-rank-6762663} | {roblox-name}",
+            ],
+            [
+                "group-rank-6762663 | {roblox-name}",
+                "{group-rank}-6762663 | {roblox-name}",
+            ],
         ],
     )
     @pytest.mark.asyncio_concurrent(group="migrators")
