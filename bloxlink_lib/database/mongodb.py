@@ -78,7 +78,7 @@ async def _db_update[T: "BaseSchema"](
 
 
 async def fetch_item[T: "BaseSchema"](
-    constructor: Type[T], item_id: str, *aspects
+    constructor: Type[T], item_id: str, use_cache: bool = True, *aspects
 ) -> T:
     """
     Fetch an item from local cache, then redis, then database.
@@ -89,11 +89,14 @@ async def fetch_item[T: "BaseSchema"](
 
     database_domain = constructor.database_domain().value
 
-    if aspects:
-        item = await redis.hmget(f"{database_domain}:{item_id}", *aspects)
-        item = {x: y for x, y in zip(aspects, item) if y is not None}
+    if use_cache:
+        if aspects:
+            item = await redis.hmget(f"{database_domain}:{item_id}", *aspects)
+            item = {x: y for x, y in zip(aspects, item) if y is not None}
+        else:
+            item = await redis.hgetall(f"{database_domain}:{item_id}")
     else:
-        item = await redis.hgetall(f"{database_domain}:{item_id}")
+        item = None
 
     if not item:
         item = await _db_fetch(constructor, item_id, *aspects)
