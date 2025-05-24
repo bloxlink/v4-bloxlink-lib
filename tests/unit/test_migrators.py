@@ -1,3 +1,4 @@
+from typing import Final
 import pytest
 from bloxlink_lib import GuildData, GuildSerializable
 from bloxlink_lib.models.binds import BindCriteria, GuildBind, GroupBindData
@@ -5,7 +6,7 @@ from bloxlink_lib.models.binds import BindCriteria, GuildBind, GroupBindData
 pytestmark = pytest.mark.database
 
 
-TEST_GROUP_ID = 1337
+TEST_GROUP_ID: Final[int] = 1337
 
 
 class TestVerifiedRoleMigrators:
