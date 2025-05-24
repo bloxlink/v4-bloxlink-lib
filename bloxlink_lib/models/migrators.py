@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Type
-from bloxlink_lib.models.binds import VALID_BIND_TYPES
+from bloxlink_lib.models.binds import GuildBind, VALID_BIND_TYPES
 from bloxlink_lib.models.schemas.guilds import (  # pylint: disable=no-name-in-module
     GuildRestriction,
 )
@@ -206,3 +206,20 @@ def migrate_nickname_template(nickname_template: str | None) -> str | None:
         nickname_template = nickname_template.replace(placeholder, original)
 
     return nickname_template
+
+
+def migrate_binds(guild_binds: list[GuildBind]) -> list[GuildBind]:
+    """Migrate the binds field. This will merge duplicate binds."""
+
+    binds_by_hash: dict[int, GuildBind] = {}
+
+    for bind in guild_binds:
+        bind_hash = hash(bind)
+
+        if bind_hash not in binds_by_hash:
+            binds_by_hash[bind_hash] = bind
+        else:
+            binds_by_hash[bind_hash].roles.extend(bind.roles)
+            binds_by_hash[bind_hash].remove_roles.extend(bind.remove_roles)
+
+    return list(binds_by_hash.values())

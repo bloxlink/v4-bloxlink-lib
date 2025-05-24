@@ -1,7 +1,12 @@
+from typing import Final
 import pytest
 from bloxlink_lib import GuildData, GuildSerializable
+from bloxlink_lib.models.binds import BindCriteria, GuildBind, GroupBindData
 
 pytestmark = pytest.mark.database
+
+
+TEST_GROUP_ID: Final[int] = 1337
 
 
 class TestVerifiedRoleMigrators:
@@ -136,3 +141,89 @@ class TestVerifiedRoleMigrators:
         )
 
         assert test_guild_data.nicknameTemplate == nickname_template[1]
+
+    @pytest.mark.asyncio_concurrent(group="migrators")
+    async def test_migrate_binds(self, test_guild: GuildSerializable):
+        """Test the binds migrator"""
+
+        test_guild_data = GuildData(
+            id=1,
+            binds=[
+                GuildBind(
+                    criteria=BindCriteria(
+                        type="group",
+                        id=TEST_GROUP_ID,
+                        group=GroupBindData(
+                            dynamicRoles=True,
+                        ),
+                    ),
+                    roles=["123"],
+                    remove_roles=["777"],
+                ),
+                GuildBind(
+                    criteria=BindCriteria(
+                        type="group",
+                        id=TEST_GROUP_ID,
+                        group=GroupBindData(
+                            dynamicRoles=True,
+                        ),
+                    ),
+                    roles=["567"],
+                    remove_roles=["888"],
+                ),
+                GuildBind(
+                    criteria=BindCriteria(
+                        type="group",
+                        id=TEST_GROUP_ID,
+                        group=GroupBindData(
+                            everyone=True,
+                        ),
+                    ),
+                    roles=["123"],
+                ),
+                GuildBind(
+                    criteria=BindCriteria(
+                        type="group",
+                        id=TEST_GROUP_ID + 1,
+                        group=GroupBindData(
+                            everyone=True,
+                        ),
+                    ),
+                    roles=[],
+                ),
+            ],
+        )
+
+        assert test_guild_data.binds == [
+            GuildBind(
+                criteria=BindCriteria(
+                    type="group",
+                    id=TEST_GROUP_ID,
+                    group=GroupBindData(
+                        dynamicRoles=True,
+                    ),
+                ),
+                roles=["123", "567"],
+                remove_roles=["777", "888"],
+            ),
+            GuildBind(
+                criteria=BindCriteria(
+                    type="group",
+                    id=TEST_GROUP_ID,
+                    group=GroupBindData(
+                        everyone=True,
+                    ),
+                ),
+                roles=["123"],
+            ),
+            GuildBind(
+                criteria=BindCriteria(
+                    type="group",
+                    id=TEST_GROUP_ID + 1,
+                    group=GroupBindData(
+                        everyone=True,
+                    ),
+                ),
+                roles=[],
+            ),
+        ]
