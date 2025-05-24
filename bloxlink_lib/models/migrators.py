@@ -220,5 +220,6 @@ def migrate_binds(guild_binds: list[GuildBind]) -> list[GuildBind]:
             binds_by_hash[bind_hash] = bind
         else:
             binds_by_hash[bind_hash].roles.extend(bind.roles)
+            binds_by_hash[bind_hash].remove_roles.extend(bind.remove_roles)
 
     return list(binds_by_hash.values())

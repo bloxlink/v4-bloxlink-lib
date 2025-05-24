@@ -157,6 +157,7 @@ class TestVerifiedRoleMigrators:
                         ),
                     ),
                     roles=["123"],
+                    remove_roles=["777"],
                 ),
                 GuildBind(
                     criteria=BindCriteria(
@@ -167,6 +168,7 @@ class TestVerifiedRoleMigrators:
                         ),
                     ),
                     roles=["567"],
+                    remove_roles=["888"],
                 ),
                 GuildBind(
                     criteria=BindCriteria(
@@ -201,6 +203,7 @@ class TestVerifiedRoleMigrators:
                     ),
                 ),
                 roles=["123", "567"],
+                remove_roles=["777", "888"],
             ),
             GuildBind(
                 criteria=BindCriteria(
