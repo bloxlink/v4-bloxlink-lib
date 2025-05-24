@@ -446,6 +446,11 @@ async def delete_bind(
 
     guild_binds = await get_binds(str(guild_id))
 
+    if guild_id == 1159591224072749197:
+        print("REMOVE BIND HASHES", remove_bind_hashes)
+        for bind in guild_binds:
+            print("BIND HASH:", hash(bind), bind.criteria, hash(bind.criteria))
+
     for bind_hash in remove_bind_hashes:
         bind = find(lambda b: hash(b) == bind_hash, guild_binds)
 
