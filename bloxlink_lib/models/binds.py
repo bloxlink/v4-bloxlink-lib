@@ -549,9 +549,7 @@ class GuildBind(BaseModel):
         )
 
     def __hash__(self) -> int:
-        return hash(
-            (self.criteria, tuple(self.roles), tuple(self.remove_roles), self.nickname)
-        )
+        return hash(self.criteria)
 
 
 async def build_binds_desc(
