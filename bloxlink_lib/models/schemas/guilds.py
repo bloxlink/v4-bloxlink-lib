@@ -208,10 +208,17 @@ class GuildData(BaseSchema):
     def transform_binds(cls: Type[Self], binds: list) -> list[GuildBind]:
         """Transforms DB binds to GuildBinds"""
 
-        if all(isinstance(b, GuildBind) for b in binds):
-            return binds
+        from bloxlink_lib.models.migrators import (
+            migrate_binds,
+        )
 
-        return [GuildBind(**b) for b in binds]
+        guild_binds = (
+            binds
+            if all(isinstance(b, GuildBind) for b in binds)
+            else [GuildBind(**b) for b in binds]
+        )
+
+        return migrate_binds(guild_binds)
 
     @field_validator("deleteCommands", mode="before")
     @classmethod
