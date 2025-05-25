@@ -1,5 +1,5 @@
 import pytest
-from bloxlink_lib.models.roblox.binds import delete_bind, get_binds, count_binds
+from bloxlink_lib.models.roblox.binds import delete_bind, get_binds
 from bloxlink_lib.models.schemas.guilds import (  # pylint: disable=no-name-in-module
     update_guild_data,
 )
@@ -110,7 +110,7 @@ class TestIntegrationV3BindRemovals:
             assert bind not in await get_binds(test_guild_id)
 
 
-class TestBindUtils:
+class TestBindProperties:
     """Tests the utils for binds."""
 
     @pytest.mark.asyncio
