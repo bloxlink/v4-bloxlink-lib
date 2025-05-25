@@ -75,7 +75,7 @@ async def get_binds(
 
     guild_id = str(guild_id)
 
-    guild_data = await fetch_guild_data(guild_id, "binds", use_cache=False)
+    guild_data = await fetch_guild_data(guild_id, "binds")
     guild_data.binds = await migrate_old_binds_to_v4(
         guild_id,
         guild_data.binds,
@@ -312,7 +312,6 @@ async def migrate_old_binds_to_v4(
         "roleBinds",
         "groupIDs",
         "migratedBindsToV4",
-        use_cache=False,
     )
 
     new_migrated_binds: list[GuildBind] = []

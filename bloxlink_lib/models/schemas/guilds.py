@@ -334,7 +334,7 @@ class GuildData(BaseSchema):
 
 
 async def fetch_guild_data(
-    guild: str | int | dict | GuildSerializable, *aspects, use_cache: bool = True
+    guild: str | int | dict | GuildSerializable, *aspects
 ) -> GuildData:
     """
     Fetch a full guild from local cache, then redis, then database.
@@ -348,7 +348,7 @@ async def fetch_guild_data(
     else:
         guild_id = str(guild)
 
-    return await fetch_item(GuildData, guild_id, use_cache, *aspects)
+    return await fetch_item(GuildData, guild_id, *aspects)
 
 
 async def update_guild_data(
