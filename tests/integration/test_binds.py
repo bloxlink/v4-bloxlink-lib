@@ -108,3 +108,27 @@ class TestIntegrationV3BindRemovals:
             )
 
             assert bind not in await get_binds(test_guild_id)
+
+
+class TestBindUtils:
+    """Tests the utils for binds."""
+
+    @pytest.mark.asyncio
+    async def test_bind_hash_equals(
+        self, test_guild_id: int, bind_conversion_test_data: BindConversionTestCase
+    ):
+        """Test the hash of a bind"""
+
+        binds = bind_conversion_test_data.v4_binds
+
+        await update_guild_data(
+            test_guild_id,
+            binds=binds.model_dump(exclude_unset=True, by_alias=True),
+        )
+
+        merged_binds = await get_binds(test_guild_id)
+
+        assert len(merged_binds) == len(binds)
+
+        for i, bind in enumerate(merged_binds):
+            assert hash(bind) == hash(binds[i])
