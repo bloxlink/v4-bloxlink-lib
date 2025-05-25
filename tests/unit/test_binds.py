@@ -537,6 +537,97 @@ class TestBindHash:
             bind_2
         ), "Binds should be equal since the display name is mutable but not a part of the criteria of the bind"
 
+    @pytest.mark.asyncio()
+    async def test_bind_hash_equals_with_data_and_dynamic_roles(self):
+        """Test the bind hash logic with a different display name."""
+
+        bind_1 = GuildBind(
+            roles=["1", "2", "3"],
+            nickname="test",
+            remove_roles=["4", "5", "6"],
+            criteria=BindCriteria(
+                type="group",
+                id=1,
+                group=GroupBindData(
+                    dynamicRoles=True,
+                ),
+            ),
+            data=BindData(
+                displayName="test 1",
+            ),
+        )
+
+        bind_2 = GuildBind(
+            roles=["1", "2", "3"],
+            nickname="test",
+            remove_roles=["4", "5", "6"],
+            criteria=BindCriteria(
+                type="group",
+                id=1,
+                group=GroupBindData(
+                    dynamicRoles=True,
+                ),
+            ),
+            data=BindData(
+                displayName="test 2",
+            ),
+        )
+
+        assert hash(bind_1) == hash(bind_2)
+
+    @pytest.mark.asyncio()
+    async def test_bind_hash_includes_dynamic_roles(self):
+        """Test that dynamicRoles field is included in hash calculation to prevent collisions in delete_bind."""
+
+        bind_1 = GuildBind(
+            roles=["111111111"],
+            nickname="test",
+            remove_roles=["222222222"],
+            criteria=BindCriteria(
+                type="group",
+                id=9999999,
+                group=GroupBindData(
+                    everyone=False,
+                    guest=False,
+                    min=None,
+                    max=None,
+                    roleset=None,
+                    dynamicRoles=False,
+                ),
+            ),
+        )
+
+        bind_2 = GuildBind(
+            roles=["111111111"],
+            nickname="test",
+            remove_roles=["222222222"],
+            criteria=BindCriteria(
+                type="group",
+                id=9999999,
+                group=GroupBindData(
+                    everyone=False,
+                    guest=False,
+                    min=None,
+                    max=None,
+                    roleset=None,
+                    dynamicRoles=True,  # Different from bind_1
+                ),
+            ),
+        )
+
+        assert hash(bind_1.criteria.group) != hash(
+            bind_2.criteria.group
+        ), "GroupBindData should have different hashes when dynamicRoles differs"
+        assert hash(bind_1) != hash(
+            bind_2
+        ), "GuildBind should have different hashes when dynamicRoles differs"
+
+        group_data_1 = bind_1.criteria.group
+        group_data_2 = bind_2.criteria.group
+
+        assert group_data_1.dynamicRoles != group_data_2.dynamicRoles
+        assert hash(group_data_1) != hash(group_data_2)
+
 
 async def _assert_successful_binds_results(
     mocked_bind_scenario: MockedBindScenarioResult,

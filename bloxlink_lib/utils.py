@@ -191,6 +191,7 @@ def init_sentry():
                 "NotFoundError",
                 "HTTPError",
                 "BadSignatureError",
+                "RobloxDown",
             ],
         )
 

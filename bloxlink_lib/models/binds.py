@@ -96,7 +96,16 @@ class GroupBindData(BaseModel):
             )
 
     def __hash__(self) -> int:
-        return hash((self.everyone, self.guest, self.min, self.max, self.roleset))
+        return hash(
+            (
+                self.everyone,
+                self.guest,
+                self.min,
+                self.max,
+                self.roleset,
+                self.dynamicRoles,
+            )
+        )
 
 
 class BindCriteria(BaseModel):
@@ -540,12 +549,8 @@ class GuildBind(BaseModel):
         We define this ourselves since there are other fields that are not included in the comparison.
         """
 
-        return (
-            isinstance(other, GuildBind)
-            and self.criteria == getattr(other, "criteria", None)
-            and self.roles == getattr(other, "roles", None)
-            and self.remove_roles == getattr(other, "remove_roles", None)
-            and self.nickname == getattr(other, "nickname", None)
+        return isinstance(other, GuildBind) and self.criteria == getattr(
+            other, "criteria", None
         )
 
     def __hash__(self) -> int:
