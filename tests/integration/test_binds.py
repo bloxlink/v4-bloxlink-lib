@@ -132,3 +132,28 @@ class TestBindProperties:
 
         for i, bind in enumerate(merged_binds):
             assert hash(bind) == hash(binds[i])
+
+    @pytest.mark.asyncio
+    async def test_bind_hash_get_binds_multiple_calls(
+        self, test_guild_id: int, bind_conversion_test_data: BindConversionTestCase
+    ):
+        """Test that get_binds returns the same bind multiple times"""
+
+        binds = bind_conversion_test_data.v4_binds
+
+        await update_guild_data(
+            test_guild_id,
+            binds=binds.model_dump(exclude_unset=True, by_alias=True),
+        )
+
+        merged_binds_1 = await get_binds(test_guild_id)
+        merged_binds_2 = await get_binds(test_guild_id)
+
+        assert merged_binds_1 == merged_binds_2
+
+        for bind_1, bind_2 in zip(merged_binds_1, merged_binds_2):
+            assert hash(bind_1.criteria) == hash(bind_2.criteria)
+            assert hash(bind_1) == hash(bind_2)
+            assert hash(bind_1) == hash(bind_2.criteria) and hash(bind_2) == hash(
+                bind_1.criteria
+            )
