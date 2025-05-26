@@ -433,7 +433,7 @@ async def count_binds(guild_id: int | str, bind_id: int = None) -> int:
 
 async def delete_bind(
     guild_id: int | str,
-    remove_bind_hashes: list[int],
+    *binds: GuildBind,
 ):
     """
     Remove a bind from the database.
@@ -445,13 +445,11 @@ async def delete_bind(
 
     guild_binds = await get_binds(str(guild_id))
 
-    for bind_hash in remove_bind_hashes:
-        bind = find(lambda b: hash(b) == bind_hash, guild_binds)
-
-        if not bind:
-            raise ValueError(f"Bind not found: {bind_hash}")
-
-        guild_binds.remove(bind)
+    for bind in binds:
+        try:
+            guild_binds.remove(bind)
+        except ValueError:
+            raise ValueError(f"Bind not found: {bind.id}")
 
     await update_guild_data(
         guild_id,
