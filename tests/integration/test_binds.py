@@ -27,10 +27,7 @@ class TestIntegrationV3BindRemovals:
 
         merged_binds = await get_binds(test_guild_id)
 
-        await delete_bind(
-            guild_id=test_guild_id,
-            remove_bind_hashes=[hash(bind) for bind in merged_binds],
-        )
+        await delete_bind(test_guild_id, *merged_binds)
 
         assert len(await get_binds(test_guild_id)) == 0
 
@@ -51,10 +48,7 @@ class TestIntegrationV3BindRemovals:
         merged_binds = await get_binds(test_guild_id)
 
         for bind in list(merged_binds):
-            await delete_bind(
-                guild_id=test_guild_id,
-                remove_bind_hashes=[hash(bind)],
-            )
+            await delete_bind(test_guild_id, bind)
 
             assert bind not in await get_binds(test_guild_id)
 
@@ -77,10 +71,7 @@ class TestIntegrationV3BindRemovals:
         merged_binds = await get_binds(test_guild_id)
 
         for bind in list(merged_binds):
-            await delete_bind(
-                guild_id=test_guild_id,
-                remove_bind_hashes=[hash(bind)],
-            )
+            await delete_bind(test_guild_id, bind)
 
             assert bind not in await get_binds(test_guild_id)
 
@@ -102,10 +93,7 @@ class TestIntegrationV3BindRemovals:
         assert len(merged_binds) == len(v4_binds)
 
         for bind in list(merged_binds):
-            await delete_bind(
-                guild_id=test_guild_id,
-                remove_bind_hashes=[hash(bind)],
-            )
+            await delete_bind(test_guild_id, bind)
 
             assert bind not in await get_binds(test_guild_id)
 
