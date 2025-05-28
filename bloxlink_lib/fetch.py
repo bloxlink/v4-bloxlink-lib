@@ -94,7 +94,7 @@ async def fetch[T](
                 if response.status != HTTPStatus.OK and raise_on_failure:
                     if response.status == HTTPStatus.SERVICE_UNAVAILABLE:
                         logging.warning(f"{url} is down: {await response.text()}")
-                        raise RobloxDown()
+                        raise RobloxDown("Roblox is down. Please try again later.")
 
                     # Roblox APIs sometimes use 400 as not found
                     if response.status in (
@@ -102,7 +102,9 @@ async def fetch[T](
                         HTTPStatus.NOT_FOUND,
                     ):
                         logging.debug(f"{url} not found: {await response.text()}")
-                        raise RobloxNotFound()
+                        raise RobloxNotFound(
+                            "An unexpected error occurred while fetching data."
+                        )
 
                     logging.warning(
                         f"{url} failed with status {response.status} and body {await response.text()}; proxy: {CONFIG.PROXY_URL}, using proxy: {CONFIG.PROXY_URL and 'roblox.com' in url}",
@@ -136,10 +138,10 @@ async def fetch[T](
 
     except asyncio.TimeoutError:
         logging.warning(f"URL {url} timed out")
-        raise RobloxDown() from None
+        raise RobloxDown("An unexpected error occurred while fetching data.") from None
     except aiohttp.client_exceptions.ClientConnectorError:
         logging.warning(f"URL {url} failed to connect")
-        raise RobloxDown() from None
+        raise RobloxDown("An unexpected error occurred while fetching data.") from None
 
 
 async def fetch_typed[T](
