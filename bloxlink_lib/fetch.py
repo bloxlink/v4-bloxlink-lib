@@ -103,14 +103,14 @@ async def fetch[T](
                     ):
                         logging.debug(f"{url} not found: {await response.text()}")
                         raise RobloxNotFound(
-                            "An unexpected error occurred while fetching data."
+                            "An unexpected error occurred while fetching data. 1"
                         )
 
                     logging.warning(
                         f"{url} failed with status {response.status} and body {await response.text()}; proxy: {CONFIG.PROXY_URL}, using proxy: {CONFIG.PROXY_URL and 'roblox.com' in url}",
                     )
                     raise RobloxAPIError(
-                        "An unexpected error occurred while fetching data."
+                        "An unexpected error occurred while fetching data. 2"
                     )
 
                 if parse_as:
@@ -124,7 +124,7 @@ async def fetch[T](
                             logging.debug(f"{url} {await response.text()}")
 
                             raise RobloxAPIError(
-                                "An unexpected error occurred while fetching data."
+                                "An unexpected error occurred while fetching data. 3"
                             ) from exc
 
                         return json_response, response
@@ -138,10 +138,14 @@ async def fetch[T](
 
     except asyncio.TimeoutError:
         logging.warning(f"URL {url} timed out")
-        raise RobloxDown("An unexpected error occurred while fetching data.") from None
+        raise RobloxDown(
+            "An unexpected error occurred while fetching data. 4"
+        ) from None
     except aiohttp.client_exceptions.ClientConnectorError:
         logging.warning(f"URL {url} failed to connect")
-        raise RobloxDown("An unexpected error occurred while fetching data.") from None
+        raise RobloxDown(
+            "An unexpected error occurred while fetching data. 5"
+        ) from None
 
 
 async def fetch_typed[T](
