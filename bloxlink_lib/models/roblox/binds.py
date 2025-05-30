@@ -116,7 +116,10 @@ async def get_nickname_template(
         reverse=True,
     )
 
-    highest_priority_bind: GuildBind = potential_binds[0] if potential_binds else None
+    # find the highest bind that has a nickname set
+    highest_priority_bind: GuildBind = find(
+        lambda b: b.nickname is not None, potential_binds
+    )
 
     nickname_template = (
         highest_priority_bind.nickname
