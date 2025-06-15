@@ -18,13 +18,12 @@ class BaseConfig(BaseSettings):
     BOT_RELEASE: Literal["LOCAL", "CANARY", "MAIN", "PRO"] | None = None
 
     BOT_API: str | None = None
-    BOT_API_AUTH: str | None = None
 
     PROXY_URL: str | None = None
     DISCORD_PROXY_URL: str | None = None
 
-    SHARD_COUNT: int = 1
-    SHARDS_PER_NODE: int = 1
+    SHARD_COUNT: int | None = None
+    SHARDS_PER_NODE: int | None = None
     #############################
     # DATABASE SETTINGS
     #############################
