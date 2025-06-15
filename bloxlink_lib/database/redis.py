@@ -17,7 +17,6 @@ def connect_redis():
     global redis  # pylint: disable=global-statement
 
     if CONFIG.REDIS_URL:
-        print(CONFIG.REDIS_URL)
         redis = Redis.from_url(
             CONFIG.REDIS_URL,
             decode_responses=True,
