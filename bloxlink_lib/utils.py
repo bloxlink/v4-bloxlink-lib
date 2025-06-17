@@ -89,7 +89,7 @@ async def get_node_id() -> int:
         int: The node ID for this process
     """
 
-    if not CONFIG.SHARD_COUNT or not CONFIG.SHARDS_PER_NODE:
+    if not (CONFIG.SHARD_COUNT and CONFIG.SHARDS_PER_NODE):
         raise RuntimeError("Shard count and shards per node must be set")
 
     lock = redis.lock(
@@ -128,7 +128,7 @@ async def get_node_id() -> int:
 def get_node_count() -> int:
     """Gets the node count."""
 
-    if not CONFIG.SHARD_COUNT or not CONFIG.SHARDS_PER_NODE:
+    if not (CONFIG.SHARD_COUNT and CONFIG.SHARDS_PER_NODE):
         raise RuntimeError("Shard count and shards per node must be set")
 
     shards_per_node = CONFIG.SHARDS_PER_NODE
