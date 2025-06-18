@@ -385,6 +385,7 @@ async def get_user(
     roblox_username: str = None,
     roblox_id: int = None,
     guild_id: int = None,
+    raise_on_unverified: bool = True,
 ) -> RobloxUser:
     """Get a Roblox account.
 
@@ -401,12 +402,12 @@ async def get_user(
         roblox_id (int, optional): ID of the account to get. Defaults to None.
         guild_id (int, optional): Guild ID if looking up a user to determine the linked account in that guild.
             Defaults to None.
-
+        raise_on_unverified (bool, optional): Should an error be raised if the user is not verified? Defaults to True.
     Returns:
         RobloxUser | None: The found Roblox account, if any.
     """
 
-    roblox_user: RobloxUser = None
+    roblox_user: RobloxUser | None = None
 
     if roblox_id and roblox_username:
         raise ValueError("You cannot provide both a roblox_id and a roblox_username.")
@@ -417,8 +418,15 @@ async def get_user(
         )
 
     if user:
-        roblox_user = await get_user_account(user, guild_id)
-        await roblox_user.sync(includes)
+        try:
+            roblox_user = await get_user_account(user, guild_id)
+
+        except UserNotVerified:
+            if raise_on_unverified:
+                raise
+
+        if roblox_user:
+            await roblox_user.sync(includes)
 
     else:
         roblox_user = RobloxUser(username=roblox_username, id=roblox_id)
