@@ -379,7 +379,7 @@ async def get_user_account(
 
 
 async def get_user(
-    user: hikari.User = None,
+    user: hikari.User | None = None,
     includes: list[Literal["groups", "badges"]] = None,
     *,
     roblox_username: str = None,
