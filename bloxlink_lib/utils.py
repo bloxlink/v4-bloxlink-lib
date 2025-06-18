@@ -5,7 +5,6 @@ from inspect import isfunction
 import enum
 import json
 from aiohttp import ClientConnectorError
-import hikari
 import sentry_sdk
 from sentry_sdk.integrations.aiohttp import AioHttpIntegration
 from .models.base import BaseModel

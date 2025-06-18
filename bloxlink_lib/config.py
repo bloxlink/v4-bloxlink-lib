@@ -18,6 +18,7 @@ class BaseConfig(BaseSettings):
     BOT_RELEASE: Literal["LOCAL", "CANARY", "MAIN", "PRO"] | None = None
 
     BOT_API: str | None = None
+    BOT_API_AUTH: str | None = None
 
     PROXY_URL: str | None = None
     DISCORD_PROXY_URL: str | None = None
