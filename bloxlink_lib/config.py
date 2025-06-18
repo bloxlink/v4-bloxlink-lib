@@ -23,8 +23,8 @@ class BaseConfig(BaseSettings):
     PROXY_URL: str | None = None
     DISCORD_PROXY_URL: str | None = None
 
-    SHARD_COUNT: int = 1
-    SHARDS_PER_NODE: int = 1
+    SHARD_COUNT: int | None = None
+    SHARDS_PER_NODE: int | None = None
     #############################
     # DATABASE SETTINGS
     #############################

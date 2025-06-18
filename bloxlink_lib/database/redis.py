@@ -1,15 +1,11 @@
 from __future__ import annotations
 
 import asyncio
-import datetime
-import json
-import logging
-from typing import Any
 
 from redis.asyncio import Redis
 from redis import ConnectionError as RedisConnectionError
 
-from bloxlink_lib import BaseModel
+
 from bloxlink_lib.config import CONFIG
 
 redis: Redis = None

@@ -5,7 +5,6 @@ from inspect import isfunction
 import enum
 import json
 from aiohttp import ClientConnectorError
-import hikari
 import sentry_sdk
 from sentry_sdk.integrations.aiohttp import AioHttpIntegration
 from .models.base import BaseModel
@@ -59,27 +58,24 @@ def create_task_log_exception(awaitable: Awaitable) -> asyncio.Task:
 async def _set_shard_config():
     """Sets the shard config in Redis."""
 
-    if CONFIG.SHARD_COUNT and CONFIG.SHARDS_PER_NODE:
-        existing_shard_count = await redis.get(
-            f"bloxlink:{CONFIG.BOT_RELEASE}:shard_count"
-        )
-        existing_shards_per_node = await redis.get(
-            f"bloxlink:{CONFIG.BOT_RELEASE}:shards_per_node"
+    existing_shard_count = await redis.get(f"bloxlink:{CONFIG.BOT_RELEASE}:shard_count")
+    existing_shards_per_node = await redis.get(
+        f"bloxlink:{CONFIG.BOT_RELEASE}:shards_per_node"
+    )
+
+    if not existing_shard_count or existing_shard_count != CONFIG.SHARD_COUNT:
+        await redis.set(
+            f"bloxlink:{CONFIG.BOT_RELEASE}:shard_count", CONFIG.SHARD_COUNT
         )
 
-        if not existing_shard_count or existing_shard_count != CONFIG.SHARD_COUNT:
-            await redis.set(
-                f"bloxlink:{CONFIG.BOT_RELEASE}:shard_count", CONFIG.SHARD_COUNT
-            )
-
-        if (
-            not existing_shards_per_node
-            or existing_shards_per_node != CONFIG.SHARDS_PER_NODE
-        ):
-            await redis.set(
-                f"bloxlink:{CONFIG.BOT_RELEASE}:shards_per_node",
-                CONFIG.SHARDS_PER_NODE,
-            )
+    if (
+        not existing_shards_per_node
+        or existing_shards_per_node != CONFIG.SHARDS_PER_NODE
+    ):
+        await redis.set(
+            f"bloxlink:{CONFIG.BOT_RELEASE}:shards_per_node",
+            CONFIG.SHARDS_PER_NODE,
+        )
 
 
 async def get_node_id() -> int:
@@ -91,6 +87,10 @@ async def get_node_id() -> int:
     Returns:
         int: The node ID for this process
     """
+
+    if not (CONFIG.SHARD_COUNT and CONFIG.SHARDS_PER_NODE):
+        raise RuntimeError("Shard count and shards per node must be set")
+
     lock = redis.lock(
         f"bloxlink:{CONFIG.BOT_RELEASE}:node_id",
         blocking=True,
@@ -126,6 +126,9 @@ async def get_node_id() -> int:
 
 def get_node_count() -> int:
     """Gets the node count."""
+
+    if not (CONFIG.SHARD_COUNT and CONFIG.SHARDS_PER_NODE):
+        raise RuntimeError("Shard count and shards per node must be set")
 
     shards_per_node = CONFIG.SHARDS_PER_NODE
     shard_count = CONFIG.SHARD_COUNT
