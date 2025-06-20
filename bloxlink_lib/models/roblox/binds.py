@@ -85,9 +85,9 @@ async def get_binds(
         guild_roles = {r.id: RoleSerializable.from_hikari(r) for r in guild_roles}
 
     if guild_roles:
-        await check_for_verified_roles(
-            guild_id, guild_roles=guild_roles, merge_to=guild_data.binds
-        )
+        # await check_for_verified_roles(
+        #     guild_id, guild_roles=guild_roles, merge_to=guild_data.binds
+        # )
 
         # filter out invalid roles from binds
         for bind in guild_data.binds:
