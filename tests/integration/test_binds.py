@@ -158,10 +158,11 @@ class TestInvalidRoles:
         """Test the handling of invalid roles."""
 
         INVALID_ROLE_ID = "1234567890"
+
         VERIFIED_ROLE = RoleSerializable(id=3, name="Verified")
         UNVERIFIED_ROLE = RoleSerializable(id=4, name="Unverified")
 
-        VALID_ROLES = [
+        EXTRA_ROLES = [
             RoleSerializable(id=1, name="Member"),
             RoleSerializable(id=2, name="Helper"),
         ]
@@ -177,7 +178,7 @@ class TestInvalidRoles:
                 GuildBind(
                     roles=[
                         INVALID_ROLE_ID,
-                        *[str(r.id) for r in VALID_ROLES],
+                        *[str(r.id) for r in EXTRA_ROLES],
                     ],
                     criteria=BindCriteria(
                         type="group", id=2, group=GroupBindData(dynamicRoles=True)
@@ -194,7 +195,7 @@ class TestInvalidRoles:
             ]
         )
 
-        guild_roles = {r.id: r for r in VALID_ROLES + [VERIFIED_ROLE, UNVERIFIED_ROLE]}
+        guild_roles = {r.id: r for r in EXTRA_ROLES + [VERIFIED_ROLE, UNVERIFIED_ROLE]}
 
         await update_guild_data(
             test_guild_id,
@@ -206,6 +207,6 @@ class TestInvalidRoles:
         assert (
             len(new_binds) == 3
         ), "Expected 3 binds since the first bind has no valid roles and we are still left with 1 valid group bind and 2 verified/unverified binds"
-        assert new_binds[0].roles == [str(r.id) for r in VALID_ROLES]
+        assert new_binds[0].roles == [str(r.id) for r in EXTRA_ROLES]
         assert new_binds[1].roles == [str(VERIFIED_ROLE.id)]
         assert new_binds[2].roles == [str(UNVERIFIED_ROLE.id)]
