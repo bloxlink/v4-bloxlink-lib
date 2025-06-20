@@ -1,4 +1,7 @@
 import pytest
+from bloxlink_lib.models.base.iterables import PydanticList
+from bloxlink_lib.models.base.serializable import RoleSerializable
+from bloxlink_lib.models.binds import BindCriteria, GuildBind, GroupBindData
 from bloxlink_lib.models.roblox.binds import delete_bind, get_binds
 from bloxlink_lib.models.schemas.guilds import (  # pylint: disable=no-name-in-module
     update_guild_data,
@@ -145,3 +148,64 @@ class TestBindProperties:
             assert hash(bind_1) == hash(bind_2.criteria) and hash(bind_2) == hash(
                 bind_1.criteria
             )
+
+
+class TestInvalidRoles:
+    """Tests the handling of invalid roles."""
+
+    @pytest.mark.asyncio
+    async def test_invalid_roles(self, test_guild_id: int):
+        """Test the handling of invalid roles."""
+
+        INVALID_ROLE_ID = "1234567890"
+        VERIFIED_ROLE = RoleSerializable(id=3, name="Verified")
+        UNVERIFIED_ROLE = RoleSerializable(id=4, name="Unverified")
+
+        VALID_ROLES = [
+            RoleSerializable(id=1, name="Member"),
+            RoleSerializable(id=2, name="Helper"),
+        ]
+
+        binds = PydanticList[GuildBind](
+            root=[
+                GuildBind(
+                    roles=[INVALID_ROLE_ID],
+                    criteria=BindCriteria(
+                        type="group", id=1, group=GroupBindData(dynamicRoles=True)
+                    ),
+                ),
+                GuildBind(
+                    roles=[
+                        INVALID_ROLE_ID,
+                        *[str(r.id) for r in VALID_ROLES],
+                    ],
+                    criteria=BindCriteria(
+                        type="group", id=2, group=GroupBindData(dynamicRoles=True)
+                    ),
+                ),
+                GuildBind(
+                    roles=[str(VERIFIED_ROLE.id)],
+                    criteria=BindCriteria(type="verified"),
+                ),
+                GuildBind(
+                    roles=[str(UNVERIFIED_ROLE.id)],
+                    criteria=BindCriteria(type="unverified"),
+                ),
+            ]
+        )
+
+        guild_roles = {r.id: r for r in VALID_ROLES + [VERIFIED_ROLE, UNVERIFIED_ROLE]}
+
+        await update_guild_data(
+            test_guild_id,
+            binds=binds.model_dump(exclude_unset=True, by_alias=True),
+        )
+
+        new_binds = await get_binds(test_guild_id, guild_roles=guild_roles)
+
+        assert (
+            len(new_binds) == 3
+        ), "Expected 3 binds since the first bind has no valid roles and we are still left with 1 valid group bind and 2 verified/unverified binds"
+        assert new_binds[0].roles == [str(r.id) for r in VALID_ROLES]
+        assert new_binds[1].roles == [str(VERIFIED_ROLE.id)]
+        assert new_binds[2].roles == [str(UNVERIFIED_ROLE.id)]
