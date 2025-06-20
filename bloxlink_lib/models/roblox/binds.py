@@ -89,6 +89,15 @@ async def get_binds(
             guild_id, guild_roles=guild_roles, merge_to=guild_data.binds
         )
 
+        # filter out invalid roles from binds
+        for bind in guild_data.binds:
+            bind.roles = list(filter(lambda r: int(r) in guild_roles, bind.roles))
+
+        # filter out binds with no valid roles
+        guild_data.binds = list(
+            filter(lambda bind: len(bind.roles) > 0, guild_data.binds)
+        )
+
     return list(
         filter(
             lambda b: b.type == category
