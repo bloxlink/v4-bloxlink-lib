@@ -152,34 +152,28 @@ async def update_item[T: "BaseSchema"](
     # validate the model to ensure no invalid fields are being set
     constructor.model_validate({"id": item_id, **aspects})
 
-    # Update redis cache
-    redis_set_aspects = {}
-    redis_unset_aspects = {}
-
-    for aspect_name, aspect_value in dict(aspects).items():
-        if aspect_value is None:
-            redis_unset_aspects[aspect_name] = aspect_value
-        elif isinstance(aspect_value, (dict, list, bool)):  # TODO
-            pass
-        else:
-            redis_set_aspects[aspect_name] = aspect_value
-
-    if redis_set_aspects:
-        async with redis.pipeline() as pipeline:
-            await pipeline.hset(
-                f"{database_domain}:{item_id}", mapping=redis_set_aspects
-            )
-            await pipeline.expire(
-                f"{database_domain}:{item_id}",
-                int(datetime.timedelta(hours=1).total_seconds()),
-            )
-            await pipeline.execute()
-
-    if redis_unset_aspects:
-        await redis.hdel(f"{database_domain}:{item_id}", *redis_unset_aspects.keys())
-
-    # update database
     await _db_update(constructor, item_id, set_aspects, unset_aspects)
+
+    if unset_aspects:
+        await redis.hdel(f"{database_domain}:{item_id}", *unset_aspects.keys())
+
+    if set_aspects:
+        cacheable_aspects = {
+            key: value
+            for key, value in set_aspects.items()
+            if not isinstance(value, (dict, list, bool))
+        }
+
+        if cacheable_aspects:
+            async with redis.pipeline() as pipeline:
+                await pipeline.hset(
+                    f"{database_domain}:{item_id}", mapping=cacheable_aspects
+                )
+                await pipeline.expire(
+                    f"{database_domain}:{item_id}",
+                    int(datetime.timedelta(hours=1).total_seconds()),
+                )
+                await pipeline.execute()
 
 
 connect_database()

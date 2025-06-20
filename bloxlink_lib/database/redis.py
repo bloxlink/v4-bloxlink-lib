@@ -33,18 +33,6 @@ def connect_redis():
             health_check_interval=30,
         )
 
-    # loop.create_task(_heartbeat_loop()) # TODO: fix this
-
-
-async def _heartbeat_loop():
-    while True:
-        try:
-            await asyncio.wait_for(redis.ping(), timeout=10)
-        except RedisConnectionError as e:
-            raise SystemError("Failed to connect to Redis.") from e
-
-        await asyncio.sleep(5)
-
 
 async def wait_for_redis():
     """Block until Redis connects"""
