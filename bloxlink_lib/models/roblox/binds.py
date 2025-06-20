@@ -381,18 +381,13 @@ async def check_for_verified_roles(
     new_verified_binds: list[GuildBind] = []
 
     if verified_role_enabled and not find(
-        lambda b: b.criteria.type == "verified" and verified_role_id in b.roles,
+        lambda b: b.criteria.type == "verified",
         merge_to,
     ):
-        print(
-            f"DEBUG: verified_role_enabled={verified_role_enabled}, verified_role_id={verified_role_id}, verified_role_name={verified_role_name}"
-        )
-        verified_role = find(
+        if verified_role := find(
             lambda r: str(r.id) == verified_role_id or r.name == verified_role_name,
             guild_roles.values(),
-        )
-
-        if verified_role:
+        ):
             new_bind = GuildBind(
                 criteria=BindCriteria(type="verified"),
                 roles=[str(verified_role.id)],
@@ -402,12 +397,10 @@ async def check_for_verified_roles(
     if unverified_role_enabled and not find(
         lambda b: b.criteria.type == "unverified", merge_to
     ):
-        unverified_role = find(
+        if unverified_role := find(
             lambda r: str(r.id) == unverified_role_id or r.name == unverified_role_name,
             guild_roles.values(),
-        )
-
-        if unverified_role:
+        ):
             new_bind = GuildBind(
                 criteria=BindCriteria(type="unverified"),
                 roles=[str(unverified_role.id)],
