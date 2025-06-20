@@ -384,6 +384,9 @@ async def check_for_verified_roles(
         lambda b: b.criteria.type == "verified" and verified_role_id in b.roles,
         merge_to,
     ):
+        print(
+            f"DEBUG: verified_role_enabled={verified_role_enabled}, verified_role_id={verified_role_id}, verified_role_name={verified_role_name}"
+        )
         verified_role = find(
             lambda r: str(r.id) == verified_role_id or r.name == verified_role_name,
             guild_roles.values(),
