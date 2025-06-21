@@ -25,9 +25,7 @@ if TYPE_CHECKING:
 POP_OLD_BINDS: bool = False  # remove old binds from the database
 SAVE_NEW_BINDS: bool = False  # save new binds to the database
 
-ARBITRARY_GROUP_TEMPLATE = re.compile(r"\{group-rank-(.*?)\}")
-
-ARBITRARY_GROUP_TEMPLATE = re.compile(r"\{group-rank-(.*?)\}")
+ARBITRARY_GROUP_TEMPLATE = re.compile(r"\{group-rank-(\d+)\}")
 NICKNAME_TEMPLATE_REGEX = re.compile(r"\{(.*?)\}")
 ROLESET_BRACKET_TEMPLATE = re.compile(r"\[(.*)\]")
 
@@ -223,7 +221,7 @@ async def parse_template(
 
         # parse {group-rank-<group_id>} in the nickname template
         for group_id in ARBITRARY_GROUP_TEMPLATE.findall(template):
-            group = roblox_user.groups.get(group_id)
+            group = roblox_user.groups.get(int(group_id))
             group_role_from_group = group.role.name if group else "Guest"
 
             template = template.replace(
