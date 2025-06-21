@@ -1,4 +1,7 @@
+from typing import Final
+
 import pytest
+from bloxlink_lib import GuildSerializable
 from bloxlink_lib.models.base.iterables import PydanticList
 from bloxlink_lib.models.base.serializable import RoleSerializable
 from bloxlink_lib.models.binds import BindCriteria, GuildBind, GroupBindData
@@ -157,12 +160,14 @@ class TestInvalidRoles:
     async def test_invalid_roles(self, test_guild_id: int):
         """Test the handling of invalid roles."""
 
-        INVALID_ROLE_ID = "1234567890"
+        INVALID_ROLE_ID: Final[str] = "1234567890"
 
-        VERIFIED_ROLE = RoleSerializable(id=3, name="Verified")
-        UNVERIFIED_ROLE = RoleSerializable(id=4, name="Unverified")
+        VERIFIED_ROLE: Final[RoleSerializable] = RoleSerializable(id=3, name="Verified")
+        UNVERIFIED_ROLE: Final[RoleSerializable] = RoleSerializable(
+            id=4, name="Unverified"
+        )
 
-        EXTRA_ROLES = [
+        EXTRA_ROLES: Final[list[RoleSerializable]] = [
             RoleSerializable(id=1, name="Member"),
             RoleSerializable(id=2, name="Helper"),
         ]
