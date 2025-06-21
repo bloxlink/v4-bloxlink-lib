@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import Callable
 from datetime import datetime
+from unittest.mock import AsyncMock
 from bloxlink_lib.models import binds
 from bloxlink_lib import (
     RoleSerializable,
@@ -14,6 +15,7 @@ from bloxlink_lib import (
     RobloxBaseAsset,
 )
 from bloxlink_lib.models.base.serializable import GuildSerializable
+from bloxlink_lib.models.schemas.guilds import GuildData
 from bloxlink_lib.test_utils.utils import generate_snowflake
 
 __all__ = [
@@ -27,6 +29,7 @@ __all__ = [
     "mock_user",
     "MockUserData",
     "MockUser",
+    "mock_guild_data",
 ]
 
 
@@ -233,4 +236,36 @@ def mock_user(
         discord_user=member,
         roblox_user=roblox_user,
         owns_assets=owns_assets,
+    )
+
+
+def mock_guild_data(
+    mocker,
+    guild_data: GuildData,
+) -> None:
+    """Mock the guild's stored data"""
+
+    # Mock the Redis cache calls to return empty (cache miss)
+    mocker.patch(
+        "bloxlink_lib.database.redis.redis.hmget",
+        new_callable=AsyncMock,
+        return_value={},
+    )
+    mocker.patch(
+        "bloxlink_lib.database.redis.redis.hgetall",
+        new_callable=AsyncMock,
+        return_value={},
+    )
+
+    # Mock the raw MongoDB call _db_fetch to return our test data
+    async def _mock_db_fetch(constructor, item_id, *aspects):
+        data = guild_data.model_dump(by_alias=True, exclude_unset=True)
+        data["_id"] = item_id
+
+        return data
+
+    mocker.patch(
+        "bloxlink_lib.database.mongodb._db_fetch",
+        new_callable=AsyncMock,
+        side_effect=_mock_db_fetch,
     )

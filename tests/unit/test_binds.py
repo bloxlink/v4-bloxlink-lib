@@ -1,13 +1,20 @@
+from typing import Callable
+from unittest.mock import AsyncMock
 import pytest
 from bloxlink_lib import GuildSerializable, SnowflakeSet, RoleSerializable
 from bloxlink_lib.models.binds import GuildBind, BindCriteria, GroupBindData, BindData
+from bloxlink_lib.models.roblox.binds import get_binds
+from bloxlink_lib.models.schemas.guilds import GuildData
 from bloxlink_lib.test_utils.fixtures import (
     GuildRoles,
     GroupRolesets,
     MockAssets,
     AssetTypes,
     BindTestFixtures,
+    verified_bind,
+    unverified_bind,
 )
+from bloxlink_lib.test_utils.mockers import mock_guild_data
 from .fixtures import (
     MockBindScenario,
     ExpectedBindsResult,
@@ -645,3 +652,106 @@ async def _assert_successful_binds_results(
         assert result.ineligible_roles == SnowflakeSet(
             expected_result.expected_remove_roles
         )
+
+
+class TestBindVerifiedRoles:
+    """Test different scenarios of verified/unverified roles"""
+
+    @pytest.mark.parametrize(
+        "verified_role_enabled, unverified_role_enabled",
+        [
+            (True, True),
+            (True, False),
+            (False, True),
+            (False, False),
+        ],
+    )
+    @pytest.mark.asyncio()
+    async def test_create_verified_binds(
+        self,
+        mocker,
+        test_guild: GuildSerializable,
+        verified_role_enabled: bool,
+        unverified_role_enabled: bool,
+        verified_bind: GuildBind,
+        unverified_bind: GuildBind,
+    ):
+        """Test that both verified/unverified binds are created when both verified/unverified roles are enabled"""
+
+        mock_guild_data(
+            mocker,
+            GuildData(
+                id=test_guild.id,
+                binds=[],
+                verifiedRoleEnabled=verified_role_enabled,
+                unverifiedRoleEnabled=unverified_role_enabled,
+            ),
+        )
+
+        guild_binds = await get_binds(
+            test_guild.id,
+            guild_roles=test_guild.roles,
+        )
+
+        assert sum(1 for b in guild_binds if b.criteria.type == "verified") == (
+            1 if verified_role_enabled else 0
+        )
+        assert sum(1 for b in guild_binds if b.criteria.type == "unverified") == (
+            1 if unverified_role_enabled else 0
+        )
+
+        assert verified_bind in guild_binds if verified_role_enabled else True
+        assert unverified_bind in guild_binds if unverified_role_enabled else True
+
+    @pytest.mark.parametrize(
+        "verified_role_set, unverified_role_set",
+        [
+            (True, True),
+            (True, False),
+            (False, True),
+            (False, False),
+        ],
+    )
+    @pytest.mark.asyncio()
+    async def test_create_verified_binds_with_verified_role_set_as(
+        self,
+        mocker,
+        test_guild: GuildSerializable,
+        find_discord_roles: Callable[[GuildRoles], list[RoleSerializable]],
+        verified_role_set: bool,
+        unverified_role_set: bool,
+        verified_bind: GuildBind,
+        unverified_bind: GuildBind,
+    ):
+        """Test that both verified and unverified binds are created even if verifiedRole or unverifiedRole is set to None"""
+
+        mock_guild_data(
+            mocker,
+            GuildData(
+                id=test_guild.id,
+                binds=[],
+                verifiedRole=(
+                    str(find_discord_roles(GuildRoles.VERIFIED)[0].id)
+                    if verified_role_set
+                    else None
+                ),
+                unverifiedRole=(
+                    str(find_discord_roles(GuildRoles.UNVERIFIED)[0].id)
+                    if unverified_role_set
+                    else None
+                ),
+                verifiedRoleEnabled=True,
+                unverifiedRoleEnabled=True,
+            ),
+        )
+
+        guild_binds = await get_binds(
+            test_guild.id,
+            guild_roles=test_guild.roles,
+        )
+
+        assert sum(1 for b in guild_binds if b.criteria.type == "verified") == 1
+        assert sum(1 for b in guild_binds if b.criteria.type == "unverified") == 1
+
+        assert verified_bind in guild_binds
+        assert unverified_bind in guild_binds

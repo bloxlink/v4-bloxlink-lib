@@ -89,6 +89,15 @@ async def get_binds(
             guild_id, guild_roles=guild_roles, merge_to=guild_data.binds
         )
 
+        # filter out invalid roles from binds
+        for bind in guild_data.binds:
+            bind.roles = list(filter(lambda r: int(r) in guild_roles, bind.roles))
+
+        # filter out binds with no valid roles
+        guild_data.binds = list(
+            filter(lambda bind: len(bind.roles) > 0, guild_data.binds)
+        )
+
     return list(
         filter(
             lambda b: b.type == category
@@ -372,15 +381,13 @@ async def check_for_verified_roles(
     new_verified_binds: list[GuildBind] = []
 
     if verified_role_enabled and not find(
-        lambda b: b.criteria.type == "verified" and verified_role_id in b.roles,
+        lambda b: b.criteria.type == "verified",
         merge_to,
     ):
-        verified_role = find(
+        if verified_role := find(
             lambda r: str(r.id) == verified_role_id or r.name == verified_role_name,
             guild_roles.values(),
-        )
-
-        if verified_role:
+        ):
             new_bind = GuildBind(
                 criteria=BindCriteria(type="verified"),
                 roles=[str(verified_role.id)],
@@ -390,12 +397,10 @@ async def check_for_verified_roles(
     if unverified_role_enabled and not find(
         lambda b: b.criteria.type == "unverified", merge_to
     ):
-        unverified_role = find(
+        if unverified_role := find(
             lambda r: str(r.id) == unverified_role_id or r.name == unverified_role_name,
             guild_roles.values(),
-        )
-
-        if unverified_role:
+        ):
             new_bind = GuildBind(
                 criteria=BindCriteria(type="unverified"),
                 roles=[str(unverified_role.id)],

@@ -23,6 +23,7 @@ class GroupTestFixtures(Enum):
     ROLESET_GROUP_BIND = "roleset_group_bind"
     MIN_MAX_GROUP_BIND = "min_max_group_bind"
     EVERYONE_GROUP_BIND = "everyone_group_bind"
+    GROUP_MULTIPLE_BINDS = "group_multiple_binds"
 
 
 class GroupRolesets(Enum):
@@ -242,6 +243,40 @@ def group_bind(
         )
 
     return _get_bind_for_group
+
+
+@pytest.fixture()
+def group_multiple_binds(
+    mocker,
+    find_discord_roles: Callable[[guild_fixtures.GuildRoles], list[RoleSerializable]],
+) -> Callable[[list[RobloxGroup], guild_fixtures.GuildRoles], list[binds.GuildBind]]:
+    """Bind multiple groups to receive these specific roles"""
+
+    def _get_binds_for_group(
+        group: RobloxGroup,
+        discord_role: guild_fixtures.GuildRoles,
+    ) -> list[binds.GuildBind]:
+
+        return [
+            mock_bind(
+                mocker,
+                discord_roles=find_discord_roles(discord_role),
+                criteria=binds.BindCriteria(
+                    type="group", id=group.value, group=GroupBindData(everyone=True)
+                ),
+                entity=RobloxGroup(id=group.value),
+            ),
+            mock_bind(
+                mocker,
+                discord_roles=find_discord_roles(discord_role),
+                criteria=binds.BindCriteria(
+                    type="group", id=group.value, group=GroupBindData(dynamicRoles=True)
+                ),
+                entity=RobloxGroup(id=group.value),
+            ),
+        ]
+
+    return _get_binds_for_group
 
 
 __all__ = [

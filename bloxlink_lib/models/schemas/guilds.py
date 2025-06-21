@@ -303,28 +303,13 @@ class GuildData(BaseSchema):
         return v
 
     def model_post_init(self, __context):
-        # merge verified roles into binds
-        if self.verifiedRole is not None:
-            verified_role_bind = GuildBind(
-                criteria={"type": "verified"}, roles=[self.verifiedRole]
-            )
+        """Post-init hook to handle verifiedRole and unverifiedRole"""
 
-            if verified_role_bind not in self.binds:
-                self.binds.append(verified_role_bind)
+        if self.verifiedRole is not None and self.verifiedRoleName is not None:
+            self.verifiedRoleName = None
 
-            if self.verifiedRoleName is not None:
-                self.verifiedRoleName = None
-
-        if self.unverifiedRole is not None:
-            unverified_role_bind = GuildBind(
-                criteria={"type": "unverified"}, roles=[self.unverifiedRole]
-            )
-
-            if unverified_role_bind not in self.binds:
-                self.binds.append(unverified_role_bind)
-
-            if self.unverifiedRoleName is not None:
-                self.unverifiedRoleName = None
+        if self.unverifiedRole is not None and self.unverifiedRoleName is not None:
+            self.unverifiedRoleName = None
 
     @staticmethod
     def database_domain() -> DatabaseDomains:
