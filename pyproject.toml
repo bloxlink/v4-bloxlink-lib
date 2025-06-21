@@ -73,6 +73,9 @@ omit = [
     "bloxlink_lib/test_utils/*",
 ]
 
+[tool.poetry.plugins."pytest11"]
+bloxlink_lib_fixtures = "bloxlink_lib.test_utils"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

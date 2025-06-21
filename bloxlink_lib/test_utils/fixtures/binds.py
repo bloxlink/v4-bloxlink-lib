@@ -9,7 +9,7 @@ from bloxlink_lib.test_utils.fixtures import (
     assets as asset_fixtures,
     groups as group_fixtures,
 )
-from bloxlink_lib.test_utils.fixtures.guilds import GuildRoles, find_discord_roles
+from bloxlink_lib.test_utils.fixtures.guilds import GuildRoles
 from bloxlink_lib.test_utils.mockers import mock_bind
 
 
