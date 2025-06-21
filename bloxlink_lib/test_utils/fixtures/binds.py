@@ -3,7 +3,7 @@ from typing import Callable
 from pydantic.dataclasses import dataclass
 import pytest
 
-from bloxlink_lib import BloxlinkEntity, GuildBind, RoleSerializable
+from bloxlink_lib import BloxlinkEntity, RoleSerializable
 from bloxlink_lib.models import binds
 from bloxlink_lib.test_utils.fixtures import (
     assets as asset_fixtures,
@@ -11,6 +11,7 @@ from bloxlink_lib.test_utils.fixtures import (
 )
 from bloxlink_lib.test_utils.fixtures.guilds import GuildRoles
 from bloxlink_lib.test_utils.mockers import mock_bind
+from bloxlink_lib.test_utils.utils import find_discord_roles
 
 
 # Verified bind fixtures

@@ -8,7 +8,6 @@ from bloxlink_lib import (
     RobloxUserGroup,
     GuildBind,
     GuildSerializable,
-    RoleSerializable,
 )
 from bloxlink_lib.test_utils.fixtures import (
     GuildRoles,
@@ -157,25 +156,10 @@ def mock_bind_scenario(
     return scenario_result
 
 
-# Bind utility fixtures
-@pytest.fixture()
-def find_discord_roles(guild_roles: "GuildRolesType") -> list[RoleSerializable]:
-    """Retrieve the Discord roles from the GuildRoles enum"""
-
-    def _find_discord_roles(*role_enums: GuildRoles) -> list[RoleSerializable]:
-        return [
-            find(lambda r: r.name == role_enum.value, guild_roles.values())
-            for role_enum in role_enums
-        ]
-
-    return _find_discord_roles
-
-
 __all__ = [
     "ExpectedBindsResult",
     "MockBindScenario",
     "MockedBindScenarioResult",
-    "find_discord_roles",
     "AssetBindTestCase",
     "BindTestCase",
     "BindTestFixtures",
