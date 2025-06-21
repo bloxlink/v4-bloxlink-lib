@@ -221,7 +221,7 @@ async def parse_template(
 
         # parse {group-rank-<group_id>} in the nickname template
         for group_id in ARBITRARY_GROUP_TEMPLATE.findall(template):
-            group = roblox_user.groups.get(group_id)
+            group = roblox_user.groups.get(int(group_id))
             group_role_from_group = group.role.name if group else "Guest"
 
             template = template.replace(
