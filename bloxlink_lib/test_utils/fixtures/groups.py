@@ -10,6 +10,7 @@ from bloxlink_lib import (
 )
 from bloxlink_lib.models import binds
 from bloxlink_lib.test_utils.fixtures import guilds as guild_fixtures
+from bloxlink_lib.test_utils.fixtures.guilds import find_discord_roles
 from bloxlink_lib.test_utils.mockers import mock_bind, mock_group
 from bloxlink_lib.test_utils.utils import generate_snowflake
 
