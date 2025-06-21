@@ -673,6 +673,8 @@ class TestBindVerifiedRoles:
         test_guild: GuildSerializable,
         verified_role_enabled: bool,
         unverified_role_enabled: bool,
+        verified_bind: GuildBind,
+        unverified_bind: GuildBind,
     ):
         """Test that both verified/unverified binds are created when both verified/unverified roles are enabled"""
 
@@ -698,6 +700,9 @@ class TestBindVerifiedRoles:
             1 if unverified_role_enabled else 0
         )
 
+        assert verified_bind in guild_binds if verified_role_enabled else True
+        assert unverified_bind in guild_binds if unverified_role_enabled else True
+
     @pytest.mark.parametrize(
         "verified_role_set, unverified_role_set",
         [
@@ -715,6 +720,8 @@ class TestBindVerifiedRoles:
         find_discord_roles: Callable[[GuildRoles], list[RoleSerializable]],
         verified_role_set: bool,
         unverified_role_set: bool,
+        verified_bind: GuildBind,
+        unverified_bind: GuildBind,
     ):
         """Test that both verified and unverified binds are created even if verifiedRole or unverifiedRole is set to None"""
 
@@ -745,3 +752,6 @@ class TestBindVerifiedRoles:
 
         assert sum(1 for b in guild_binds if b.criteria.type == "verified") == 1
         assert sum(1 for b in guild_binds if b.criteria.type == "unverified") == 1
+
+        assert verified_bind in guild_binds
+        assert unverified_bind in guild_binds
