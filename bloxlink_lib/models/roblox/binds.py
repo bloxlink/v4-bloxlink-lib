@@ -88,13 +88,19 @@ async def get_binds(
         )
 
         # filter out invalid roles from binds
-        for bind in guild_data.binds:
-            bind.roles = list(filter(lambda r: int(r) in guild_roles, bind.roles))
+        binds_to_remove: list[GuildBind] = []
 
-        # filter out binds with no valid roles
-        guild_data.binds = list(
-            filter(lambda bind: len(bind.roles) > 0, guild_data.binds)
-        )
+        for bind in filter(lambda b: b.roles, guild_data.binds):
+            if filtered_roles := list(
+                filter(lambda r: int(r) in guild_roles, bind.roles)
+            ):
+                bind.roles = filtered_roles
+            else:
+                binds_to_remove.append(bind)
+
+        # Remove binds that have no valid roles
+        for bind in binds_to_remove:
+            guild_data.binds.remove(bind)
 
     return list(
         filter(
