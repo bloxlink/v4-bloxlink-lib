@@ -25,9 +25,7 @@ if TYPE_CHECKING:
 POP_OLD_BINDS: bool = False  # remove old binds from the database
 SAVE_NEW_BINDS: bool = False  # save new binds to the database
 
-ARBITRARY_GROUP_TEMPLATE = re.compile(r"\{group-rank-(.*?)\}")
-
-ARBITRARY_GROUP_TEMPLATE = re.compile(r"\{group-rank-(.*?)\}")
+ARBITRARY_GROUP_TEMPLATE = re.compile(r"\{group-rank-(\d+)\}")
 NICKNAME_TEMPLATE_REGEX = re.compile(r"\{(.*?)\}")
 ROLESET_BRACKET_TEMPLATE = re.compile(r"\[(.*)\]")
 
