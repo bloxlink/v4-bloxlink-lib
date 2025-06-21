@@ -1,11 +1,9 @@
 from typing import TYPE_CHECKING, Callable, Annotated
 import pytest
 from pydantic import Field
-from bloxlink_lib.models import binds
 from bloxlink_lib import (
     RobloxGroup,
     find,
-    BloxlinkEntity,
     BaseModel,
     RobloxUserGroup,
     GuildBind,
@@ -16,9 +14,8 @@ from bloxlink_lib.test_utils.fixtures import (
     GuildRoles,
     MockAssets,
     AssetTypes,
-    VerifiedTestFixtures,
 )
-from bloxlink_lib.test_utils.mockers import mock_bind, MockUserData, MockUser, mock_user
+from bloxlink_lib.test_utils.mockers import MockUserData, MockUser, mock_user
 from bloxlink_lib.test_utils.fixtures.binds import BindTestFixtures
 from tests.unit.utils import enum_list_to_value_list
 
@@ -174,42 +171,6 @@ def find_discord_roles(guild_roles: "GuildRolesType") -> list[RoleSerializable]:
     return _find_discord_roles
 
 
-# Verified bind fixtures
-@pytest.fixture()
-def verified_bind(
-    mocker,
-    find_discord_roles: Callable[[GuildRoles], list[RoleSerializable]],
-) -> binds.GuildBind:
-    """Bind everyone to receive these specific roles"""
-
-    mocked_bind = mock_bind(
-        mocker,
-        discord_roles=find_discord_roles(GuildRoles.VERIFIED),
-        criteria=binds.BindCriteria(type="verified"),
-        entity=BloxlinkEntity(type="verified"),
-    )
-
-    return mocked_bind
-
-
-# Unverified bind fixtures
-@pytest.fixture()
-def unverified_bind(
-    mocker,
-    find_discord_roles: Callable[[GuildRoles], list[RoleSerializable]],
-) -> binds.GuildBind:
-    """Bind everyone to receive these specific roles"""
-
-    mocked_bind = mock_bind(
-        mocker,
-        discord_roles=find_discord_roles(GuildRoles.UNVERIFIED),
-        criteria=binds.BindCriteria(type="unverified"),
-        entity=BloxlinkEntity(type="unverified"),
-    )
-
-    return mocked_bind
-
-
 __all__ = [
     "ExpectedBindsResult",
     "MockBindScenario",
@@ -219,4 +180,4 @@ __all__ = [
     "BindTestCase",
     "BindTestFixtures",
     "mock_bind_scenario",
-] + [fixture.value for fixture in VerifiedTestFixtures]
+]

@@ -3,7 +3,13 @@ import pytest
 from bloxlink_lib import GuildSerializable, RoleSerializable
 from bloxlink_lib.test_utils.mockers import mock_guild, mock_guild_roles
 
-__all__ = ["GuildRoles", "GuildRolesType", "guild_roles", "test_guild"]
+__all__ = [
+    "GuildRoles",
+    "GuildRolesType",
+    "guild_roles",
+    "test_guild",
+    "test_guild_no_verified_roles",
+]
 
 
 class GuildRoles(Enum):
@@ -39,3 +45,16 @@ def test_guild(guild_roles: GuildRolesType) -> GuildSerializable:
     """Test Discord server."""
 
     return mock_guild(role_names=[r.name for r in guild_roles.values()])
+
+
+@pytest.fixture()
+def test_guild_no_verified_roles(guild_roles: GuildRolesType) -> GuildSerializable:
+    """Test Discord server."""
+
+    return mock_guild(
+        role_names=[
+            r.name
+            for r in guild_roles.values()
+            if r.name not in (GuildRoles.VERIFIED.value, GuildRoles.UNVERIFIED.value)
+        ]
+    )
