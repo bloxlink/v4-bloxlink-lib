@@ -387,6 +387,9 @@ async def check_for_verified_roles(
         if verified_role := find(
             lambda r: str(r.id) == verified_role_id or r.name == verified_role_name,
             guild_roles.values(),
+        ) or find(
+            lambda r: r.name == "Verified",
+            guild_roles.values(),
         ):
             new_bind = GuildBind(
                 criteria=BindCriteria(type="verified"),
@@ -399,6 +402,9 @@ async def check_for_verified_roles(
     ):
         if unverified_role := find(
             lambda r: str(r.id) == unverified_role_id or r.name == unverified_role_name,
+            guild_roles.values(),
+        ) or find(
+            lambda r: r.name == "Unverified",
             guild_roles.values(),
         ):
             new_bind = GuildBind(
