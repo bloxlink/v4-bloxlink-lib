@@ -10,6 +10,7 @@ from bloxlink_lib.test_utils.mockers import MockUser, mock_user
 __all__ = [
     "test_group_member",
     "test_group_member_bracketed_roleset",
+    "test_unverified_member",
 ]
 
 
