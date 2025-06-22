@@ -34,6 +34,20 @@ def test_group_member(
 
 
 @pytest.fixture()
+def test_unverified_member(
+    mocker,
+    test_guild: GuildSerializable,
+) -> MockUser:
+    """Test Discord Member model."""
+
+    user = mock_user(
+        mocker, verified=False, username="bob", guild=test_guild, groups=None
+    )
+
+    return user
+
+
+@pytest.fixture()
 def test_group_member_bracketed_roleset(
     mocker,
     test_guild: GuildSerializable,
