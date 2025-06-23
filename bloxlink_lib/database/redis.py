@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-import logging
 
 from redis.asyncio import Redis
 from redis import ConnectionError as RedisConnectionError
@@ -16,10 +15,6 @@ def connect_redis():
     """Connect to Redis"""
 
     global redis  # pylint: disable=global-statement
-
-    if CONFIG.UNIT_TEST_SKIP_DB:
-        logging.info("UNIT_TEST_SKIP_DB is enabled, skipping Redis connection")
-        return
 
     if CONFIG.REDIS_URL:
         redis = Redis.from_url(
