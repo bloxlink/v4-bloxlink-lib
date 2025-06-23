@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import datetime
+import logging
 import os
 from typing import Type, TYPE_CHECKING
 
@@ -17,6 +18,10 @@ if TYPE_CHECKING:
 
 def connect_database():
     """Connect to MongoDB"""
+
+    if CONFIG.UNIT_TEST_SKIP_DB:
+        logging.info("UNIT_TEST_SKIP_DB is enabled, skipping MongoDB connection")
+        return
 
     global mongo  # pylint: disable=global-statement
 
