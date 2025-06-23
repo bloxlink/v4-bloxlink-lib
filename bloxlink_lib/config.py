@@ -50,40 +50,40 @@ class BaseConfig(BaseSettings):
     #############################
     # TESTING SETTINGS
     #############################
-    TEST_MODE: bool = False
+    SKIP_DB_VALIDATION: bool = False
 
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )
 
-    # def model_post_init(self, __context):
-    #     if self.TEST_MODE:
-    #         logging.info("TEST_MODE is enabled, skipping database validation")
-    #         return
+    def model_post_init(self, __context):
+        if self.SKIP_DB_VALIDATION:
+            logging.info("SKIP_DB_VALIDATION is enabled, skipping database validation")
+            return
 
-    #     if self.REDIS_URL is None and (
-    #         self.REDIS_HOST is None or self.REDIS_PORT is None
-    #     ):
-    #         raise ValueError(
-    #             "REDIS_URL or REDIS_HOST/REDIS_PORT/REDIS_PASSWORD must be set"
-    #         )
+        if self.REDIS_URL is None and (
+            self.REDIS_HOST is None or self.REDIS_PORT is None
+        ):
+            raise ValueError(
+                "REDIS_URL or REDIS_HOST/REDIS_PORT/REDIS_PASSWORD must be set"
+            )
 
-    #     if self.REDIS_URL and self.REDIS_HOST:
-    #         raise ValueError(
-    #             "REDIS_URL and REDIS_HOST/REDIS_PORT/REDIS_PASSWORD cannot both be set"
-    #         )
+        if self.REDIS_URL and self.REDIS_HOST:
+            raise ValueError(
+                "REDIS_URL and REDIS_HOST/REDIS_PORT/REDIS_PASSWORD cannot both be set"
+            )
 
-    #     if self.MONGO_URL is None and (
-    #         self.MONGO_HOST is None or self.MONGO_PORT is None
-    #     ):
-    #         raise ValueError(
-    #             "MONGO_URL or MONGO_HOST/MONGO_PORT/MONGO_USER/MONGO_PASSWORD must be set"
-    #         )
+        if self.MONGO_URL is None and (
+            self.MONGO_HOST is None or self.MONGO_PORT is None
+        ):
+            raise ValueError(
+                "MONGO_URL or MONGO_HOST/MONGO_PORT/MONGO_USER/MONGO_PASSWORD must be set"
+            )
 
-    #     if self.MONGO_URL and self.MONGO_HOST:
-    #         raise ValueError(
-    #             "MONGO_URL and MONGO_HOST/MONGO_PORT/MONGO_USER/MONGO_PASSWORD cannot both be set"
-    #         )
+        if self.MONGO_URL and self.MONGO_HOST:
+            raise ValueError(
+                "MONGO_URL and MONGO_HOST/MONGO_PORT/MONGO_USER/MONGO_PASSWORD cannot both be set"
+            )
 
 
 CONFIG = BaseConfig()
