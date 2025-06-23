@@ -4,7 +4,7 @@ from typing import Callable
 
 from bloxlink_lib.models import binds
 from bloxlink_lib import create_entity, RoleSerializable
-from bloxlink_lib.test_utils.fixtures.guilds import GuildRoles
+from bloxlink_lib.test_utils.fixtures.guilds import GuildRoles, find_discord_roles
 from bloxlink_lib.test_utils import mock_bind
 
 

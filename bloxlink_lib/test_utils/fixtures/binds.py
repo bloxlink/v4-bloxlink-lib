@@ -11,7 +11,6 @@ from bloxlink_lib.test_utils.fixtures import (
 )
 from bloxlink_lib.test_utils.fixtures.guilds import GuildRoles
 from bloxlink_lib.test_utils.mockers import mock_bind
-from bloxlink_lib.test_utils.utils import find_discord_roles
 
 
 # Verified bind fixtures

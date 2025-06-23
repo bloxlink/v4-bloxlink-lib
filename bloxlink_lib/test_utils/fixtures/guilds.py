@@ -1,6 +1,6 @@
 from enum import Enum
 import pytest
-from bloxlink_lib import GuildSerializable, RoleSerializable
+from bloxlink_lib import GuildSerializable, RoleSerializable, find
 from bloxlink_lib.test_utils.mockers import mock_guild, mock_guild_roles
 
 __all__ = [
@@ -9,6 +9,7 @@ __all__ = [
     "guild_roles",
     "test_guild",
     "test_guild_no_verified_roles",
+    "find_discord_roles",
 ]
 
 
@@ -58,3 +59,16 @@ def test_guild_no_verified_roles(guild_roles: GuildRolesType) -> GuildSerializab
             if r.name not in (GuildRoles.VERIFIED.value, GuildRoles.UNVERIFIED.value)
         ]
     )
+
+
+@pytest.fixture()
+def find_discord_roles(guild_roles: GuildRolesType):
+    """Retrieve the Discord roles from the GuildRoles enum"""
+
+    def _find_discord_roles(*role_enums: GuildRoles) -> list[RoleSerializable]:
+        return [
+            find(lambda r: r.name == role_enum.value, guild_roles.values())
+            for role_enum in role_enums
+        ]
+
+    return _find_discord_roles

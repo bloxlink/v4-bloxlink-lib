@@ -10,6 +10,7 @@ from bloxlink_lib.test_utils.mockers import MockUser, mock_user
 __all__ = [
     "test_group_member",
     "test_group_member_bracketed_roleset",
+    "test_unverified_member",
 ]
 
 
@@ -28,6 +29,20 @@ def test_group_member(
         username="john",
         guild=test_guild,
         groups={test_group.id: RobloxUserGroup(group=test_group, role=member_roleset)},
+    )
+
+    return user
+
+
+@pytest.fixture()
+def test_unverified_member(
+    mocker,
+    test_guild: GuildSerializable,
+) -> MockUser:
+    """Test Discord Member model."""
+
+    user = mock_user(
+        mocker, verified=False, username="bob", guild=test_guild, groups=None
     )
 
     return user

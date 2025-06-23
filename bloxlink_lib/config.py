@@ -1,3 +1,4 @@
+import logging
 from typing import Literal
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -47,12 +48,19 @@ class BaseConfig(BaseSettings):
     )
     BLOXLINK_PUBLIC_API_KEY: str | None = None
     #############################
+    # TESTING SETTINGS
+    #############################
+    SKIP_DB_VALIDATION: bool = False
 
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )
 
     def model_post_init(self, __context):
+        if self.SKIP_DB_VALIDATION:
+            logging.info("SKIP_DB_VALIDATION is enabled, skipping database validation")
+            return
+
         if self.REDIS_URL is None and (
             self.REDIS_HOST is None or self.REDIS_PORT is None
         ):
