@@ -14,7 +14,7 @@ from bloxlink_lib.fetch import fetch, fetch_typed
 from bloxlink_lib.config import CONFIG
 from bloxlink_lib.exceptions import RobloxNotFound, RobloxAPIError, UserNotVerified
 from bloxlink_lib.database.mongodb import mongo  # pylint: disable=no-name-in-module
-from bloxlink_lib.models.base import BaseModel, MemberSerializable
+from bloxlink_lib.models.base import BaseModel, MemberSerializable, BaseResponse
 from bloxlink_lib.utils import get_environment, Environment
 from .groups import GroupRoleset, RobloxGroup
 
@@ -134,8 +134,8 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
             if self.groups and "groups" in includes:
                 includes.remove("groups")
 
-        roblox_user_data, user_data_response = await fetch_typed(
-            RobloxUser,
+        roblox_user_body, user_data_response = await fetch_typed(
+            BaseResponse[RobloxUser],
             f"{CONFIG.BOT_API}/users",
             headers={"Authorization": CONFIG.BOT_API_AUTH},
             params={
@@ -144,6 +144,8 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
                 "include": ",".join(includes),
             },
         )
+
+        roblox_user_data = roblox_user_body.data
 
         if user_data_response.status == HTTPStatus.OK:
             self.id = roblox_user_data.id or self.id
