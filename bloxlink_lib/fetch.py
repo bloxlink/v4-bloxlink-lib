@@ -74,6 +74,9 @@ async def fetch[T](
         elif v is None:
             del params[k]
 
+    if url.startswith(CONFIG.BOT_API):
+        headers["Authorization"] = f"Bearer {CONFIG.BOT_API_AUTH}"
+
     try:
         async with aiohttp.ClientSession(
             json_serialize=_bytes_to_str_wrapper
@@ -160,4 +163,5 @@ async def fetch_typed[T](
     Returns:
         T: The dataclass instance of the response.
     """
+
     return await fetch(url=url, parse_as=parse_as, method=method, **kwargs)
