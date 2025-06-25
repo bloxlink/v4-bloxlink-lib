@@ -14,7 +14,7 @@ from bloxlink_lib.fetch import fetch, fetch_typed
 from bloxlink_lib.config import CONFIG
 from bloxlink_lib.exceptions import RobloxNotFound, RobloxAPIError, UserNotVerified
 from bloxlink_lib.database.mongodb import mongo  # pylint: disable=no-name-in-module
-from bloxlink_lib.models.base import BaseModel, MemberSerializable
+from bloxlink_lib.models.base import BaseModel, MemberSerializable, BaseResponse
 from bloxlink_lib.utils import get_environment, Environment
 from .groups import GroupRoleset, RobloxGroup
 
@@ -137,7 +137,6 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
         roblox_user_data, user_data_response = await fetch_typed(
             RobloxUser,
             f"{CONFIG.BOT_API}/users",
-            headers={"Authorization": CONFIG.BOT_API_AUTH},
             params={
                 "id": self.id,
                 "username": self.username,
@@ -165,7 +164,11 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
             avatar = roblox_user_data.avatar
 
             if avatar:
-                avatar_url, avatar_response = await fetch("GET", avatar.bust_thumbnail)
+                avatar_url, avatar_response = await fetch(
+                    method="GET",
+                    url=avatar.bust_thumbnail,
+                    parse_as="JSON",
+                )
 
                 if avatar_response.status == HTTPStatus.OK:
                     self.avatar_url = (
@@ -184,8 +187,8 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
 
         try:
             response_data, _ = await fetch(
-                "GET",
-                f"{INVENTORY_API}/v1/users/{self.id}/items/{asset.type_number}/{asset.id}/is-owned",
+                method="GET",
+                url=f"{INVENTORY_API}/v1/users/{self.id}/items/{asset.type_number}/{asset.id}/is-owned",
                 parse_as="TEXT",
             )
         except RobloxAPIError:
@@ -380,7 +383,7 @@ async def get_user_account(
 
 async def get_user(
     user: hikari.User | None = None,
-    includes: list[Literal["groups", "badges"]] = None,
+    includes: list[Literal["groups", "badges"]] | None = None,
     *,
     roblox_username: str = None,
     roblox_id: int = None,
@@ -408,6 +411,9 @@ async def get_user(
     """
 
     roblox_user: RobloxUser | None = None
+
+    if includes is None:
+        includes = ["groups"]
 
     if roblox_id and roblox_username:
         raise ValueError("You cannot provide both a roblox_id and a roblox_username.")
