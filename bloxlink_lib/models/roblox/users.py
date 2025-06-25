@@ -137,7 +137,6 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
         roblox_user_body, user_data_response = await fetch_typed(
             BaseResponse[RobloxUser],
             f"{CONFIG.BOT_API}/users",
-            headers={"Authorization": CONFIG.BOT_API_AUTH},
             params={
                 "id": self.id,
                 "username": self.username,

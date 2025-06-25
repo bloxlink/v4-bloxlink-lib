@@ -29,6 +29,8 @@ def _bytes_to_str_wrapper(data: Any) -> str:
 
 
 class FetchRequestArgs(TypedDict):
+    """Arguments for the fetch function."""
+
     method: Required[str]
     url: Required[str]
     params: NotRequired[dict[str, str]]
@@ -95,43 +97,50 @@ async def _parse_response[T](
 async def _do_request[T](
     **fetch_args: Unpack[FetchRequestArgs],
 ) -> tuple[T | None, aiohttp.ClientResponse]:
+    """Make a request to a URL and parse the response."""
+
+    method = fetch_args.get("method", "GET")
+    url = fetch_args.get("url")
+    params = fetch_args.get("params", {})
+    headers = fetch_args.get("headers", {})
+    body = fetch_args.get("body", {})
+    parse_as = fetch_args.get("parse_as", "JSON")
+    raise_on_failure = fetch_args.get("raise_on_failure", True)
+    timeout = fetch_args.get("timeout", 10)
+
     try:
         async with aiohttp.ClientSession(
             json_serialize=_bytes_to_str_wrapper
         ) as session:
             async with session.request(
-                fetch_args["method"],
-                fetch_args["url"],
-                json=fetch_args["body"],
-                params=fetch_args["params"],
-                headers=fetch_args["headers"],
-                timeout=(
-                    aiohttp.ClientTimeout(total=fetch_args["timeout"])
-                    if fetch_args["timeout"]
-                    else None
-                ),
+                method,
+                url,
+                json=body,
+                params=params,
+                headers=headers,
+                timeout=(aiohttp.ClientTimeout(total=timeout) if timeout else None),
                 proxy=(
                     CONFIG.PROXY_URL
-                    if CONFIG.PROXY_URL and "roblox.com" in fetch_args["url"]
+                    if CONFIG.PROXY_URL and "roblox.com" in url
                     else None
                 ),
             ) as response:
                 return await _parse_response(
                     response,
-                    fetch_args["url"],
-                    fetch_args["raise_on_failure"],
-                    fetch_args["parse_as"],
+                    url,
+                    raise_on_failure,
+                    parse_as,
                 )
 
     except asyncio.TimeoutError:
-        logging.warning(f"URL {fetch_args['url']} timed out")
+        logging.warning(f"URL {url} timed out")
 
         raise RobloxDown(
             "An unexpected error occurred while fetching data. 4"
         ) from None
 
     except aiohttp.client_exceptions.ClientConnectorError:
-        logging.warning(f"URL {fetch_args['url']} failed to connect")
+        logging.warning(f"URL {url} failed to connect")
 
         raise RobloxDown(
             "An unexpected error occurred while fetching data. 5"
@@ -175,44 +184,52 @@ async def fetch[T](
         The requested data from the request, if any.
     """
 
-    fetch_args["url"] = requote_uri(fetch_args["url"])
-    fetch_args["retries"] = fetch_args["retries"] or 3
+    url = requote_uri(fetch_args["url"])
+    method = fetch_args.get("method", "GET")
+    retries = fetch_args.get("retries", 3)
+    params = fetch_args.get("params", {})
+    headers = fetch_args.get("headers", {})
+    body = fetch_args.get("body", {})
+    parse_as = fetch_args.get("parse_as", "JSON")
+    raise_on_failure = fetch_args.get("raise_on_failure", True)
+    timeout = fetch_args.get("timeout", 10)
 
-    for k, v in dict(fetch_args["params"]).items():
+    for k, v in dict(params).items():
         if isinstance(v, bool):
-            fetch_args["params"][k] = "true" if v else "false"
+            params[k] = "true" if v else "false"
         elif v is None:
-            del fetch_args["params"][k]
+            del params[k]
 
-    while fetch_args["retries"] > 0:
+    if url.startswith(CONFIG.BOT_API):
+        headers["Authorization"] = f"Bearer {CONFIG.BOT_API_AUTH}"
+
+    while retries > 0:
         try:
             response_body, response_headers = await _do_request(
-                method=fetch_args["method"],
-                url=fetch_args["url"],
-                params=fetch_args["params"],
-                headers=fetch_args["headers"],
-                body=fetch_args["body"],
-                parse_as=fetch_args["parse_as"],
-                raise_on_failure=fetch_args["raise_on_failure"],
-                timeout=fetch_args["timeout"],
+                method=method,
+                url=url,
+                params=params,
+                headers=headers,
+                body=body,
+                parse_as=parse_as,
+                raise_on_failure=raise_on_failure,
+                timeout=timeout,
             )
 
             if response_headers.status != HTTPStatus.OK:
-                raise RobloxAPIError(
-                    f"Retrying {fetch_args['url']} {fetch_args['method']} {fetch_args['retries']} times"
-                )
+                raise RobloxAPIError(f"Retrying {url} {method} {retries} times")
 
             return response_body, response_headers
 
         except Exception as e:  # pylint: disable=broad-exception-caught
-            logging.warning(f"Error fetching {fetch_args['url']}: {e}")
+            logging.warning(f"Error fetching {url}: {e}")
 
-            if fetch_args["retries"] == 0:
+            if retries == 0:
                 raise e
 
-            fetch_args["retries"] -= 1
+            retries -= 1
 
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.5)
 
 
 async def fetch_typed[T](
