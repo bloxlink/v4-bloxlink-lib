@@ -3,9 +3,10 @@ import logging
 from http import HTTPStatus
 from typing import Literal, Type, Union, Tuple, Any
 from requests.utils import requote_uri
+from aiohttp_retry import RetryClient, ExponentialRetry
 import aiohttp
 from pydantic_core import to_json
-from bloxlink_lib.models.base import BaseModel
+from bloxlink_lib.models.base import BaseModel, BaseResponse
 from bloxlink_lib.utils import parse_into
 
 from .exceptions import RobloxAPIError, RobloxDown, RobloxNotFound
@@ -33,7 +34,6 @@ async def fetch[T](
     Tuple[str, aiohttp.ClientResponse],
     Tuple[bytes, aiohttp.ClientResponse],
     Tuple[T, aiohttp.ClientResponse],
-    aiohttp.ClientResponse,
 ]:
     """Make a REST request with the ability to proxy.
 
@@ -74,67 +74,65 @@ async def fetch[T](
         elif v is None:
             del params[k]
 
+    session = aiohttp.ClientSession(json_serialize=_bytes_to_str_wrapper)
+    retry_options = ExponentialRetry(attempts=3)
+    retry_client = RetryClient(
+        client_session=session, raise_for_status=False, retry_options=retry_options
+    )
+
     try:
-        async with aiohttp.ClientSession(
-            json_serialize=_bytes_to_str_wrapper
-        ) as session:
-            async with session.request(
-                method,
-                url,
-                json=body,
-                params=params,
-                headers=headers,
-                timeout=aiohttp.ClientTimeout(total=timeout) if timeout else None,
-                proxy=(
-                    CONFIG.PROXY_URL
-                    if CONFIG.PROXY_URL and "roblox.com" in url
-                    else None
-                ),
-            ) as response:
-                if response.status != HTTPStatus.OK and raise_on_failure:
-                    if response.status == HTTPStatus.SERVICE_UNAVAILABLE:
-                        logging.warning(f"{url} is down: {await response.text()}")
-                        raise RobloxDown("Roblox is down. Please try again later.")
+        async with retry_client.request(
+            method,
+            url,
+            json=body,
+            params=params,
+            headers=headers,
+            timeout=aiohttp.ClientTimeout(total=timeout) if timeout else None,
+            proxy=(
+                CONFIG.PROXY_URL if CONFIG.PROXY_URL and "roblox.com" in url else None
+            ),
+        ) as response:
+            if response.status != HTTPStatus.OK and raise_on_failure:
+                if response.status == HTTPStatus.SERVICE_UNAVAILABLE:
+                    logging.warning(f"{url} is down: {await response.text()}")
+                    raise RobloxDown("Roblox is down. Please try again later.")
 
-                    # Roblox APIs sometimes use 400 as not found
-                    if response.status in (
-                        HTTPStatus.BAD_REQUEST,
-                        HTTPStatus.NOT_FOUND,
-                    ):
-                        logging.debug(f"{url} not found: {await response.text()}")
-                        raise RobloxNotFound(
-                            "An unexpected error occurred while fetching data. 1"
-                        )
-
-                    logging.warning(
-                        f"{url} failed with status {response.status} and body {await response.text()}; proxy: {CONFIG.PROXY_URL}, using proxy: {CONFIG.PROXY_URL and 'roblox.com' in url}",
+                # Roblox APIs sometimes use 400 as not found
+                if response.status in (
+                    HTTPStatus.BAD_REQUEST,
+                    HTTPStatus.NOT_FOUND,
+                ):
+                    logging.debug(f"{url} not found: {await response.text()}")
+                    raise RobloxNotFound(
+                        "An unexpected error occurred while fetching data. 1"
                     )
+
+                logging.warning(
+                    f"{url} failed with status {response.status} and body {await response.text()}; proxy: {CONFIG.PROXY_URL}, using proxy: {CONFIG.PROXY_URL and 'roblox.com' in url}",
+                )
+                raise RobloxAPIError(
+                    "An unexpected error occurred while fetching data. 2"
+                )
+
+            if parse_as == "TEXT":
+                return await response.text(), response
+
+            if parse_as == "JSON":
+                try:
+                    json_response = await response.json()
+                except aiohttp.client_exceptions.ContentTypeError as exc:
+                    logging.debug(f"{url} {await response.text()}")
+
                     raise RobloxAPIError(
-                        "An unexpected error occurred while fetching data. 2"
-                    )
+                        "An unexpected error occurred while fetching data. 3"
+                    ) from exc
 
-                if parse_as:
-                    if parse_as == "TEXT":
-                        return await response.text(), response
+                return json_response, response
 
-                    if parse_as == "JSON":
-                        try:
-                            json_response = await response.json()
-                        except aiohttp.client_exceptions.ContentTypeError as exc:
-                            logging.debug(f"{url} {await response.text()}")
+            if parse_as == "BYTES":
+                return await response.read(), response
 
-                            raise RobloxAPIError(
-                                "An unexpected error occurred while fetching data. 3"
-                            ) from exc
-
-                        return json_response, response
-
-                    if parse_as == "BYTES":
-                        return await response.read(), response
-
-                    return parse_into(await response.json(), parse_as), response
-
-                return response
+            return parse_into(await response.json(), parse_as), response
 
     except asyncio.TimeoutError:
         logging.warning(f"URL {url} timed out")
@@ -160,4 +158,9 @@ async def fetch_typed[T](
     Returns:
         T: The dataclass instance of the response.
     """
-    return await fetch(url=url, parse_as=parse_as, method=method, **kwargs)
+
+    fetch_body, fetch_headers = await fetch(
+        url=url, parse_as=BaseResponse, method=method, **kwargs
+    )
+
+    return parse_into(fetch_body.data, parse_as), fetch_headers

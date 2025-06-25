@@ -134,8 +134,8 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
             if self.groups and "groups" in includes:
                 includes.remove("groups")
 
-        roblox_user_body, user_data_response = await fetch_typed(
-            BaseResponse[RobloxUser],
+        roblox_user_data, user_data_response = await fetch_typed(
+            RobloxUser,
             f"{CONFIG.BOT_API}/users",
             params={
                 "id": self.id,
@@ -143,8 +143,6 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
                 "include": ",".join(includes),
             },
         )
-
-        roblox_user_data = roblox_user_body.data
 
         if user_data_response.status == HTTPStatus.OK:
             self.id = roblox_user_data.id or self.id
