@@ -76,7 +76,7 @@ async def fetch[T](
         elif v is None:
             del params[k]
 
-    if url.startswith(CONFIG.BOT_API):
+    if CONFIG.BOT_API and url.startswith(CONFIG.BOT_API):
         headers["Authorization"] = f"Bearer {CONFIG.BOT_API_AUTH}"
 
     session = aiohttp.ClientSession(json_serialize=_bytes_to_str_wrapper)
@@ -169,15 +169,15 @@ async def fetch_typed[T](
         T: The dataclass instance of the response.
     """
 
-    if url.startswith(CONFIG.BOT_API):
+    if CONFIG.BOT_API and url.startswith(CONFIG.BOT_API):
         fetch_body, fetch_headers = await fetch(
             url=url, parse_as=BaseResponse, method=method, **kwargs
         )
 
         return parse_into(fetch_body.data, parse_as), fetch_headers
-    else:
-        fetch_body, fetch_headers = await fetch(
-            url=url, parse_as=parse_as, method=method, **kwargs
-        )
 
-        return fetch_body, fetch_headers
+    fetch_body, fetch_headers = await fetch(
+        url=url, parse_as=parse_as, method=method, **kwargs
+    )
+
+    return fetch_body, fetch_headers
