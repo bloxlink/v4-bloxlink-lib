@@ -15,7 +15,7 @@ from typing import (
 from requests.utils import requote_uri
 import aiohttp
 from pydantic_core import to_json
-from bloxlink_lib.models.base import BaseModel
+from bloxlink_lib.models.base import BaseModel, BaseResponse
 from bloxlink_lib.utils import parse_into
 
 from .exceptions import RobloxAPIError, RobloxDown, RobloxNotFound
@@ -250,9 +250,12 @@ async def fetch_typed[T](
         T: The dataclass instance of the response.
     """
 
-    return await fetch(
+    # First parse as BaseResponse, then parse as the actual desired type
+    response_body, response_headers = await fetch(
         url=url,
-        parse_as=parse_as,
+        parse_as=BaseResponse,
         method=method,
         **kwargs,
     )
+
+    return parse_into(response_body, parse_as), response_headers
