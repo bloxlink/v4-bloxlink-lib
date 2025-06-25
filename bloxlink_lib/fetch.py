@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from http import HTTPStatus
-from typing import Literal, Type, Union, Tuple, Any
+from typing import Literal, Type, Union, Tuple, Any, Final
 from requests.utils import requote_uri
 from aiohttp_retry import RetryClient, ExponentialRetry
 import aiohttp
@@ -13,6 +13,8 @@ from .exceptions import RobloxAPIError, RobloxDown, RobloxNotFound
 from .config import CONFIG
 
 __all__ = ("fetch", "fetch_typed")
+
+MAX_HTTP_RETRIES: Final[int] = 3
 
 
 def _bytes_to_str_wrapper(data: Any) -> str:
@@ -78,7 +80,7 @@ async def fetch[T](
         headers["Authorization"] = f"Bearer {CONFIG.BOT_API_AUTH}"
 
     session = aiohttp.ClientSession(json_serialize=_bytes_to_str_wrapper)
-    retry_options = ExponentialRetry(attempts=3)
+    retry_options = ExponentialRetry(attempts=MAX_HTTP_RETRIES)
     retry_client = RetryClient(
         client_session=session, raise_for_status=False, retry_options=retry_options
     )
@@ -139,14 +141,19 @@ async def fetch[T](
 
     except asyncio.TimeoutError:
         logging.warning(f"URL {url} timed out")
+
         raise RobloxDown(
             "An unexpected error occurred while fetching data. 4"
         ) from None
     except aiohttp.client_exceptions.ClientConnectorError:
         logging.warning(f"URL {url} failed to connect")
+
         raise RobloxDown(
             "An unexpected error occurred while fetching data. 5"
         ) from None
+
+    finally:
+        await retry_client.close()
 
 
 async def fetch_typed[T](
@@ -162,8 +169,15 @@ async def fetch_typed[T](
         T: The dataclass instance of the response.
     """
 
-    fetch_body, fetch_headers = await fetch(
-        url=url, parse_as=BaseResponse, method=method, **kwargs
-    )
+    if url.startswith(CONFIG.BOT_API):
+        fetch_body, fetch_headers = await fetch(
+            url=url, parse_as=BaseResponse, method=method, **kwargs
+        )
 
-    return parse_into(fetch_body.data, parse_as), fetch_headers
+        return parse_into(fetch_body.data, parse_as), fetch_headers
+    else:
+        fetch_body, fetch_headers = await fetch(
+            url=url, parse_as=parse_as, method=method, **kwargs
+        )
+
+        return fetch_body, fetch_headers
