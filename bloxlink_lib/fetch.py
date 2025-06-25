@@ -74,6 +74,9 @@ async def fetch[T](
         elif v is None:
             del params[k]
 
+    if url.startswith(CONFIG.BOT_API):
+        headers["Authorization"] = f"Bearer {CONFIG.BOT_API_AUTH}"
+
     session = aiohttp.ClientSession(json_serialize=_bytes_to_str_wrapper)
     retry_options = ExponentialRetry(attempts=3)
     retry_client = RetryClient(
