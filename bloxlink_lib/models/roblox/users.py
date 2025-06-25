@@ -383,7 +383,7 @@ async def get_user_account(
 
 async def get_user(
     user: hikari.User | None = None,
-    includes: list[Literal["groups", "badges"]] = None,
+    includes: list[Literal["groups", "badges"]] | None = None,
     *,
     roblox_username: str = None,
     roblox_id: int = None,
@@ -411,6 +411,9 @@ async def get_user(
     """
 
     roblox_user: RobloxUser | None = None
+
+    if includes is None:
+        includes = ["groups"]
 
     if roblox_id and roblox_username:
         raise ValueError("You cannot provide both a roblox_id and a roblox_username.")
