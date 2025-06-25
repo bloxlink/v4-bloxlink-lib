@@ -200,6 +200,8 @@ async def fetch[T](
         elif v is None:
             del params[k]
 
+    print(url, url.startswith(CONFIG.BOT_API))
+
     if url.startswith(CONFIG.BOT_API):
         headers["Authorization"] = f"Bearer {CONFIG.BOT_API_AUTH}"
 
