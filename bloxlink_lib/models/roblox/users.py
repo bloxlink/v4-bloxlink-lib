@@ -166,7 +166,11 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
             avatar = roblox_user_data.avatar
 
             if avatar:
-                avatar_url, avatar_response = await fetch("GET", avatar.bust_thumbnail)
+                avatar_url, avatar_response = await fetch(
+                    method="GET",
+                    url=avatar.bust_thumbnail,
+                    parse_as="JSON",
+                )
 
                 if avatar_response.status == HTTPStatus.OK:
                     self.avatar_url = (
@@ -185,8 +189,8 @@ class RobloxUser(BaseModel):  # pylint: disable=too-many-instance-attributes
 
         try:
             response_data, _ = await fetch(
-                "GET",
-                f"{INVENTORY_API}/v1/users/{self.id}/items/{asset.type_number}/{asset.id}/is-owned",
+                method="GET",
+                url=f"{INVENTORY_API}/v1/users/{self.id}/items/{asset.type_number}/{asset.id}/is-owned",
                 parse_as="TEXT",
             )
         except RobloxAPIError:
