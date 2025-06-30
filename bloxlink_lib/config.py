@@ -10,8 +10,15 @@ class BaseConfig(BaseSettings):
     # GENERAL SETTINGS
     #############################
     LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
-    SENTRY_DSN: str | None = None
     NODE_LOCK_TTL: int = 600
+    APP_NAME: str
+    #############################
+    # REGISTRATIONS
+    #############################
+    SENTRY_DSN: str | None = None
+    CONSUL_URL: str | None = None
+    CONSUL_TOKEN: str | None = None
+    CONSUL_PORT: int | None = 8500
     #############################
     # BOT SETTINGS
     #############################
