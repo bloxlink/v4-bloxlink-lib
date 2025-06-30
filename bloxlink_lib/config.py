@@ -17,7 +17,7 @@ class BaseConfig(BaseSettings):
     #############################
     SENTRY_DSN: str | None = None
     CONSUL_URL: str | None = None
-    CONSUL_TOKEN: str | None = None
+    CONSUL_MASTER_TOKEN: str | None = None
     CONSUL_PORT: int | None = 8500
     VPC_PRIVATE_IP: str | None = None
     METRICS_PORT: int = 9090

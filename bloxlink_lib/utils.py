@@ -215,6 +215,7 @@ def init_consul():
             service_id=f"{CONFIG.APP_NAME}:{host}",
             address=CONFIG.VPC_PRIVATE_IP,
             port=CONFIG.CONSUL_PORT,
+            token=CONFIG.CONSUL_MASTER_TOKEN,
             tags=[
                 CONFIG.BOT_RELEASE,
                 "metrics",
