@@ -210,24 +210,23 @@ def init_consul():
         c = consul.Consul(host=CONFIG.CONSUL_URL, port=CONFIG.CONSUL_PORT)
         host = socket.gethostname()
 
-        service_definition = {
-            "id": f"{CONFIG.APP_NAME}:{host}",
-            "name": CONFIG.APP_NAME,
-            "address": CONFIG.VPC_PRIVATE_IP,
-            "port": CONFIG.METRICS_PORT,
-            "tags": [
-                f"release:{CONFIG.BOT_RELEASE}",
+        c.agent.service.register(
+            name=CONFIG.APP_NAME,
+            service_id=f"{CONFIG.APP_NAME}:{host}",
+            address=CONFIG.VPC_PRIVATE_IP,
+            port=CONFIG.CONSUL_PORT,
+            tags=[
+                CONFIG.BOT_RELEASE,
+                "metrics",
                 f"metrics-port:{CONFIG.METRICS_PORT}",
             ],
-            "check": {
+            check={
                 "http": f"http://{CONFIG.VPC_PRIVATE_IP}:{CONFIG.METRICS_PORT}/metrics",
                 "interval": "10s",
                 "timeout": "5s",
                 "deregistercriticalserviceafter": "5m",
             },
-        }
-
-        c.agent.service.register(service_definition)
+        )
     else:
         logging.warning("Consul URL not set, skipping Consul initialization")
 
