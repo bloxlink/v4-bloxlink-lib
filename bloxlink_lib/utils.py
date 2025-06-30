@@ -214,7 +214,11 @@ def init_consul():
             name=CONFIG.APP_NAME,
             service_id=f"{CONFIG.APP_NAME}:{host}",
             port=CONFIG.CONSUL_PORT,
-            tags=[CONFIG.BOT_RELEASE, "metrics"],
+            tags=[
+                CONFIG.BOT_RELEASE,
+                "metrics",
+                f"metrics-port:{CONFIG.METRICS_PORT}",
+            ],
         )
     else:
         logging.warning("Consul URL not set, skipping Consul initialization")

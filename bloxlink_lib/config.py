@@ -19,6 +19,7 @@ class BaseConfig(BaseSettings):
     CONSUL_URL: str | None = None
     CONSUL_TOKEN: str | None = None
     CONSUL_PORT: int | None = 8500
+    METRICS_PORT: int = 9090
     #############################
     # BOT SETTINGS
     #############################
