@@ -218,8 +218,8 @@ def init_consul():
             # token=CONFIG.CONSUL_MASTER_TOKEN,
             tags=[
                 CONFIG.BOT_RELEASE,
-                "metrics",
                 f"metrics-port:{CONFIG.METRICS_PORT}",
+                f"job:{CONFIG.APP_NAME}",
             ],
             check={
                 "http": f"http://{CONFIG.VPC_PRIVATE_IP}:{CONFIG.METRICS_PORT}/metrics",
