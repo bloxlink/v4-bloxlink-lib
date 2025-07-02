@@ -219,10 +219,11 @@ def init_consul():
             tags=[
                 CONFIG.BOT_RELEASE,
                 f"metrics-port:{CONFIG.METRICS_PORT}",
+                f"metrics-enabled:{'true' if CONFIG.METRICS_ENABLED else 'false'}",
                 f"job:{CONFIG.APP_NAME}",
             ],
             check={
-                "http": f"http://{CONFIG.VPC_PRIVATE_IP}:{CONFIG.METRICS_PORT}/metrics",
+                "http": f"http://{CONFIG.VPC_PRIVATE_IP}:{CONFIG.METRICS_PORT}{CONFIG.METRICS_PATH}",
                 "interval": "10s",
                 "timeout": "5s",
                 "deregistercriticalserviceafter": "5m",

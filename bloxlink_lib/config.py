@@ -13,6 +13,12 @@ class BaseConfig(BaseSettings):
     NODE_LOCK_TTL: int = 600
     APP_NAME: str
     #############################
+    # METRICS
+    #############################
+    METRICS_PORT: int = 9090
+    METRICS_ENABLED: bool = True
+    METRICS_PATH: str = "/metrics"
+    #############################
     # REGISTRATIONS
     #############################
     SENTRY_DSN: str | None = None
@@ -20,7 +26,6 @@ class BaseConfig(BaseSettings):
     CONSUL_MASTER_TOKEN: str | None = None
     CONSUL_PORT: int | None = 8500
     VPC_PRIVATE_IP: str | None = None
-    METRICS_PORT: int = 9090
     #############################
     # BOT SETTINGS
     #############################
