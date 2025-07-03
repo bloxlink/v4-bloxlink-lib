@@ -10,8 +10,22 @@ class BaseConfig(BaseSettings):
     # GENERAL SETTINGS
     #############################
     LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
-    SENTRY_DSN: str | None = None
     NODE_LOCK_TTL: int = 600
+    APP_NAME: str
+    #############################
+    # METRICS
+    #############################
+    METRICS_PORT: int = 9090
+    METRICS_ENABLED: bool = True
+    METRICS_PATH: str = "/metrics"
+    #############################
+    # REGISTRATIONS
+    #############################
+    SENTRY_DSN: str | None = None
+    CONSUL_URL: str | None = None
+    CONSUL_MASTER_TOKEN: str | None = None
+    CONSUL_PORT: int | None = 8500
+    VPC_PRIVATE_IP: str | None = None
     #############################
     # BOT SETTINGS
     #############################

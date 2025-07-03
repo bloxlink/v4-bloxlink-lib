@@ -52,10 +52,18 @@ class RobloxDown(Error):
 class UserNotVerified(Error):
     """Raised when a user is not verified."""
 
-    status_code = HTTPStatus.FORBIDDEN
+    status_code = HTTPStatus.NOT_FOUND
 
 
-class BloxlinkForbidden(Error):
+class BloxlinkPermissionError(Error):
     """Raised when a user lacks permissions."""
 
     status_code = HTTPStatus.FORBIDDEN
+
+
+class UserForbidden(BloxlinkPermissionError):
+    """Raised when a user lacks command-specific permissions."""
+
+
+class BloxlinkForbidden(BloxlinkPermissionError):
+    """Raised when Bloxlink lacks permissions."""
