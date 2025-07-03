@@ -217,7 +217,7 @@ def init_consul():
             port=CONFIG.CONSUL_PORT,
             # token=CONFIG.CONSUL_MASTER_TOKEN,
             tags=[
-                CONFIG.BOT_RELEASE,
+                f"bot_release:{CONFIG.BOT_RELEASE}",
                 f"metrics-port:{CONFIG.METRICS_PORT}",
                 f"metrics-enabled:{'true' if CONFIG.METRICS_ENABLED else 'false'}",
                 f"job:{CONFIG.APP_NAME}",
