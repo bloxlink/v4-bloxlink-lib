@@ -221,7 +221,7 @@ def init_consul():
                 f"metrics-port:{CONFIG.METRICS_PORT}",
                 f"metrics-enabled:{'true' if CONFIG.METRICS_ENABLED else 'false'}",
                 f"job:{CONFIG.APP_NAME}",
-                f"environment:{get_environment().name.lower().title()}",
+                f"environment:{get_environment().title()}",
             ],
             check={
                 "http": f"http://{CONFIG.VPC_PRIVATE_IP}:{CONFIG.METRICS_PORT}{CONFIG.METRICS_PATH}",
