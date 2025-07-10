@@ -19,4 +19,3 @@ from .database.redis import redis
 logging.basicConfig(level=CONFIG.LOG_LEVEL)
 
 init_sentry()
-init_consul()

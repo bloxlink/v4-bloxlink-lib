@@ -1,11 +1,9 @@
 from typing import Callable, Coroutine, Iterable, Awaitable, Type, TypeVar
-import socket
 import logging
 import asyncio
 from inspect import isfunction
 import enum
 import json
-import consul
 from aiohttp import ClientConnectorError
 import sentry_sdk
 from sentry_sdk.integrations.aiohttp import AioHttpIntegration
@@ -199,39 +197,6 @@ def init_sentry():
                 "RobloxDown",
             ],
         )
-
-
-def init_consul():
-    """Initialize Consul."""
-
-    if CONFIG.CONSUL_URL:
-        logging.info("Initializing Consul")
-
-        c = consul.Consul(host=CONFIG.CONSUL_URL, port=CONFIG.CONSUL_PORT)
-        host = socket.gethostname()
-
-        c.agent.service.register(
-            name=CONFIG.APP_NAME,
-            service_id=f"{CONFIG.APP_NAME}:{host}",
-            address=CONFIG.VPC_PRIVATE_IP,
-            port=CONFIG.CONSUL_PORT,
-            # token=CONFIG.CONSUL_MASTER_TOKEN,
-            tags=[
-                f"bot_release:{CONFIG.BOT_RELEASE}",
-                f"metrics-port:{CONFIG.METRICS_PORT}",
-                f"metrics-enabled:{'true' if CONFIG.METRICS_ENABLED else 'false'}",
-                f"job:{CONFIG.APP_NAME}",
-                f"environment:{get_environment().name.title()}",
-            ],
-            check={
-                "http": f"http://{CONFIG.VPC_PRIVATE_IP}:{CONFIG.METRICS_PORT}{CONFIG.METRICS_PATH}",
-                "interval": "10s",
-                "timeout": "5s",
-                "deregistercriticalserviceafter": "5m",
-            },
-        )
-    else:
-        logging.warning("Consul URL not set, skipping Consul initialization")
 
 
 class JSONSerializer(json.JSONEncoder):
