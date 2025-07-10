@@ -13,11 +13,12 @@ class BaseConfig(BaseSettings):
     NODE_LOCK_TTL: int = 600
     APP_NAME: str
     #############################
-    # METRICS
+    # METRICS AND LOGGING
     #############################
     METRICS_PORT: int = 9090
     METRICS_ENABLED: bool = True
     METRICS_PATH: str = "/metrics"
+    SENTRY_DSN: str | None = None
     #############################
     # BOT SETTINGS
     #############################
