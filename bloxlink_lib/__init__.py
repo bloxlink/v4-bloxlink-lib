@@ -21,4 +21,4 @@ from .metrics import *
 logging.basicConfig(level=CONFIG.LOG_LEVEL)
 
 init_sentry()
-asyncio.create_task(start_metrics_server())
+asyncio.run(start_metrics_server())
