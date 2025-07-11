@@ -28,12 +28,6 @@ class MetricsServer:
     def start(self):
         """Start the metrics server in a background thread"""
 
-        if not CONFIG.METRICS_ENABLED:
-            logging.info(
-                "Metrics are disabled. To enable metrics, set METRICS_ENABLED to True."
-            )
-            return
-
         if self.started:
             logging.warning("Metrics server is already running")
             return
@@ -103,6 +97,12 @@ class MetricsServer:
 
 def start_metrics_server():
     """Start the metrics server in the background"""
+
+    if not CONFIG.METRICS_ENABLED:
+        logging.info(
+            "Metrics are disabled. To enable metrics, set METRICS_ENABLED to True."
+        )
+        return
 
     server = MetricsServer()
     server.start()
