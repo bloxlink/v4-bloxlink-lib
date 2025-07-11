@@ -1,6 +1,9 @@
 import logging
-from typing import Literal
+from typing import Final, Literal
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+DEFAULT_METRICS_PORT: Final[int] = 9090
 
 
 class BaseConfig(BaseSettings):
@@ -15,7 +18,7 @@ class BaseConfig(BaseSettings):
     #############################
     # METRICS AND LOGGING
     #############################
-    METRICS_PORT: int = 9090
+    METRICS_PORT: int = DEFAULT_METRICS_PORT
     METRICS_ENABLED: bool = True
     METRICS_PATH: str = "/metrics"
     SENTRY_DSN: str | None = None
@@ -64,6 +67,11 @@ class BaseConfig(BaseSettings):
     )
 
     def model_post_init(self, __context):
+        if getattr(self, "PORT", None) == DEFAULT_METRICS_PORT:
+            raise ValueError(
+                f"PORT cannot be set to the default metrics port ({DEFAULT_METRICS_PORT}). Please set a different port."
+            )
+
         if self.SKIP_DB_VALIDATION:
             logging.info("SKIP_DB_VALIDATION is enabled, skipping database validation")
             return
