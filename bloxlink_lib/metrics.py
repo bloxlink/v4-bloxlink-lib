@@ -38,7 +38,7 @@ class MetricsServer:
         config = uvicorn.Config(
             app,
             host=CONFIG.METRICS_HOST,
-            port=int(CONFIG.METRICS_PORT),
+            port=int(CONFIG._METRICS_PORT),
             log_level=CONFIG.LOG_LEVEL.lower(),
         )
         self.server = uvicorn.Server(config=config)
@@ -55,7 +55,7 @@ class MetricsServer:
 
         if self.started:
             logging.info(
-                f"Metrics server started on {CONFIG.METRICS_HOST}:{CONFIG.METRICS_PORT}"
+                f"Metrics server started on {CONFIG.METRICS_HOST}:{CONFIG._METRICS_PORT}"
             )
         else:
             logging.error("Failed to start metrics server")

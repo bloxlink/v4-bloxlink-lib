@@ -3,7 +3,7 @@ from typing import Final, Literal
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-DEFAULT_METRICS_PORT: Final[int] = 9090
+METRICS_PORT: Final[int] = 9091
 
 
 class BaseConfig(BaseSettings):
@@ -20,7 +20,7 @@ class BaseConfig(BaseSettings):
     # METRICS AND LOGGING
     #############################
     METRICS_HOST: str = "0.0.0.0"
-    METRICS_PORT: int = DEFAULT_METRICS_PORT
+    _METRICS_PORT: int = METRICS_PORT
     METRICS_ENABLED: bool = True
     #############################
     # BOT SETTINGS
@@ -67,9 +67,9 @@ class BaseConfig(BaseSettings):
     )
 
     def model_post_init(self, __context):
-        if getattr(self, "PORT", None) == DEFAULT_METRICS_PORT:
+        if getattr(self, "PORT", None) == METRICS_PORT:
             raise ValueError(
-                f"PORT cannot be set to the default metrics port ({DEFAULT_METRICS_PORT}). Please set a different port."
+                f"PORT cannot be set to the metrics port ({METRICS_PORT}). Please set a different port."
             )
 
         if self.SKIP_DB_VALIDATION:
