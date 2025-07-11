@@ -14,7 +14,7 @@ class BaseConfig(BaseSettings):
     #############################
     LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
     NODE_LOCK_TTL: int = 600
-    APP_NAME: str
+    APP_NAME: str | None
     #############################
     # METRICS AND LOGGING
     #############################

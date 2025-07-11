@@ -59,6 +59,8 @@ MONGO_USER = "admin"
 MONGO_PASSWORD = "admin123"
 MONGO_HOST = "localhost"
 REDIS_HOST = "localhost"
+METRICS_ENABLED = false
+APP_NAME = "None"
 
 [tool.coverage.report]
 exclude_also = [
