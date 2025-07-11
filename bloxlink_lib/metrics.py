@@ -1,5 +1,4 @@
 import logging
-import contextlib
 import time
 import threading
 import uvicorn
@@ -18,50 +17,92 @@ async def metrics():
     return PlainTextResponse(generate_latest())
 
 
-class MetricsServer(uvicorn.Server):
-    """A custom server that runs in a separate thread for metrics"""
+class MetricsServer:
+    """A background metrics server that runs in a separate thread"""
 
-    @contextlib.contextmanager
-    def run_in_thread(self):
-        """Runs the server in a separate thread"""
+    def __init__(self):
+        self.server = None
+        self.thread = None
+        self.started = False
 
-        thread = threading.Thread(target=self.run)
-        thread.start()
+    def start(self):
+        """Start the metrics server in a background thread"""
+
+        if not CONFIG.METRICS_ENABLED:
+            logging.info(
+                "Metrics are disabled. To enable metrics, set METRICS_ENABLED to True."
+            )
+            return
+
+        if self.started:
+            logging.warning("Metrics server is already running")
+            return
+
+        app = FastAPI()
+        app.include_router(router)
+
+        config = uvicorn.Config(
+            app,
+            host=CONFIG.METRICS_HOST,
+            port=int(CONFIG.METRICS_PORT),
+            log_level=CONFIG.LOG_LEVEL.lower(),
+        )
+        self.server = uvicorn.Server(config=config)
+
+        self.thread = threading.Thread(target=self._run_server, daemon=True)
+        self.thread.start()
+
+        # Wait for server to start
+        for _ in range(100):  # Wait up to 10 seconds
+            if self.started:
+                break
+
+            time.sleep(0.1)
+
+        if self.started:
+            logging.info(
+                f"Metrics server started on {CONFIG.METRICS_HOST}:{CONFIG.METRICS_PORT}"
+            )
+        else:
+            logging.error("Failed to start metrics server")
+
+    def _run_server(self):
+        """Internal method to run the server"""
 
         try:
-            while not self.started:
-                time.sleep(1e-3)
+            self.started = True
+            self.server.run()
 
-            yield
+        except Exception as e:
+            logging.error(f"Error running metrics server: {e}")
 
         finally:
-            self.should_exit = True
-            thread.join()
+            self.started = False
+
+    def stop(self):
+        """Stop the metrics server"""
+
+        if not self.started:
+            return
+
+        if self.server:
+            self.server.should_exit = True
+
+        if self.thread and self.thread.is_alive():
+            self.thread.join(timeout=5)
+
+        self.started = False
+
+        logging.info("Metrics server stopped")
+
+    def is_running(self):
+        """Check if the metrics server is running"""
+
+        return self.started and self.thread and self.thread.is_alive()
 
 
 def start_metrics_server():
-    """Starts the metrics server"""
+    """Start the metrics server in the background"""
 
-    if not CONFIG.METRICS_ENABLED:
-        logging.info(
-            "Metrics are disabled. To enable metrics, set METRICS_ENABLED to True."
-        )
-        return
-
-    app = FastAPI()
-    app.include_router(router)
-
-    config = uvicorn.Config(
-        app,
-        host=CONFIG.METRICS_HOST,
-        port=int(CONFIG.METRICS_PORT),
-        log_level=CONFIG.LOG_LEVEL.lower(),
-    )
-    server = MetricsServer(config=config)
-
-    with server.run_in_thread():
-        logging.info(
-            f"Metrics server started on {CONFIG.METRICS_HOST}:{CONFIG.METRICS_PORT}"
-        )
-
-    logging.info("Metrics server stopped")
+    server = MetricsServer()
+    server.start()
