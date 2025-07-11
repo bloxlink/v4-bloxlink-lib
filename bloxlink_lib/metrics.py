@@ -9,7 +9,7 @@ from prometheus_client import generate_latest
 router = APIRouter(tags=["Metrics"])
 
 
-@router.get(CONFIG.METRICS_PATH)
+@router.get("/")
 async def metrics():
     """Endpoint to get the metrics for the service."""
 
@@ -25,12 +25,16 @@ async def main():
         )
         return
 
+    logging.info(
+        f"Starting metrics server on {CONFIG.METRICS_HOST}:{CONFIG.METRICS_PORT}"
+    )
+
     app = FastAPI()
     app.include_router(router)
 
     config = uvicorn.Config(
         app,
-        host=CONFIG.HOST,
+        host=CONFIG.METRICS_HOST,
         port=int(CONFIG.METRICS_PORT),
         log_level=CONFIG.LOG_LEVEL.lower(),
     )

@@ -18,9 +18,9 @@ class BaseConfig(BaseSettings):
     #############################
     # METRICS AND LOGGING
     #############################
+    METRICS_HOST: str = "localhost"
     METRICS_PORT: int = DEFAULT_METRICS_PORT
     METRICS_ENABLED: bool = True
-    METRICS_PATH: str = "/metrics"
     SENTRY_DSN: str | None = None
     #############################
     # BOT SETTINGS
