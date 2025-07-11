@@ -13,14 +13,15 @@ class BaseConfig(BaseSettings):
     # GENERAL SETTINGS
     #############################
     LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
+    SENTRY_DSN: str | None = None
     NODE_LOCK_TTL: int = 600
     #############################
+
     # METRICS AND LOGGING
     #############################
     METRICS_HOST: str = "localhost"
     METRICS_PORT: int = DEFAULT_METRICS_PORT
     METRICS_ENABLED: bool = True
-    SENTRY_DSN: str | None = None
     #############################
     # BOT SETTINGS
     #############################
