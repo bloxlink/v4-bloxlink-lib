@@ -1,6 +1,5 @@
 import logging
 import uvicorn
-from bloxlink_lib.utils import create_task_log_exception
 from .config import CONFIG
 from fastapi import APIRouter, FastAPI
 from starlette.responses import PlainTextResponse
@@ -16,7 +15,7 @@ async def metrics():
     return PlainTextResponse(generate_latest())
 
 
-async def main():
+async def start_metrics_server():
     """Starts the metrics server."""
 
     if not CONFIG.METRICS_ENABLED:
@@ -40,6 +39,3 @@ async def main():
     )
     server = uvicorn.Server(config)
     await server.serve()
-
-
-create_task_log_exception(main())
