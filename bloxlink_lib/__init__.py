@@ -1,5 +1,4 @@
 import logging
-import asyncio
 
 from .models.base import *
 from .models import *
@@ -21,4 +20,4 @@ from .metrics import *
 logging.basicConfig(level=CONFIG.LOG_LEVEL)
 
 init_sentry()
-asyncio.run(start_metrics_server())
+create_task_log_exception(start_metrics_server())
