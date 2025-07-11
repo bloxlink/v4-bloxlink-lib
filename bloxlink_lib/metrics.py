@@ -9,7 +9,7 @@ from prometheus_client import generate_latest
 router = APIRouter(tags=["Metrics"])
 
 
-@router.get("/metrics")
+@router.get(CONFIG.METRICS_PATH)
 async def metrics():
     """Endpoint to get the metrics for the service."""
 
