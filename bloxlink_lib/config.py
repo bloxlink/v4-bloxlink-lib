@@ -19,7 +19,7 @@ class BaseConfig(BaseSettings):
 
     # METRICS AND LOGGING
     #############################
-    METRICS_HOST: str = "localhost"
+    METRICS_HOST: str = "0.0.0.0"
     METRICS_PORT: int = DEFAULT_METRICS_PORT
     METRICS_ENABLED: bool = True
     #############################
