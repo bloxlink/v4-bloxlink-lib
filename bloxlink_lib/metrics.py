@@ -13,41 +13,43 @@ router = APIRouter(tags=["Metrics"])
 
 @router.get("/")
 async def metrics():
-    """Endpoint to get the metrics for the service."""
+    """Endpoint to get the metrics for the service"""
 
     return PlainTextResponse(generate_latest())
 
 
 class MetricsServer(uvicorn.Server):
-    """
-    A custom server that runs in a separate thread for metrics.
-    """
+    """A custom server that runs in a separate thread for metrics"""
 
     @contextlib.contextmanager
     def run_in_thread(self):
+        """Runs the server in a separate thread"""
+
         thread = threading.Thread(target=self.run)
         thread.start()
+
         try:
             while not self.started:
                 time.sleep(1e-3)
+
             yield
+
         finally:
             self.should_exit = True
             thread.join()
 
 
-if __name__ == "__main__":
+def start_metrics_server():
+    """Starts the metrics server"""
+
     if not CONFIG.METRICS_ENABLED:
         logging.info(
             "Metrics are disabled. To enable metrics, set METRICS_ENABLED to True."
         )
+        return
 
     app = FastAPI()
     app.include_router(router)
-
-    logging.info(
-        f"Starting metrics server on {CONFIG.METRICS_HOST}:{CONFIG.METRICS_PORT}"
-    )
 
     config = uvicorn.Config(
         app,
@@ -58,6 +60,8 @@ if __name__ == "__main__":
     server = MetricsServer(config=config)
 
     with server.run_in_thread():
-        logging.info("Metrics server started")
-        while True:
-            time.sleep(1)
+        logging.info(
+            f"Metrics server started on {CONFIG.METRICS_HOST}:{CONFIG.METRICS_PORT}"
+        )
+
+    logging.info("Metrics server stopped")
