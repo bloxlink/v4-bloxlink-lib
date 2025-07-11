@@ -10,7 +10,7 @@ from .config import CONFIG
 router = APIRouter(tags=["Metrics"])
 
 
-@router.get("/")
+@router.get("/metrics")
 async def metrics():
     """Endpoint to get the metrics for the service"""
 
