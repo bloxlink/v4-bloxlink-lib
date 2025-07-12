@@ -15,7 +15,9 @@ from .config import *
 from .module import *
 from .database.mongodb import fetch_item, update_item
 from .database.redis import redis
+from .metrics import start_metrics_server
 
 logging.basicConfig(level=CONFIG.LOG_LEVEL)
 
 init_sentry()
+start_metrics_server()

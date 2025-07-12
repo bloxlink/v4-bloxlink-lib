@@ -1,6 +1,9 @@
 import logging
-from typing import Literal
+from typing import Final, Literal
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+METRICS_PORT: Final[int] = 9091
 
 
 class BaseConfig(BaseSettings):
@@ -12,6 +15,12 @@ class BaseConfig(BaseSettings):
     LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
     SENTRY_DSN: str | None = None
     NODE_LOCK_TTL: int = 600
+    #############################
+
+    # METRICS AND LOGGING
+    #############################
+    METRICS_ENABLED: bool = True
+    _METRICS_PORT: int = METRICS_PORT
     #############################
     # BOT SETTINGS
     #############################
@@ -57,6 +66,14 @@ class BaseConfig(BaseSettings):
     )
 
     def model_post_init(self, __context):
+        """Post-initialization validation"""
+
+        if getattr(self, "PORT", None) == METRICS_PORT:
+            raise ValueError(
+                f"PORT cannot be set to the metrics port ({METRICS_PORT}). Please set a different port."
+            )
+
+        # Database validation
         if self.SKIP_DB_VALIDATION:
             logging.info("SKIP_DB_VALIDATION is enabled, skipping database validation")
             return

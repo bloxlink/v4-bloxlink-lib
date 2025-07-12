@@ -2,9 +2,11 @@ import asyncio
 import logging
 from http import HTTPStatus
 from typing import Literal, Type, Union, Tuple, Any, Final
+from urllib.parse import urlparse
 from requests.utils import requote_uri
 from aiohttp_retry import RetryClient, ExponentialRetry
 import aiohttp
+from prometheus_client import Counter
 from pydantic_core import to_json
 from bloxlink_lib.models.base import BaseModel, BaseResponse
 from bloxlink_lib.utils import parse_into
@@ -16,9 +18,46 @@ __all__ = ("fetch", "fetch_typed")
 
 MAX_HTTP_RETRIES: Final[int] = 3
 
+requests_timeout_counter = Counter(
+    "fetch_requests_timeout",
+    "Counter for the number of requests that timed out",
+    ["method", "url_path"],
+)
+requests_total_counter = Counter(
+    "fetch_requests_total",
+    "Counter for the number of requests made",
+    ["method", "url_path"],
+)
+
 
 def _bytes_to_str_wrapper(data: Any) -> str:
     return to_json(data).decode("utf-8")
+
+
+def _normalize_url_for_metrics(url: str) -> str:
+    """Normalize URL for metrics by removing query parameters and replacing numeric path segments with wildcards"""
+
+    # Remove query parameters
+    base_url = url.split("?")[0]
+
+    parsed = urlparse(base_url)
+
+    domain = parsed.netloc
+
+    path_segments = [segment for segment in parsed.path.split("/") if segment]
+
+    # Replace numeric segments with '*'
+    normalized_segments = []
+    for segment in path_segments:
+        if segment.isdigit():
+            normalized_segments.append("*")
+        else:
+            normalized_segments.append(segment)
+
+    if normalized_segments:
+        return f"{domain}/{'/'.join(normalized_segments)}"
+
+    return domain
 
 
 async def fetch[T](
@@ -85,6 +124,8 @@ async def fetch[T](
         client_session=session, raise_for_status=False, retry_options=retry_options
     )
 
+    requests_total_counter.labels(method, _normalize_url_for_metrics(url)).inc()
+
     try:
         async with retry_client.request(
             method,
@@ -140,6 +181,8 @@ async def fetch[T](
             return parse_into(await response.json(), parse_as), response
 
     except asyncio.TimeoutError:
+        requests_timeout_counter.labels(method, _normalize_url_for_metrics(url)).inc()
+
         logging.warning(f"URL {url} timed out")
 
         raise RobloxDown(
