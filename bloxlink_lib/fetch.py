@@ -23,6 +23,11 @@ requests_timeout_counter = Counter(
     "Counter for the number of requests that timed out",
     ["method", "url_path"],
 )
+requests_total_counter = Counter(
+    "fetch_requests_total",
+    "Counter for the number of requests made",
+    ["method", "url_path"],
+)
 
 
 def _bytes_to_str_wrapper(data: Any) -> str:
@@ -118,6 +123,8 @@ async def fetch[T](
     retry_client = RetryClient(
         client_session=session, raise_for_status=False, retry_options=retry_options
     )
+
+    requests_total_counter.labels(method, _normalize_url_for_metrics(url)).inc()
 
     try:
         async with retry_client.request(
