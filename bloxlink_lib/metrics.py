@@ -1,4 +1,5 @@
 import logging
+from typing import Final
 import time
 import threading
 import uvicorn
@@ -8,6 +9,8 @@ from prometheus_client import generate_latest
 from .config import CONFIG
 
 router = APIRouter(tags=["Metrics"])
+
+METRICS_HOST: Final[str] = "0.0.0.0"
 
 
 @router.get("/metrics")
@@ -37,7 +40,7 @@ class MetricsServer:
 
         config = uvicorn.Config(
             app,
-            host=CONFIG.METRICS_HOST,
+            host=METRICS_HOST,
             port=int(CONFIG._METRICS_PORT),
             log_level=CONFIG.LOG_LEVEL.lower(),
         )
@@ -55,7 +58,7 @@ class MetricsServer:
 
         if self.started:
             logging.info(
-                f"Metrics server started on {CONFIG.METRICS_HOST}:{CONFIG._METRICS_PORT}"
+                f"Metrics server started on {METRICS_HOST}:{CONFIG._METRICS_PORT}"
             )
         else:
             logging.error("Failed to start metrics server")

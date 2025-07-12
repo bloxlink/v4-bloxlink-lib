@@ -19,9 +19,8 @@ class BaseConfig(BaseSettings):
 
     # METRICS AND LOGGING
     #############################
-    METRICS_HOST: str = "0.0.0.0"
-    _METRICS_PORT: int = METRICS_PORT
     METRICS_ENABLED: bool = True
+    _METRICS_PORT: int = METRICS_PORT
     #############################
     # BOT SETTINGS
     #############################
@@ -67,11 +66,14 @@ class BaseConfig(BaseSettings):
     )
 
     def model_post_init(self, __context):
+        """Post-initialization validation"""
+
         if getattr(self, "PORT", None) == METRICS_PORT:
             raise ValueError(
                 f"PORT cannot be set to the metrics port ({METRICS_PORT}). Please set a different port."
             )
 
+        # Database validation
         if self.SKIP_DB_VALIDATION:
             logging.info("SKIP_DB_VALIDATION is enabled, skipping database validation")
             return
